@@ -27,7 +27,6 @@ function getSession(context) {
 function executeCypherQuery(session, query, params = {}) {
   try {
     const result = session.run(query, params);
-    // const result = session.readTransaction(txc => txc.run(query, params));
     // session.close();
     return result;
   } catch (error) {
