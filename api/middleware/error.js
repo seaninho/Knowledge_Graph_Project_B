@@ -1,18 +1,11 @@
-const { GeneralError } = require('../utils/errors');
+const error = function (err, req, res, next) {
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-const error = (err, req, res, next) => {
-    if (err instanceof GeneralError) {
-        return res.status(err.getCode()).json({
-            status: 'error',
-            message: err.message
-        });
-    }
-
-    return res.status(500).json({
-        status: 'error',
-        message: err.message
-    });
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
 }
-
 
 module.exports = error;
