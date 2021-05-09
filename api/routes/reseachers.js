@@ -1,19 +1,19 @@
 const Researchers = require('../models/researcher');
-const graphDBConnect = require('../middleware/graphDBConnect');
+const databaseHandler = require('../middleware/graphDBHandler');
 const writeResponse = require('../helpers/response').writeResponse;
 
 const listAllResearchers = function (req, res) {
-    Researchers.getAll(graphDBConnect.getSession(req))
+    Researchers.getAll(databaseHandler.getSession(req))
         .then(response => writeResponse(res, response));
 }
 
 const getById = function (req, res) {
-    Researchers.getResearcherById(graphDBConnect.getSession(req), req.params.id)
+    Researchers.getResearcherById(databaseHandler.getSession(req), req.params.id)
         .then(response => writeResponse(res, response));
 }
 
 const listAllResearchedAreasByResearcher = function (req, res) {
-    Researchers.getAllResearchedAreasByResearcher(graphDBConnect.getSession(req), req.params.id)
+    Researchers.getAllResearchedAreasByResearcher(databaseHandler.getSession(req), req.params.id)
         .then(response => writeResponse(res, response));
 }
 

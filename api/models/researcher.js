@@ -1,16 +1,16 @@
-const graphDBConnect = require('../middleware/graphDBConnect');
+const databaseHandler = require('../middleware/graphDBHandler');
 const formatResponse = require('../helpers/response').formatResponse;
 
 // get all researchers
-const getAll = async function (session) {
+async function getAll(session) {
     const query = 'MATCH (researcher:Researcher) RETURN researcher';
     const params = {};
-    const resultObj = await graphDBConnect.executeCypherQuery(session, query, params);
+    const resultObj = await databaseHandler.executeCypherQuery(session, query, params);
     return formatResponse(resultObj);
 };
 
 // get researcher by id
-const getResearcherById = async function (session, researcherId) {
+async function getResearcherById(session, researcherId) {
     const query = 
     'MATCH (researcher:Researcher) WHERE researcher.id = $researcherId \
     RETURN researcher';
@@ -20,7 +20,7 @@ const getResearcherById = async function (session, researcherId) {
 };
 
 // get all labs with active research done by researcher with "researcherId"
-const getAllLabsWithActiveResearchByResearcher = async function (session, researcherId) {
+async function getAllLabsWithActiveResearchByResearcher(session, researcherId) {
     const query =
     'MATCH (lab:Lab)<-[:HAS_ACTIVE_PROJECT]-(:Researcher { id: $researcherId} ) \
     RETURN DISTINCT lab';
@@ -30,7 +30,7 @@ const getAllLabsWithActiveResearchByResearcher = async function (session, resear
 };
 
 // get all products purchased by researcher with "researcherId"
-const getAllProductsPurchasedByResearcher = async function (session, researcherId) {
+async function getAllProductsPurchasedByResearcher(session, researcherId) {
     const query =
     'MATCH (product:Product)<-[:PURCHASED]-(:Researcher { id: $researcherId} ) \
     RETURN DISTINCT product';
@@ -40,7 +40,7 @@ const getAllProductsPurchasedByResearcher = async function (session, researcherI
 };
 
 // get all reasearched areas researched by researcher with "researcherId"
-const getAllResearchedAreasByResearcher = async function (session, researcherId) {
+async function getAllResearchedAreasByResearcher(session, researcherId) {
     const query =
     'MATCH (researchArea:ResearchArea)<-[:RESEARCH]-(:Researcher { id: $researcherId} ) \
     RETURN DISTINCT researchArea';

@@ -1,12 +1,11 @@
-const neo4j = require('neo4j-driver');
-const graphDBConnect = require('../middleware/graphDBConnect');
-const executeQuery = graphDBConnect.executeCypherQuery;
+const databaseHandler = require('../middleware/graphDBHandler');
+const executeQuery = databaseHandler.executeCypherQuery;
 const response = require('../helpers/response');
 const formatResponse = response.formatResponse;
 
 
 // get all labs
-const getAll = async function(session) {
+async function getAll(session) {
     const query = 'MATCH (lab:Lab) RETURN lab';
     const params = {};
     const resultObj = await executeQuery(session, query, params);
@@ -14,7 +13,7 @@ const getAll = async function(session) {
 };
 
 // get lab by id
-const getLabById = async function (session, labId) {
+async function getLabById(session, labId) {
     const query = 'MATCH (lab:Lab) WHERE lab.id = $labId RETURN lab';
     const params = { labId: labId };
     const resultObj = await executeQuery(session, query, params);
@@ -22,7 +21,7 @@ const getLabById = async function (session, labId) {
 };
 
 // get all researchers in lab with "labId"
-const getAllResearchersInLab = async function(session, labId) {
+async function getAllResearchersInLab(session, labId) {
     const query = 
     'MATCH (researcher:Researcher)-[:HAS_ACTIVE_PROJECT]->(:Lab {id: $labId} ) \
     RETURN DISTINCT researcher';
@@ -32,7 +31,7 @@ const getAllResearchersInLab = async function(session, labId) {
 }
 
 // get all research areas researched in lab with "labId"
-const getAllResearcheAreasInLab = async function (session, labId) {
+async function getAllResearcheAreasInLab(session, labId) {
     const query = 
     'MATCH (researchArea:ResearchArea)-[:WAS_RESEARCHED_AT]->(:Lab { id: $labId} ) \
     RETURN DISTINCT researchArea';
@@ -42,7 +41,7 @@ const getAllResearcheAreasInLab = async function (session, labId) {
 }
 
 // get all products used in lab with "labId"
-const getAllProductsUsedInLab = async function (session, labId) {
+async function getAllProductsUsedInLab(session, labId) {
     const query =
     'MATCH (product:Product)-[:USED_AT]->(:Lab { id: $labId} ) \
     RETURN DISTINCT product';
