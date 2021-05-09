@@ -7,7 +7,7 @@ function formatResponse(resultObj) {
     var result = [];
     if (resultObj.records.length > 0) {      
         resultObj.records.map(record => {
-            // result.push(record._fields[0]);
+            // console.log(record._fields[0]);
             result.push(record._fields[0].properties);
         });
     }

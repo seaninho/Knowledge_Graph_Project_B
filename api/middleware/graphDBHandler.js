@@ -62,7 +62,7 @@ async function loadDataFromCsv(req, res) {
     WITH row, split(row.Labs, ",") as labs, split(row.ResearchAreas, ",") as researchAreas \
     UNWIND labs as lab \
     UNWIND researchAreas as ra \
-    MERGE(r: Researcher { name: row.Researcher }) \
+    MERGE(r: Researcher { id: row.ResearcherId, name: row.Researcher }) \
     MERGE(l: Lab { name: lab }) \
     MERGE(rsa: ResearchArea { name: ra }) \
     MERGE(r) - [: HAS_ACTIVE_PROJECT] -> (l) \

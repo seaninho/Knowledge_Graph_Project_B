@@ -1,11 +1,13 @@
 const databaseHandler = require('../middleware/graphDBHandler');
-const formatResponse = require('../helpers/response').formatResponse;
+const executeQuery = databaseHandler.executeCypherQuery;
+const response = require('../helpers/response');
+const formatResponse = response.formatResponse;
 
 // get all researchers
 async function getAll(session) {
     const query = 'MATCH (researcher:Researcher) RETURN researcher';
     const params = {};
-    const resultObj = await databaseHandler.executeCypherQuery(session, query, params);
+    const resultObj = await executeQuery(session, query, params);
     return formatResponse(resultObj);
 };
 

@@ -7,6 +7,7 @@ const error = require('../middleware/error');
 
 module.exports = function (app) {
     app.use(express.json());
+    app.set('json spaces', 1);
     app.use(error);
     app.get("/database/load", dbHandler.loadDataFromCsv);
     app.get("/database/delete", dbHandler.deleteDatabase);
@@ -23,4 +24,5 @@ module.exports = function (app) {
     app.get("/products/:id/labs", products.listAllLabsThatUseProductId);
     app.get("/products/:id/researchers", products.listAllResearchersThatPurchasedProductId);
     app.get("/products/:id/research_areas", products.listAllResearchAreasThatUseProductId);
+    app.get("/products/multiple", products.listAllMultiplePurchased);
 };
