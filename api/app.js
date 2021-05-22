@@ -1,43 +1,46 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+const morganLogger = require('morgan');
 const path = require('path');
-const createError = require('http-errors');
-const winston = require('winston');
 
+const { NotFound } = require('./utils/errors');
 const homepage = require('./routes/index');
 const router = require('./startup/routes');
 const config = require('./startup/config');
-const error = require('./middleware/error');
+const exceptionHandler = require('./middleware/exceptionHandler');
+const errorHandler = require('./middleware/errorHandler');
 
 config.assertHostAlive();
 
 var app = express();
-require('./startup/logging')();
+exceptionHandler();
 
 app.use('/', homepage);
 
 // app configurations
 app.use(express.urlencoded({ extended: false }));
+// public folder will be a static folder (e.g. holds images)
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
-app.use(logger('dev'));
+app.use(morganLogger('dev'));
 app.use(cookieParser());
 
-// view engine setup
+// views folder will hold all views
 app.set('views', path.join(__dirname, 'views'));
+// view engine setup
 app.set('view engine', 'ejs');
+
 app.set('json spaces', 1);
 
 // routing
 router(app);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
+// catch 404 and forward to our error handler
+app.use((_req, _res, next) => {
+  next(new NotFound());
 });
 
 //error handling 
-app.use(error);
+app.use(errorHandler);
 
 module.exports = app;

@@ -14,7 +14,7 @@ async function getAll(session) {
 // get product by id
 async function getProductById(session, productId) {
     const query =
-    'MATCH (product:Product) WHERE product.productID = $productId \
+    'MATCH (product:Product) WHERE product.productId = $productId \
     RETURN product';
     const params = { productId: productId };
     const resultObj = await executeQuery(session, query, params);
@@ -24,9 +24,9 @@ async function getProductById(session, productId) {
 // get all labs that use product with "productId"
 async function getAllLabs(session, productId) {
     const query =
-    'MATCH (p:Product) WHERE p.productID = $productId \
-    MATCH(product: Product) WHERE product.deviceID = p.deviceID \
-    MATCH(lab: Lab) < -[: USED_AT] - (: Product { deviceID: product.deviceID }) \
+    'MATCH (p:Product) WHERE p.productId = $productId \
+    MATCH(product: Product) WHERE product.deviceId = p.deviceId \
+    MATCH(lab: Lab) < -[: USED_AT] - (: Product { deviceId: product.deviceId }) \
     RETURN DISTINCT lab';
     const params = { productId: productId };
     const resultObj = await executeQuery(session, query, params);
@@ -36,9 +36,9 @@ async function getAllLabs(session, productId) {
 // get all researchers that purchased product with "productId"
 async function getAllResearchers(session, productId) {
     const query =
-    'MATCH (p:Product) WHERE p.productID = $productId \
-    MATCH(product: Product) WHERE product.deviceID = p.deviceID \
-    MATCH (researcher:Researcher)-[:PURCHASED]->(:Product { deviceID: product.deviceID }) \
+    'MATCH (p:Product) WHERE p.productId = $productId \
+    MATCH(product: Product) WHERE product.deviceId = p.deviceId \
+    MATCH (researcher:Researcher)-[:PURCHASED]->(:Product { deviceId: product.deviceId }) \
     RETURN DISTINCT researcher';
     const params = { productId: productId };
     const resultObj = await executeQuery(session, query, params);
@@ -48,9 +48,9 @@ async function getAllResearchers(session, productId) {
 // get all research areas that use product with "productId"
 async function getAllResearchAreas(session, productId) {
     const query =
-    'MATCH (p:Product) WHERE p.productID = $productId \
-    MATCH(product: Product) WHERE product.deviceID = p.deviceID \
-    MATCH (researchArea:ResearchArea)<-[:USED_IN]-(:Product { deviceID: product.deviceID }) \
+    'MATCH (p:Product) WHERE p.productId = $productId \
+    MATCH(product: Product) WHERE product.deviceId = p.deviceId \
+    MATCH (researchArea:ResearchArea)<-[:USED_IN]-(:Product { deviceId: product.deviceId }) \
     RETURN DISTINCT researchArea';
     const params = { productId: productId };
     const resultObj = await executeQuery(session, query, params);
@@ -61,9 +61,9 @@ async function getAllResearchAreas(session, productId) {
 async function getAllMultiplePurchased(session) {
     const query =
     'MATCH (r1:Researcher)-[:PURCHASED]->(p1:Product) \
-    MATCH(r2: Researcher) - [: PURCHASED] -> (p2: Product { deviceID: p1.deviceID }) \
+    MATCH(r2: Researcher) - [: PURCHASED] -> (p2: Product { deviceId: p1.deviceId }) \
     WHERE r1 <> r2 \
-    RETURN DISTINCT p2.deviceID';
+    RETURN DISTINCT p2.deviceId';
     const params = { productId: productId };
     const resultObj = await executeQuery(session, query, params);
     return formatResponse(resultObj);

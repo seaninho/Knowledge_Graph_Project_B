@@ -50,38 +50,46 @@ function validateCsvImport(resultObj) {
 async function loadDataFromCsv(req, res) {
   var session = getSession(req);
   // "WITH count(*) as dummy" used to run multiple queries in a serial manner
-  var query =
+  var query = 
     'LOAD CSV WITH HEADERS FROM "file:///Labs.csv" as row \
-    WITH row, split(row.ResearchAreas, ",") as researchAreas \
-    UNWIND researchAreas as ra \
-    MERGE(l: Lab { id: row.LabId, name: row.Lab }) \
-    MERGE(r: ResearchArea { name: ra }) \
-    MERGE(l) < -[: WAS_RESEARCHED_AT] - (r) \
+    CREATE(l: Lab { labId: row.LabId, name: row.LabName }) \
     WITH count(*) as dummy \
     LOAD CSV WITH HEADERS FROM "file:///Researchers.csv" as row \
-    WITH row, split(row.Labs, ",") as labs, split(row.ResearchAreas, ",") as researchAreas \
-    UNWIND labs as lab \
-    UNWIND researchAreas as ra \
-    MERGE(r: Researcher { id: row.ResearcherId, name: row.Researcher }) \
-    MERGE(l: Lab { name: lab }) \
-    MERGE(rsa: ResearchArea { name: ra }) \
-    MERGE(r) - [: HAS_ACTIVE_PROJECT] -> (l) \
-    MERGE(r) - [: RESEARCH] -> (rsa) \
+    CREATE(r: Researcher { researcherId: row.ResearcherId, name: row.ResearcherName }) \
+    WITH count(*) as dummy \
+    LOAD CSV WITH HEADERS FROM "file:///ResearchAreas.csv" as row \
+    CREATE(ra: ResearchArea { researchAreaId: row.ResearchAreaId, name: row.ResearchAreaName }) \
     WITH count(*) as dummy \
     LOAD CSV WITH HEADERS FROM "file:///Products.csv" as row \
-    WITH row, split(row.ResearchAreas, ",") as researchAreas \
-    UNWIND researchAreas as ra \
-    MERGE(p: Product { \
-      productID: row.ProductID, deviceID: row.DeviceID, \
-      description: row.Description, manufacture: row.Manufacture, \
-      dateCreated: row.DateCreated, endOfManufactureWarrenty: row.EndofManufactureWarrenty \
-    }) \
-    MERGE(r: Researcher { name: row.Researcher }) \
-    MERGE(l: Lab { name: row.Lab }) \
-    MERGE(rsa: ResearchArea { name: ra }) \
-    MERGE(r) - [: PURCHASED] -> (p) \
-    MERGE(p) - [: USED_IN] -> (rsa) \
-    MERGE(p) - [: USED_AT] -> (l)';
+    CREATE(p: Product { productId: row.ProductId, deviceId: row.DeviceId, description: row.Description, \
+      manufacture: row.Manufacture, dateCreated: row.DateCreated, endOfManufactureWarrenty: \
+      row.EndofManufactureWarrenty }) \
+    WITH count(*) as dummy \
+    LOAD CSV WITH HEADERS FROM "file:///ResearchAreas.csv" as row \
+    MATCH(rsa: ResearchArea { researchAreaId: row.ResearchAreaId }), (l: Lab { labId: row.LabId }) \
+    CREATE(rsa) - [: WAS_RESEARCHED_AT] -> (l) \
+    WITH count(*) as dummy \
+    LOAD CSV WITH HEADERS FROM "file:///Products.csv" as row \
+    MATCH(p: Product { productId: row.ProductId }), (r: Researcher { researcherId: row.ResearcherId }), \
+      (l: Lab { labId: row.LabId }) \
+    CREATE (r) - [: PURCHASED] -> (p) \
+    CREATE(p) - [: USED_AT] -> (l) \
+    WITH count(*) as dummy \
+    LOAD CSV WITH HEADERS FROM "file:///Researches.csv" as row \
+    MATCH(r: Researcher { researcherId: row.ResearcherId }), (ra: ResearchArea { researchAreaId: row.ResearchAreaId }) \
+    CREATE(r) - [: RESEARCHES] -> (ra) \
+    WITH count(*) as dummy \
+    LOAD CSV WITH HEADERS FROM "file:///UsedInResearchArea.csv" as row \
+    MATCH(p: Product { productId: row.ProductId }), (ra: ResearchArea { researchAreaId: row.ResearchAreaId }) \
+    CREATE(p) - [: USED_IN] -> (ra) \
+    WITH count(*) as dummy \
+    LOAD CSV WITH HEADERS FROM "file:///HasActiveProject.csv" as row \
+    MATCH(r: Researcher { researcherId: row.ResearcherId }), (l: Lab { labId: row.LabId }) \
+    MERGE(r) - [: HAS_ACTIVE_PROJECT { onResearchAreas: [] }] -> (l) \
+    WITH count(*) as dummy \
+    LOAD CSV WITH HEADERS FROM "file:///HasActiveProject.csv" as row \
+    MATCH(r: Researcher { researcherId: row.ResearcherId }) - [h: HAS_ACTIVE_PROJECT] -> (l: Lab { labId: row.LabId }) \
+    SET h.onResearchAreas = h.onResearchAreas + row.UnderResearchAreaId'
   var resultObj = await executeCypherQuery(session, query);
   const result = validateCsvImport(resultObj);
   responseHandler.writeResponse(res, result);

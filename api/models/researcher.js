@@ -14,7 +14,7 @@ async function getAll(session) {
 // get researcher by id
 async function getResearcherById(session, researcherId) {
     const query = 
-    'MATCH (researcher:Researcher) WHERE researcher.id = $researcherId \
+    'MATCH (researcher:Researcher) WHERE researcher.researcherId = $researcherId \
     RETURN researcher';
     const params = { researcherId: researcherId };
     const resultObj = await executeQuery(session, query, params);
@@ -24,7 +24,7 @@ async function getResearcherById(session, researcherId) {
 // get all labs with active research done by researcher with "researcherId"
 async function getAllLabsWithActiveResearchByResearcher(session, researcherId) {
     const query =
-    'MATCH (lab:Lab)<-[:HAS_ACTIVE_PROJECT]-(:Researcher { id: $researcherId} ) \
+    'MATCH (lab:Lab)<-[:HAS_ACTIVE_PROJECT]-(:Researcher { researcherId: $researcherId} ) \
     RETURN DISTINCT lab';
     const params = { researcherId: researcherId };
     const resultObj = await executeQuery(session, query, params);
@@ -34,7 +34,7 @@ async function getAllLabsWithActiveResearchByResearcher(session, researcherId) {
 // get all products purchased by researcher with "researcherId"
 async function getAllProductsPurchasedByResearcher(session, researcherId) {
     const query =
-    'MATCH (product:Product)<-[:PURCHASED]-(:Researcher { id: $researcherId} ) \
+    'MATCH (product:Product)<-[:PURCHASED]-(:Researcher { researcherId: $researcherId} ) \
     RETURN DISTINCT product';
     const params = { researcherId: researcherId };
     const resultObj = await executeQuery(session, query, params);
@@ -44,7 +44,7 @@ async function getAllProductsPurchasedByResearcher(session, researcherId) {
 // get all reasearched areas researched by researcher with "researcherId"
 async function getAllResearchedAreasByResearcher(session, researcherId) {
     const query =
-    'MATCH (researchArea:ResearchArea)<-[:RESEARCH]-(:Researcher { id: $researcherId} ) \
+    'MATCH (researchArea:ResearchArea)<-[:RESEARCHES]-(:Researcher { researcherId: $researcherId} ) \
     RETURN DISTINCT researchArea';
     const params = { researcherId: researcherId };
     const resultObj = await executeQuery(session, query, params);

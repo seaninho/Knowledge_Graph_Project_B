@@ -14,7 +14,7 @@ async function getAll(session) {
 
 // get lab by id
 async function getLabById(session, labId) {
-    const query = 'MATCH (lab:Lab) WHERE lab.id = $labId RETURN lab';
+    const query = 'MATCH (lab:Lab) WHERE lab.labId = $labId RETURN lab';
     const params = { labId: labId };
     const resultObj = await executeQuery(session, query, params);
     return formatResponse(resultObj);
@@ -23,7 +23,7 @@ async function getLabById(session, labId) {
 // get all researchers in lab with "labId"
 async function getAllResearchersInLab(session, labId) {
     const query = 
-    'MATCH (researcher:Researcher)-[:HAS_ACTIVE_PROJECT]->(:Lab {id: $labId} ) \
+    'MATCH (researcher:Researcher)-[:HAS_ACTIVE_PROJECT]->(:Lab {labId: $labId} ) \
     RETURN DISTINCT researcher';
     const params = { labId: labId };
     const resultObj = await executeQuery(session, query, params);
@@ -33,7 +33,7 @@ async function getAllResearchersInLab(session, labId) {
 // get all research areas researched in lab with "labId"
 async function getAllResearcheAreasInLab(session, labId) {
     const query = 
-    'MATCH (researchArea:ResearchArea)-[:WAS_RESEARCHED_AT]->(:Lab { id: $labId} ) \
+    'MATCH (researchArea:ResearchArea)-[:WAS_RESEARCHED_AT]->(:Lab { labId: $labId} ) \
     RETURN DISTINCT researchArea';
     const params = { labId: labId };
     const resultObj = await executeQuery(session, query, params);
@@ -43,7 +43,7 @@ async function getAllResearcheAreasInLab(session, labId) {
 // get all products used in lab with "labId"
 async function getAllProductsUsedInLab(session, labId) {
     const query =
-    'MATCH (product:Product)-[:USED_AT]->(:Lab { id: $labId} ) \
+    'MATCH (product:Product)-[:USED_AT]->(:Lab { labId: $labId} ) \
     RETURN DISTINCT product';
     const params = { labId: labId };
     const resultObj = await executeQuery(session, query, params);
