@@ -7,22 +7,22 @@ function listAllProducts(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function getById(req, res) {
+function getProductById(req, res) {
     Products.getProductById(databaseHandler.getSession(req), req.params.id)
         .then(response => writeResponse(res, response));
 }
 
-function listAllLabsThatUseProductId(req, res) {
+function listAllLabsThatUseProductById(req, res) {
     Products.getAllLabs(databaseHandler.getSession(req), req.params.id)
         .then(response => writeResponse(res, response));
 }
 
-function listAllResearchersThatPurchasedProductId(req, res) {
+function listAllResearchersThatPurchasedProductById(req, res) {
     Products.getAllResearchers(databaseHandler.getSession(req), req.params.id)
         .then(response => writeResponse(res, response));
 }
 
-function listAllResearchAreasThatUseProductId(req, res) {
+function listAllResearchAreasThatUseProductById(req, res) {
     Products.getAllResearchAreas(databaseHandler.getSession(req), req.params.id)
         .then(response => writeResponse(res, response));
 }
@@ -34,9 +34,9 @@ function listAllMultiplePurchased(req, res) {
 
 module.exports = {
     listAllProducts: listAllProducts,
-    getById: getById,
-    listAllLabsThatUseProductId: listAllLabsThatUseProductId,
-    listAllResearchersThatPurchasedProductId: listAllResearchersThatPurchasedProductId,
-    listAllResearchAreasThatUseProductId: listAllResearchAreasThatUseProductId,
+    getProductById: getProductById,
+    listAllLabsThatUseProductById: listAllLabsThatUseProductById,
+    listAllResearchersThatPurchasedProductById: listAllResearchersThatPurchasedProductById,
+    listAllResearchAreasThatUseProductById: listAllResearchAreasThatUseProductById,
     listAllMultiplePurchased: listAllMultiplePurchased
 }

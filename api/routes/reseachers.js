@@ -7,8 +7,18 @@ function listAllResearchers(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function getById(req, res) {
+function getResearcherById(req, res) {
     Researchers.getResearcherById(databaseHandler.getSession(req), req.params.id)
+        .then(response => writeResponse(res, response));
+}
+
+function listAllLabsWithActiveResearchByResearcher(req, res) {
+    Researchers.getAllLabsWithActiveResearchByResearcher(databaseHandler.getSession(req), req.params.id)
+        .then(response => writeResponse(res, response));
+}
+
+function listAllProductsPurchasedByResearcher(req, res) {
+    Researchers.getAllProductsPurchasedByResearcher(databaseHandler.getSession(req), req.params.id)
         .then(response => writeResponse(res, response));
 }
 
@@ -18,7 +28,9 @@ function listAllResearchedAreasByResearcher(req, res) {
 }
 
 module.exports = {
+    getResearcherById: getResearcherById,
     listAllResearchers: listAllResearchers,
-    getById: getById,
+    listAllLabsWithActiveResearchByResearcher: listAllLabsWithActiveResearchByResearcher,
+    listAllProductsPurchasedByResearcher: listAllProductsPurchasedByResearcher,
     listAllResearchedAreasByResearcher: listAllResearchedAreasByResearcher
 }

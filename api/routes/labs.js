@@ -7,7 +7,7 @@ const listAllLabs = function (req, res) {
         .then(response => writeResponse(res, response));
 }
 
-const getById = function (req, res) {
+const getLabById = function (req, res) {
     Labs.getLabById(databaseHandler.getSession(req), req.params.id)
         .then(response => writeResponse(res, response));
 }
@@ -30,7 +30,7 @@ const listAllProductsUsedInLab = function (req, res) {
 // exported functions
 module.exports = {
     listAllLabs: listAllLabs,
-    getById: getById,
+    getLabById: getLabById,
     listAllResearchersInLab: listAllResearchersInLab,
     listAllResearcheAreasInLab: listAllResearcheAreasInLab,
     listAllProductsUsedInLab: listAllProductsUsedInLab
