@@ -19,21 +19,20 @@ app.use('/', homepage);
 
 // app configurations
 app.use(express.urlencoded({ extended: false }));
+// views folder will hold all views
+app.set('views', path.join(__dirname, 'views'));
+// view engine setup
+app.set('view engine', 'pug');
 // public folder will be a static folder (e.g. holds images)
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(morganLogger('dev'));
 app.use(cookieParser());
 
-// views folder will hold all views
-app.set('views', path.join(__dirname, 'views'));
-// view engine setup
-app.set('view engine', 'ejs');
-
 app.set('json spaces', 1);
 
 // routing
-router(app);
+router.route(app);
 
 // catch 404 and forward to our error handler
 app.use((_req, _res, next) => {

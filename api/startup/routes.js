@@ -3,7 +3,7 @@ const researchers = require('../routes/reseachers');
 const products = require('../routes/products');
 const dbHandler = require('../middleware/graphDBHandler');
 
-module.exports = function (app) {
+function route(app) {
     app.get("/database/load", dbHandler.loadDataFromCsv);
     app.get("/database/delete", dbHandler.deleteDatabase);
     app.get("/labs", labs.listAllLabs);
@@ -22,4 +22,8 @@ module.exports = function (app) {
     app.get("/products/:id/researchers", products.listAllResearchersThatPurchasedProductById);
     app.get("/products/:id/research_areas", products.listAllResearchAreasThatUseProductById);
     app.get("/products/multiple", products.listAllMultiplePurchased);
-};
+}
+
+module.exports = {
+    route: route
+}
