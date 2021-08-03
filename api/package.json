@@ -16,6 +16,7 @@
     "morgan": "~1.9.1",
     "neo4j-driver": "^4.2.1",
     "pug": "^3.0.2",
+    "vue": "^3.1.5",
     "winston": "^3.3.3"
   },
   "devDependencies": {

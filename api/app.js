@@ -20,7 +20,7 @@ app.use('/', homepage);
 // app configurations
 app.use(express.urlencoded({ extended: false }));
 // views folder will hold all views
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'public/views'));
 // view engine setup
 app.set('view engine', 'pug');
 // public folder will be a static folder (e.g. holds images)
