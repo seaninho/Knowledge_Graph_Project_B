@@ -1,80 +1,61 @@
+const _ = require('lodash');
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
-const response = require('../helpers/response');
-const formatResponse = response.formatResponse;
 
-// get all products
-async function getAll(session) {
-    const query = 'MATCH (product:Product) RETURN product';
-    const params = {};
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
-};
+function _getProperties(record) {
+    return record.properties;
+}
+
+function _singleProductFullInfo(record) {
+    if (record.length > 0) {
+        var result = {};
+        result.Product = _.map(record.get('product'), record => _getProperties(record));
+        result.Labs = _.map(record.get('labs'), record => _getProperties(record));
+        result.Research_Areas = _.map(record.get('researchAreas'), record => _getProperties(record));
+        result.Researchers = _.map(record.get('researchers'), record => _getProperties(record));
+        result.Research_Setups = _.map(record.get('researchSetups'), record => _getProperties(record));
+        return result;
+    }
+    else {
+        return null;
+    }
+}
 
 // get product by id
-async function getProductById(session, productId) {
-    const query =
-    'MATCH (product:Product) WHERE product.productId = $productId \
-    RETURN product';
+function getProductById(session, productId) {
+    const query = [
+    'MATCH (product:Product) WHERE product.productId = $productId',
+    'OPTIONAL MATCH (lab:Lab)<-[:USED_AT]-(product)',
+    'OPTIONAL MATCH (researchSetup:ResearchSetup)-[:COMPOSED_OF]->(product)',
+    'OPTIONAL MATCH (researcher:Researcher)-[:USING]->(product)',
+    'OPTIONAL MATCH (researchArea:ResearchArea)<-[:RESEARCHES]-(r:Researcher)-[:USING]->(product)',
+    'WITH DISTINCT product,',
+    'lab, researchSetup, researcher, researchArea',
+    'RETURN COLLECT(DISTINCT product) AS product,',
+    'COLLECT(DISTINCT lab) as labs,',
+    'COLLECT(DISTINCT researchSetup) AS researchSetups,',
+    'COLLECT(DISTINCT researcher) AS researchers,',
+    'COLLECT(DISTINCT researchArea) AS researchAreas',
+    ].join('\n');
     const params = { productId: productId };
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
-}
 
-// get all labs that use product with "productId"
-async function getAllLabs(session, productId) {
-    const query =
-    'MATCH (p:Product) WHERE p.productId = $productId \
-    MATCH(product: Product) WHERE product.deviceId = p.deviceId \
-    MATCH(lab: Lab) < -[: USED_AT] - (: Product { deviceId: product.deviceId }) \
-    RETURN DISTINCT lab';
-    const params = { productId: productId };
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
-}
-
-// get all researchers that purchased product with "productId"
-async function getAllResearchers(session, productId) {
-    const query =
-    'MATCH (p:Product) WHERE p.productId = $productId \
-    MATCH(product: Product) WHERE product.deviceId = p.deviceId \
-    MATCH (researcher:Researcher)-[:PURCHASED]->(:Product { deviceId: product.deviceId }) \
-    RETURN DISTINCT researcher';
-    const params = { productId: productId };
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
-}
-
-// get all research areas that use product with "productId"
-async function getAllResearchAreas(session, productId) {
-    const query =
-    'MATCH (p:Product) WHERE p.productId = $productId \
-    MATCH(product: Product) WHERE product.deviceId = p.deviceId \
-    MATCH (researchArea:ResearchArea)<-[:USED_IN]-(:Product { deviceId: product.deviceId }) \
-    RETURN DISTINCT researchArea';
-    const params = { productId: productId };
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
-}
-
-// get all multiple purchsed products
-async function getAllMultiplePurchased(session) {
-    const query =
-    'MATCH (r1:Researcher)-[:PURCHASED]->(p1:Product) \
-    MATCH(r2: Researcher) - [: PURCHASED] -> (p2: Product { deviceId: p1.deviceId }) \
-    WHERE r1 <> r2 \
-    RETURN DISTINCT p2.deviceId';
-    const params = { productId: productId };
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
-}
+    return executeQuery(session, query, params)
+    .then(result => {
+        if (!_.isEmpty(result.records)) {
+            return _singleProductFullInfo(result.records[0]);
+        }
+        else {
+            throw {message: 'Product Not Found!', status: 404}
+        }
+    })
+    .catch(error => {
+      console.log(error);
+      session.close();
+      return;
+    });
+};
 
 // exported functions
 module.exports = {
-    getAll: getAll,
     getProductById: getProductById,
-    getAllLabs: getAllLabs,
-    getAllResearchers: getAllResearchers,
-    getAllResearchAreas: getAllResearchAreas,
-    getAllMultiplePurchased: getAllMultiplePurchased
 }

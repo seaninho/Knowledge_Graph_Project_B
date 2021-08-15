@@ -1,61 +1,64 @@
+const _ = require('lodash');
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
-const response = require('../helpers/response');
-const formatResponse = response.formatResponse;
 
-// get all researchers
-async function getAll(session) {
-    const query = 'MATCH (researcher:Researcher) RETURN researcher';
-    const params = {};
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
-};
+function _getProperties(record) {
+    return record.properties;
+}
+
+function _singleResearcherFullInfo(record) {
+    if (record.length > 0) {
+        var result = {};
+        result.Researcher = _.map(record.get('researcher'), record => _getProperties(record));
+        result.Labs = _.map(record.get('labs'), record => _getProperties(record));
+        result.Research_Areas = _.map(record.get('researchAreas'), record => _getProperties(record));
+        result.Researches = _.map(record.get('researches'), record => _getProperties(record));
+        result.Articles = _.map(record.get('articles'), record => _getProperties(record));
+        result.Purchased_Products = _.map(record.get('products'), record => _getProperties(record));
+        return result;
+    }
+    else {
+        return null;
+    }
+}
 
 // get researcher by id
-async function getResearcherById(session, researcherId) {
-    const query = 
-    'MATCH (researcher:Researcher) WHERE researcher.researcherId = $researcherId \
-    RETURN researcher';
+function getResearcherById(session, researcherId) {
+    const query = [
+    'MATCH (researcher:Researcher) WHERE researcher.researcherId = $researcherId',
+    'OPTIONAL MATCH (lab:Lab)<-[:HAS_ACTIVE_PROJECT]-(researcher)',
+    'OPTIONAL MATCH (researchArea:ResearchArea)<-[:RESEARCHES]-(researcher)',
+    'OPTIONAL MATCH (research:Research)<-[:CONDUCTS]-(researcher)',
+    'OPTIONAL MATCH (article:Article)-[:WROTE_REGARD_TO]->(r:Research)<-[:CONDUCTS]-(researcher)',
+    'OPTIONAL MATCH (product:Product)<-[:USING]-(researcher)',    
+    'WITH DISTINCT researcher,',
+    'lab, researchArea, research, article, product',
+    'RETURN COLLECT(DISTINCT researcher) AS researcher,',
+    'COLLECT(DISTINCT lab) AS labs,',
+    'COLLECT(DISTINCT researchArea) AS researchAreas,',
+    'COLLECT(DISTINCT research) as researches,',
+    'COLLECT(DISTINCT article) as articles,',
+    'COLLECT(DISTINCT product) AS products',
+    ].join('\n');
     const params = { researcherId: researcherId };
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
-};
 
-// get all labs with active research done by researcher with "researcherId"
-async function getAllLabsWithActiveResearchByResearcher(session, researcherId) {
-    const query =
-    'MATCH (lab:Lab)<-[:HAS_ACTIVE_PROJECT]-(:Researcher { researcherId: $researcherId} ) \
-    RETURN DISTINCT lab';
-    const params = { researcherId: researcherId };
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
-};
-
-// get all products purchased by researcher with "researcherId"
-async function getAllProductsPurchasedByResearcher(session, researcherId) {
-    const query =
-    'MATCH (product:Product)<-[:PURCHASED]-(:Researcher { researcherId: $researcherId} ) \
-    RETURN DISTINCT product';
-    const params = { researcherId: researcherId };
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
-};
-
-// get all reasearched areas researched by researcher with "researcherId"
-async function getAllResearchedAreasByResearcher(session, researcherId) {
-    const query =
-    'MATCH (researchArea:ResearchArea)<-[:RESEARCHES]-(:Researcher { researcherId: $researcherId} ) \
-    RETURN DISTINCT researchArea';
-    const params = { researcherId: researcherId };
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
+    return executeQuery(session, query, params)
+    .then(result => {
+        if (!_.isEmpty(result.records)) {
+            return _singleResearcherFullInfo(result.records[0]);
+        }
+        else {
+            throw {message: 'Researcher Not Found!', status: 404}
+        }
+    })
+    .catch(error => {
+      console.log(error);
+      session.close();
+      return;
+    });
 };
 
 // exported functions
 module.exports = {
-    getAll: getAll,
     getResearcherById: getResearcherById,
-    getAllLabsWithActiveResearchByResearcher: getAllLabsWithActiveResearchByResearcher,
-    getAllProductsPurchasedByResearcher: getAllProductsPurchasedByResearcher,
-    getAllResearchedAreasByResearcher: getAllResearchedAreasByResearcher
 }

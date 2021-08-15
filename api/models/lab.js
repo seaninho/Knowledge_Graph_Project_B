@@ -1,60 +1,67 @@
+const _ = require('lodash');
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
-const response = require('../helpers/response');
-const formatResponse = response.formatResponse;
 
-
-// get all labs
-async function getAll(session) {
-    const query = 'MATCH (lab:Lab) RETURN lab';
-    const params = {};
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
-};
+function _singleLabFullInfo(record) {
+    if (record.length > 0) {
+        var result = {};
+        result.Lab = _.map(record.get('lab'), record => {
+            return record.properties
+        });
+        result.Faculties = _.map(record.get('faculties'), record => { 
+            return record.properties 
+        });
+        result.Researchers = _.map(record.get('researchers'), record => { 
+            return record.properties 
+        });
+        result.Products = _.map(record.get('products'), record => { 
+            return record.properties 
+        });
+        result.Research_Areas = _.map(record.get('researchAreas'), record => { 
+            return record.properties 
+        });
+        return result;
+    }
+    else {
+        return null;
+    }
+}
 
 // get lab by id
-async function getLabById(session, labId) {
-    const query = 'MATCH (lab:Lab) WHERE lab.labId = $labId RETURN lab';
+function getLabById(session, labId) {
+    const query = [
+    'MATCH (lab:Lab) WHERE lab.labId = $labId',
+    'OPTIONAL MATCH (faculty:Faculty)<-[:PART_OF]-(lab)',
+    'OPTIONAL MATCH (researcher:Researcher)-[:HAS_ACTIVE_PROJECT]->(lab)',
+    'OPTIONAL MATCH (product:Product)-[:USED_AT]->(lab)',
+    'OPTIONAL MATCH (researchArea:ResearchArea)<-[:RESEARCHES]-(r:Researcher)-[:HAS_ACTIVE_PROJECT]->(lab)',
+    'WITH DISTINCT lab,',
+    'researcher, product, faculty, researchArea',
+    'RETURN COLLECT(DISTINCT lab) AS lab,',
+    'COLLECT(DISTINCT faculty) as faculties,',
+    'COLLECT(DISTINCT researcher) AS researchers,',
+    'COLLECT(DISTINCT product) AS products,',
+    'COLLECT(DISTINCT researchArea) AS researchAreas',
+    ].join('\n');
     const params = { labId: labId };
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
+
+    return executeQuery(session, query, params)
+    .then(result => {
+        if (!_.isEmpty(result.records)) {
+            return _singleLabFullInfo(result.records[0]);
+        }
+        else {
+            throw {message: 'Lab Not Found!', status: 404}
+        }
+    })
+    .catch(error => {
+      console.log(error);
+      session.close();
+      return;
+    });
 };
-
-// get all researchers in lab with "labId"
-async function getAllResearchersInLab(session, labId) {
-    const query = 
-    'MATCH (researcher:Researcher)-[:HAS_ACTIVE_PROJECT]->(:Lab {labId: $labId} ) \
-    RETURN DISTINCT researcher';
-    const params = { labId: labId };
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
-}
-
-// get all research areas researched in lab with "labId"
-async function getAllResearcheAreasInLab(session, labId) {
-    const query = 
-    'MATCH (researchArea:ResearchArea)-[:WAS_RESEARCHED_AT]->(:Lab { labId: $labId} ) \
-    RETURN DISTINCT researchArea';
-    const params = { labId: labId };
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
-}
-
-// get all products used in lab with "labId"
-async function getAllProductsUsedInLab(session, labId) {
-    const query =
-    'MATCH (product:Product)-[:USED_AT]->(:Lab { labId: $labId} ) \
-    RETURN DISTINCT product';
-    const params = { labId: labId };
-    const resultObj = await executeQuery(session, query, params);
-    return formatResponse(resultObj);
-}
 
 // exported functions
 module.exports = {
-    getAll: getAll,
     getLabById: getLabById,
-    getAllResearchersInLab: getAllResearchersInLab,
-    getAllResearcheAreasInLab: getAllResearcheAreasInLab,
-    getAllProductsUsedInLab: getAllProductsUsedInLab
 }
