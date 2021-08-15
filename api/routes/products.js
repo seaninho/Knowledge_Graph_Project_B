@@ -7,12 +7,6 @@ function getProductById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function listAllMultiplePurchased(req, res) {
-    Products.getAllMultiplePurchased(databaseHandler.getSession(req))
-        .then(response => writeResponse(res, response));
-}
-
 module.exports = {
-    getProductById: getProductById,
-    listAllMultiplePurchased: listAllMultiplePurchased
+    getProductById: getProductById
 }
