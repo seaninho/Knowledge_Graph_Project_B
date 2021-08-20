@@ -11,13 +11,14 @@ function route(app) {
     app.get("/database/import", dbHandler.importDataFromCsv);
     app.get("/database/export", dbHandler.exportDataToCsv);
     app.get("/database/delete", dbHandler.deleteDatabase);
-    app.get("/faculties/:id", faculties.getFacultyById)
-    app.get("/labs/:id", labs.getLabById);
-    app.get("/researchers/:id", researchers.getResearcherById);
-    app.get("/researchAreas/:id", researchAreas.getResearchAreaById);
-    app.get("/researches/:id", researches.getResearchById);
-    app.get("/researchSetups/:id", researchSetups.getResearchSetupById);
-    app.get("/products/:id", products.getProductById);
+    app.get("/faculty", faculties.listAllFaculties);    
+    app.get("/faculty/:id", faculties.getFacultyById);
+    app.get("/lab/:id", labs.getLabById);
+    app.get("/researcher/:id", researchers.getResearcherById);
+    app.get("/researchArea/:id", researchAreas.getResearchAreaById);
+    app.get("/research/:id", researches.getResearchById);
+    app.get("/researchSetup/:id", researchSetups.getResearchSetupById);
+    app.get("/product/:id", products.getProductById);
 }
 
 module.exports = {
