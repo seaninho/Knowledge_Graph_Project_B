@@ -24,11 +24,12 @@ function getEntityPropertiesByLabel(record, label) {
 };
 
 function getEntityListByRecordKey(record, recordKey) {
-  if (!_.isEmpty(record.get(recordKey)[0])) {
-    return {
-      'entityType': record.get(recordKey)[0].labels[0],
-      'entityList': getEntityPropertiesByLabel(record, recordKey) 
-    };
+  if (!_.find(record.keys, recordKey) &&
+      !_.isEmpty(record.get(recordKey))) {
+      return {
+        'entityType': record.get(recordKey)[0].labels[0],
+        'entityList': getEntityPropertiesByLabel(record, recordKey) 
+      };   
   }
 };
 
