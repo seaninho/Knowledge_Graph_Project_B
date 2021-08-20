@@ -33,8 +33,9 @@ function _importEntityResearchAreas(tx) {
 function _importEntityProducts(tx) {
   return tx.run('LOAD CSV WITH HEADERS FROM "file:///import/entity_tables//Product.csv" as row ' +
     'CREATE (p: Product { productId: row.productId, deviceId: row.deviceId, ' +
-    'description: row.productDescription, manufacture: row.manufacture, ' +
-    'dateCreated: row.dateCreated, endOfManufactureWarrenty: row.endofManufactureWarrenty })');
+    'productDescription: row.productDescription, productManufacture: row.productManufacture, ' +
+    'productDateCreated: row.productDateCreated, endOfManufactureWarrenty: row.endOfManufactureWarrenty, ' +
+    'isActiveProduct: row.isActiveProduct})');
 }
 
 function _importEntityFaculties(tx) {
