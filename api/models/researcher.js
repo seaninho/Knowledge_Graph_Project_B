@@ -1,22 +1,19 @@
 const _ = require('lodash');
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
-
-function _getProperties(record) {
-    console.log(record);
-    return record.properties;
-}
+const getEntityList = databaseHandler.getEntityListByRecordKey;
+const getEntityProperties = databaseHandler.getEntityPropertiesByLabel;
 
 function _singleResearcherFullInfo(record) {
     if (record.length > 0) {
         var result = {};
-        result["Researcher Information"] = _.map(record.get('researcher'), record => _getProperties(record));
-        result["Member Of Labs"] = _.map(record.get('labs'), record => _getProperties(record));
-        result["Areas of Research"] = _.map(record.get('researchAreas'), record => _getProperties(record));
-        result["Active Researches"] = _.map(record.get('researches'), record => _getProperties(record));
-        result["Published Articles"] = _.map(record.get('articles'), record => _getProperties(record));
-        result["Purchased Products"] = _.map(record.get('purchasedProducts'), record => _getProperties(record));
-        result["Shared Products"] = _.map(record.get('sharedProducts'), record => _getProperties(record));
+        result["Entity"] = getEntityProperties(record, 'researcher');
+        result["Member Of Labs"] = getEntityList(record, 'labs');
+        result["Areas of Research"] = getEntityList(record, 'researchAreas');
+        result["Active Researches"] = getEntityList(record, 'researches');
+        result["Published Articles"] = getEntityList(record, 'articles');
+        result["Purchased Products"] = getEntityList(record, 'purchasedProducts');
+        result["Shared Products"] = getEntityList(record, 'sharedProducts');
         return result;
     }
     else {

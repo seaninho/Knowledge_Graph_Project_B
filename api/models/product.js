@@ -1,24 +1,24 @@
 const _ = require('lodash');
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
-
-function _getProperties(record) {
-    return record.properties;
-}
+const getEntityList = databaseHandler.getEntityListByRecordKey;
+const getEntityProperties = databaseHandler.getEntityPropertiesByLabel;
 
 function _singleProductFullInfo(record) {
     if (record.length > 0) {
         var result = {};
-        result["Product Information"] = _.map(record.get('product'), record => _getProperties(record));
-        result["Labs That Use This Product"] = _.map(record.get('labs'), record => _getProperties(record));
-        result["Research Areas That Use This Product"] = _.map(record.get('researchAreas'), record => _getProperties(record));
-        result["Researches That Use This Product"] = _.map(record.get('researches'), record => _getProperties(record));
-        result["Owned By This Researcher"] = _.map(record.get('owner'), record => _getProperties(record));
-        result["Researchers That Use This Product"] = _.map(record.get('researchers'), record => _getProperties(record));
-        result["Part of This Research Setup"] = _.map(record.get('researchSetups'), record => _getProperties(record));
-        result["Other Products Purchase By Owner"] = _.map(record.get('otherProducts'), record => _getProperties(record));
-        result["Other Products Used At The Same Lab"] = _.map(record.get('labCommonProducts'), record => _getProperties(record));
-        result["Other Products Used In The Same Research Area"] = _.map(record.get('raCommonProducts'), record => _getProperties(record));
+        var recommendations = {};
+        result["Entity"] = getEntityProperties(record, 'product');
+        result["Labs That Use This Product"] = getEntityList(record, 'labs');
+        result["Research Areas That Use This Product"] = getEntityList(record, 'researchAreas');
+        result["Researches That Use This Product"] = getEntityList(record, 'researches');
+        result["Owned By This Researcher"] = getEntityList(record, 'owner');
+        result["Researchers That Use This Product"] = getEntityList(record, 'researchers');
+        result["Part of This Research Setup"] = getEntityList(record, 'researchSetups');        
+        recommendations["Other Products Purchase By Owner"] = getEntityList(record, 'otherProducts');
+        recommendations["Other Products Used At The Same Lab"] = getEntityList(record, 'labCommonProducts');
+        recommendations["Other Products Used In The Same Research Area"] = getEntityList(record, 'raCommonProducts');
+        result["recommendations"] = recommendations;
         return result;
     }
     else {

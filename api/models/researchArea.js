@@ -1,19 +1,17 @@
 const _ = require('lodash');
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
-
-function _getProperties(record) {
-    return record.properties;
-}
+const getEntityList = databaseHandler.getEntityListByRecordKey;
+const getEntityProperties = databaseHandler.getEntityPropertiesByLabel;
 
 function _singleResearchAreaFullInfo(record) {
     if (record.length > 0) {
         var result = {};
-        result["Research Area Information"] = _.map(record.get('researchArea'), record => _getProperties(record));
-        result["Researched In Labs"] = _.map(record.get('labs'), record => _getProperties(record));
-        result["Researches In This Area"] = _.map(record.get('researches'), record => _getProperties(record));
-        result["Researchers In This Area"] = _.map(record.get('researchers'), record => _getProperties(record));
-        result["Products Used In This Area"] = _.map(record.get('products'), record => _getProperties(record));        
+        result["Entity"] = getEntityProperties(record, 'researchArea');
+        result["Researched In Labs"] = getEntityList(record, 'labs');
+        result["Researches In This Area"] = getEntityList(record, 'researches');
+        result["Researchers In This Area"] = getEntityList(record, 'researchers');
+        result["Products Used In This Area"] = getEntityList(record, 'products');       
         return result;
     }
     else {
