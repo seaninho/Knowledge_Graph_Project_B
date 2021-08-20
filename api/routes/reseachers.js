@@ -7,6 +7,12 @@ function getResearcherById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
+function listAllResearchers(req, res) {
+    Researchers.getAllResearchers(databaseHandler.getSession(req))
+        .then(response => writeResponse(res, response));
+}
+
 module.exports = {
     getResearcherById: getResearcherById,
+    listAllResearchers: listAllResearchers
 }

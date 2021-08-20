@@ -7,6 +7,12 @@ function getProductById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
+function listAllProducts(req, res) {
+    Products.getAllProducts(databaseHandler.getSession(req))
+        .then(response => writeResponse(res, response));
+}
+
 module.exports = {
-    getProductById: getProductById
+    getProductById: getProductById,
+    listAllProducts: listAllProducts
 }
