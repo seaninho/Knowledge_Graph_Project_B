@@ -3,8 +3,6 @@ const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
 const getEntityList = databaseHandler.getEntityListByRecordKey;
 const getEntityProperties = databaseHandler.getEntityPropertiesByLabel;
-const response = require('../helpers/response');
-const formatResponse = response.formatResponse;
 
 function _singleFacultyFullInfo(record) {
     if (record.length > 0) {
@@ -54,16 +52,15 @@ function getFacultyById(session, facultyId) {
 
 function getAllFaculties(session) {
 const query = [
-    'MATCH (faculty:Faculty)',   
-    'WITH DISTINCT faculty',
-    'RETURN faculty',    
+    'MATCH (faculty:Faculty)',
+    'RETURN COLLECT(DISTINCT faculty) AS faculty',    
     ].join('\n');
     const params = {};
 
     return executeQuery(session, query, params)
     .then(result => {
         if (!_.isEmpty(result.records)) {
-            return formatResponse(result);
+            return getEntityList(result.records[0], 'faculty');
         }
         else {
             throw {message: 'No Faculties Were Found!', status: 404}
