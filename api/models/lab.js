@@ -9,11 +9,11 @@ function _getProperties(record) {
 function _singleLabFullInfo(record) {
     if (record.length > 0) {
         var result = {};
-        result.Lab = _.map(record.get('lab'), record => _getProperties(record));
-        result.Faculties = _.map(record.get('faculties'), record => _getProperties(record));
-        result.Research_Areas = _.map(record.get('researchAreas'), record => _getProperties(record));
-        result.Researchers = _.map(record.get('researchers'), record => _getProperties(record));
-        result.Products = _.map(record.get('products'), record => _getProperties(record));        
+        result["Lab Information"] = _.map(record.get('lab'), record => _getProperties(record));
+        result["Department of"] = _.map(record.get('faculty'), record => _getProperties(record));
+        result["Areas of Research"] = _.map(record.get('researchAreas'), record => _getProperties(record));
+        result["Researchers"] = _.map(record.get('researchers'), record => _getProperties(record));
+        result["Products"] = _.map(record.get('products'), record => _getProperties(record));        
         return result;
     }
     else {
@@ -32,7 +32,7 @@ function getLabById(session, labId) {
     'WITH DISTINCT lab,',
     'researcher, product, faculty, researchArea',
     'RETURN COLLECT(DISTINCT lab) AS lab,',
-    'COLLECT(DISTINCT faculty) as faculties,',
+    'COLLECT(DISTINCT faculty) as faculty,',
     'COLLECT(DISTINCT researcher) AS researchers,',
     'COLLECT(DISTINCT product) AS products,',
     'COLLECT(DISTINCT researchArea) AS researchAreas',

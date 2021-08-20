@@ -9,11 +9,11 @@ function _getProperties(record) {
 function _singleResearchFullInfo(record) {
     if (record.length > 0) {
         var result = {};
-        result.Research = _.map(record.get('research'), record => _getProperties(record));
-        result.Researchers = _.map(record.get('researchers'), record => _getProperties(record));
-        result.Research_Areas = _.map(record.get('researchAreas'), record => _getProperties(record));
-        result.Research_Setups = _.map(record.get('researchSetups'), record => _getProperties(record));
-        result.Articles = _.map(record.get('articles'), record => _getProperties(record));
+        result["Research Information"] = _.map(record.get('research'), record => _getProperties(record));
+        result["Researchers"] = _.map(record.get('researchers'), record => _getProperties(record));
+        result["Areas of Research"] = _.map(record.get('researchAreas'), record => _getProperties(record));
+        result["Research Setup Used"] = _.map(record.get('researchSetups'), record => _getProperties(record));
+        result["Articles Published"] = _.map(record.get('articles'), record => _getProperties(record));
         return result;
     }
     else {

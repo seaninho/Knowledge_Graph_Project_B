@@ -9,9 +9,9 @@ function _getProperties(record) {
 function _singleResearchSetupFullInfo(record) {
     if (record.length > 0) {
         var result = {};
-        result.ResearchSetup = _.map(record.get('researchSetup'), record => _getProperties(record));
-        result.Products = _.map(record.get('products'), record => _getProperties(record));
-        result.Researches = _.map(record.get('researches'), record => _getProperties(record));                
+        result["Research Setup Information"] = _.map(record.get('researchSetup'), record => _getProperties(record));
+        result["Setup Products"] = _.map(record.get('products'), record => _getProperties(record));
+        result["Used In Researches"] = _.map(record.get('researches'), record => _getProperties(record));                
         return result;
     }
     else {

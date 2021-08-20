@@ -9,11 +9,11 @@ function _getProperties(record) {
 function _singleResearchAreaFullInfo(record) {
     if (record.length > 0) {
         var result = {};
-        result.Research_Area = _.map(record.get('researchArea'), record => _getProperties(record));
-        result.Labs = _.map(record.get('labs'), record => _getProperties(record));
-        result.Researches = _.map(record.get('researches'), record => _getProperties(record));
-        result.Researchers = _.map(record.get('researchers'), record => _getProperties(record));
-        result.Products = _.map(record.get('products'), record => _getProperties(record));        
+        result["Research Area Information"] = _.map(record.get('researchArea'), record => _getProperties(record));
+        result["Researched In Labs"] = _.map(record.get('labs'), record => _getProperties(record));
+        result["Researches In This Area"] = _.map(record.get('researches'), record => _getProperties(record));
+        result["Researchers In This Area"] = _.map(record.get('researchers'), record => _getProperties(record));
+        result["Products Used In This Area"] = _.map(record.get('products'), record => _getProperties(record));        
         return result;
     }
     else {
