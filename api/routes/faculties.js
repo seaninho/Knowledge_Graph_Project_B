@@ -7,7 +7,13 @@ const getFacultyById = function (req, res) {
         .then(response => writeResponse(res, response));
 }
 
+const listAllFaculties = function (req, res) {
+    Faculties.getAllFaculties(databaseHandler.getSession(req))
+        .then(response => writeResponse(res, response));
+}
+
 // exported functions
 module.exports = {
     getFacultyById: getFacultyById,
+    listAllFaculties: listAllFaculties
 }

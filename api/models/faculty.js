@@ -1,6 +1,8 @@
 const _ = require('lodash');
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
+const response = require('../helpers/response');
+const formatResponse = response.formatResponse;
 
 function _getProperties(record) {
     return record.properties;
@@ -9,10 +11,10 @@ function _getProperties(record) {
 function _singleFacultyFullInfo(record) {
     if (record.length > 0) {
         var result = {};
-        result.Faculty = _.map(record.get('faculty'), record => _getProperties(record));
-        result.Labs = _.map(record.get('labs'), record => _getProperties(record));
-        result.Research_Areas = _.map(record.get('researchAreas'), record => _getProperties(record));
-        result.Researchers = _.map(record.get('researchers'), record => _getProperties(record));      
+        result["Faculty Information"] = _.map(record.get('faculty'), record => _getProperties(record));
+        result["Faculty Labs"] = _.map(record.get('labs'), record => _getProperties(record));
+        result["Faculty Research Areas"] = _.map(record.get('researchAreas'), record => _getProperties(record));
+        result["Faculty Researchers"] = _.map(record.get('researchers'), record => _getProperties(record));      
         return result;
     }
     else {
@@ -52,7 +54,32 @@ function getFacultyById(session, facultyId) {
     });
 };
 
+function getAllFaculties(session) {
+const query = [
+    'MATCH (faculty:Faculty)',   
+    'WITH DISTINCT faculty',
+    'RETURN faculty',    
+    ].join('\n');
+    const params = {};
+
+    return executeQuery(session, query, params)
+    .then(result => {
+        if (!_.isEmpty(result.records)) {
+            return formatResponse(result);
+        }
+        else {
+            throw {message: 'No Faculties Were Found!', status: 404}
+        }
+    })
+    .catch(error => {
+      console.log(error);
+      session.close();
+      return;
+    });
+};
+
 // exported functions
 module.exports = {
     getFacultyById: getFacultyById,
+    getAllFaculties: getAllFaculties
 }
