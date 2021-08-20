@@ -17,17 +17,17 @@
 
 function _importEntityLabs(tx) {
   return tx.run('LOAD CSV WITH HEADERS FROM "file:///import/entity_tables//Lab.csv" as row ' +
-    'CREATE (l: Lab { labId: row.labId, name: row.labName })');
+    'CREATE (l: Lab { labId: row.labId, labName: row.labName })');
 }
 
 function _importEntityResearchers(tx) {
   return tx.run('LOAD CSV WITH HEADERS FROM "file:///import/entity_tables//Researcher.csv" as row ' +
-    'CREATE (r: Researcher { researcherId: row.researcherId, name: row.researcherName })');
+    'CREATE (r: Researcher { researcherId: row.researcherId, researcherName: row.researcherName })');
 }
 
 function _importEntityResearchAreas(tx) {
   return tx.run('LOAD CSV WITH HEADERS FROM "file:///import/entity_tables//ResearchArea.csv" as row ' +
-    'CREATE (ra: ResearchArea { researchAreaId: row.researchAreaId, name: row.researchAreaName })');
+    'CREATE (ra: ResearchArea { researchAreaId: row.researchAreaId, researchAreaName: row.researchAreaName })');
 }
 
 function _importEntityProducts(tx) {
