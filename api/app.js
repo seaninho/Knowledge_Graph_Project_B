@@ -40,6 +40,6 @@ app.use((_req, _res, next) => {
 });
 
 //error handling 
-app.use(errorHandler);
+app.use(errorHandler.handleErrors);
 
 module.exports = app;
