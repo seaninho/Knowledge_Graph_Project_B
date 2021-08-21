@@ -25,6 +25,13 @@ function route(app) {
     app.get("/researchSetup/:id", researchSetups.getResearchSetupById);
     app.get("/product", products.listAllProducts);
     app.get("/product/:id", products.getProductById);
+    app.get("/scheme/faculty", faculties.getFacultyScheme);
+    app.get("/scheme/lab", labs.getLabScheme);
+    app.get("/scheme/researcher", researchers.getResearcherScheme);
+    app.get("/scheme/researchArea", researchAreas.getResearchAreaScheme);
+    app.get("/scheme/research", researches.getResearchScheme);
+    app.get("/scheme/researchSetup", researchSetups.getResearchSetupScheme);
+    app.get("/scheme/product", products.getProductScheme);
 }
 
 module.exports = {

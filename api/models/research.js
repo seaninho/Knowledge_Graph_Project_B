@@ -19,6 +19,38 @@ function _singleResearchFullInfo(record) {
     }
 }
 
+// get research scheme ("recipe")
+function getResearchScheme() {
+    return {
+        'entity': 'Research',
+        'id': 'researchId',
+        'name': 'researchName',
+        'property': [],
+        'edges': [
+            {
+                'src': 'Researcher',
+                'dst': 'Research',
+                'edgeName': 'CONDUCTS'
+            },
+            {
+                'src': 'Research',
+                'dst': 'ResearchArea',
+                'edgeName': 'RELEVANT_TO'
+            },
+            {
+                'src': 'ResearchSetup',
+                'dst': 'Research',
+                'edgeName': 'USED_IN'
+            },
+            {
+                'src': 'Article',
+                'dst': 'Research',
+                'edgeName': 'WROTE_REGARD_TO'
+            }
+        ]
+    };
+};
+
 // get research by id
 function getResearchById(session, researchId) {
     const query = [
@@ -53,6 +85,7 @@ function getResearchById(session, researchId) {
     });
 };
 
+// get all researches in our database
 function getAllResearches(session) {
 const query = [
     'MATCH (research:Research)',
@@ -78,6 +111,7 @@ const query = [
 
 // exported functions
 module.exports = {
+    getResearchScheme: getResearchScheme,
     getResearchById: getResearchById,
     getAllResearches: getAllResearches
 }

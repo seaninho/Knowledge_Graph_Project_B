@@ -15,6 +15,23 @@ function _singleResearchSetupFullInfo(record) {
     else {
         return null;
     }
+};
+
+// get research setup scheme ("recipe")
+function getResearchSetupScheme() {
+    return {
+        'entity': 'ResearchSetup',
+        'id': 'researchSetupId',
+        'name': 'researchSetupName',
+        'property': [],
+        'edges': [
+            {
+                'src': 'ResearchSetup',
+                'dst': 'Product',
+                'edgeName': 'COMPOSED_OF'
+            }
+        ]
+    };
 }
 
 // get research setup by id
@@ -47,6 +64,7 @@ function getResearchSetupById(session, researchSetupId) {
     });
 };
 
+// get all research setups in our database
 function getAllResearchSetups(session) {
 const query = [
     'MATCH (researchSetup:ResearchSetup)',
@@ -72,6 +90,7 @@ const query = [
 
 // exported functions
 module.exports = {
+    getResearchSetupScheme: getResearchSetupScheme,
     getResearchSetupById: getResearchSetupById,
     getAllResearchSetups: getAllResearchSetups
 }

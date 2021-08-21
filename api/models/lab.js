@@ -19,6 +19,38 @@ function _singleLabFullInfo(record) {
     }
 }
 
+// get lab scheme ("recipe")
+function getLabScheme() {
+    return {
+        'entity': 'Lab',
+        'id': 'labId',
+        'name': 'labName',
+        'property': [],
+        'edges': [
+            {
+                'src': 'Lab',
+                'dst': 'Faculty',
+                'edgeName': 'PART_OF'
+            },
+            {
+                'src': 'Researcher',
+                'dst': 'Lab',
+                'edgeName': 'ACTIVE_AT'
+            },
+            {
+                'src': 'Product',
+                'dst': 'Lab',
+                'edgeName': 'USED_AT'
+            },
+            {
+                'src': 'ResearchArea',
+                'dst': 'Lab',
+                'edgeName': 'WAS_RESEARCHED_AT'
+            }
+        ]
+    };
+};
+
 // get lab by id
 function getLabById(session, labId) {
     const query = [
@@ -53,6 +85,7 @@ function getLabById(session, labId) {
     });
 };
 
+// get all labs in our database
 function getAllLabs(session) {
 const query = [
     'MATCH (lab:Lab)',
@@ -78,6 +111,7 @@ const query = [
 
 // exported functions
 module.exports = {
+    getLabScheme: getLabScheme,
     getLabById: getLabById,
     getAllLabs: getAllLabs
 }

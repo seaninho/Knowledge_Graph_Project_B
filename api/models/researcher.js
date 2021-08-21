@@ -21,6 +21,38 @@ function _singleResearcherFullInfo(record) {
     }
 }
 
+// get researcher scheme ("recipe")
+function getResearcherScheme() {
+    return {
+        'entity': 'Researcher',
+        'id': 'researcherId',
+        'name': 'researcherName',
+        'property': [],
+        'edges': [
+            {
+                'src': 'Researcher',
+                'dst': 'Product',
+                'edgeName': 'USING'
+            },
+            {
+                'src': 'Researcher',
+                'dst': 'ResearchArea',
+                'edgeName': 'RESEARCHES'
+            },
+            {
+                'src': 'Researcher',
+                'dst': 'Lab',
+                'edgeName': 'ACTIVE_AT'
+            },
+            {
+                'src': 'Researcher',
+                'dst': 'Research',
+                'edgeName': 'CONDUCTS'
+            }
+        ]
+    };
+};
+
 // get researcher by id
 function getResearcherById(session, researcherId) {
     const query = [
@@ -59,6 +91,7 @@ function getResearcherById(session, researcherId) {
     });
 };
 
+// get all researchers in our database
 function getAllResearchers(session) {
 const query = [
     'MATCH (researcher:Researcher)',
@@ -84,6 +117,7 @@ const query = [
 
 // exported functions
 module.exports = {
+    getResearcherScheme: getResearcherScheme,
     getResearcherById: getResearcherById,
     getAllResearchers: getAllResearchers
 }

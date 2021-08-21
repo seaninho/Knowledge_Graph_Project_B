@@ -19,6 +19,33 @@ function _singleResearchAreaFullInfo(record) {
     }
 }
 
+// get research area scheme ("recipe")
+function getResearchAreaScheme() {
+    return {
+        'entity': 'ResearchArea',
+        'id': 'researchAreaId',
+        'name': 'researchAreaName',
+        'property': [],
+        'edges': [
+            {
+                'src': 'ResearchArea',
+                'dst': 'Lab',
+                'edgeName': 'WAS_RESEARCHED_AT'
+            },
+            {
+                'src': 'Researcher',
+                'dst': 'ResearchArea',
+                'edgeName': 'RESEARCHES'
+            },
+            {
+                'src': 'Research',
+                'dst': 'ResearchArea',
+                'edgeName': 'RELEVANT_TO'
+            }
+        ]
+    };
+}
+
 // get research area by id
 function getResearchAreaById(session, researchAreaId) {
     const query = [
@@ -53,6 +80,7 @@ function getResearchAreaById(session, researchAreaId) {
     });
 };
 
+//get all research areas in our database
 function getAllResearchAreas(session) {
 const query = [
     'MATCH (researchArea:ResearchArea)',
@@ -78,6 +106,7 @@ const query = [
 
 // exported functions
 module.exports = {
+    getResearchAreaScheme: getResearchAreaScheme,
     getResearchAreaById: getResearchAreaById,
     getAllResearchAreas: getAllResearchAreas
 }

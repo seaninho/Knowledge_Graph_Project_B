@@ -18,6 +18,23 @@ function _singleFacultyFullInfo(record) {
     }
 }
 
+// get faculty scheme ("recipe")
+function getFacultyScheme() {
+    return {
+        'entity': 'Faculty',
+        'id': 'facultyId',
+        'name': 'facultyName',
+        'property': [],
+        'edges': [
+            {
+                'src': 'Lab',
+                'dst': 'Faculty',
+                'edgeName': 'PART_OF'
+            }
+        ]
+    };
+};
+
 // get faculty by id
 function getFacultyById(session, facultyId) {
     const query = [
@@ -50,6 +67,7 @@ function getFacultyById(session, facultyId) {
     });
 };
 
+// get all faculties in our database
 function getAllFaculties(session) {
 const query = [
     'MATCH (faculty:Faculty)',
@@ -75,6 +93,7 @@ const query = [
 
 // exported functions
 module.exports = {
+    getFacultyScheme: getFacultyScheme,
     getFacultyById: getFacultyById,
     getAllFaculties: getAllFaculties
 }

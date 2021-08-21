@@ -26,6 +26,34 @@ function _singleProductFullInfo(record) {
     }
 }
 
+// get product scheme ("recipe")
+function getProductScheme() {
+    return {
+        'entity': 'Product',
+        'id': 'productId',
+        'name': 'productDescription',
+        'property': ['deviceId', 'productDateCreated', 'productManufacture', 
+                    'endOfManufactureWarrenty'],
+        'edges': [
+            {
+                'src': 'Product',
+                'dst': 'Lab',
+                'edgeName': 'USED_AT'
+            },
+            {
+                'src': 'Researcher',
+                'dst': 'Product',
+                'edgeName': 'USING'
+            },
+            {
+                'src': 'ResearchSetup',
+                'dst': 'Product',
+                'edgeName': 'COMPOSED_OF'
+            },
+        ]
+    };
+};
+
 // get product by id
 function getProductById(session, productId) {
     const query = [
@@ -71,6 +99,7 @@ function getProductById(session, productId) {
     });
 };
 
+// get all products in our database
 function getAllProducts(session) {
 const query = [
     'MATCH (product:Product)',
@@ -96,6 +125,7 @@ const query = [
 
 // exported functions
 module.exports = {
+    getProductScheme: getProductScheme,
     getProductById: getProductById,
     getAllProducts: getAllProducts
 }
