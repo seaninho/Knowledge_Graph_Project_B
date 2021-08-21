@@ -14,12 +14,11 @@ class GeneralError extends Error {
     }
 
     getMessage() {
-        if (this instanceof BadRequest) {
-            return "Error 400. Bad Request!";
-        } if (this instanceof NotFound) {
+        if (this instanceof NotFound) {
             return "Error 404. Page Not Found!";
-        }
-        return "Error 500. General Error!";
+        } else {
+            return this.message;
+        }        
     }
 }
 
