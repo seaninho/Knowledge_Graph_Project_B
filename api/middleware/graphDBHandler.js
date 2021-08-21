@@ -10,7 +10,7 @@ const importer = require('../helpers/graphDBImporter');
 const exporter = require('../helpers/graphDBExporter');
 const enforcer = require('../helpers/graphDBEnforcer');
 const responseHandler = require('../helpers/response');
-// const { GeneralError, BadRequest, NotFound } = require('../utils/errors');
+const { GeneralError, BadRequest, NotFound } = require('../utils/errors');
 
 const driver = neo4j.driver(uri, neo4j.auth.basic(user, password), {
   maxConnectionLifetime: 3 * 60 * 60 * 1000, // 3 hours
@@ -58,7 +58,7 @@ async function executeCypherQuery(session, query, params = {}, op = 'READ') {
   }
 };
 
-function importDataFromCsv(req, res) {  
+function importDataFromCsv(req, res, next) {  
   const savedBookmarks = [];
   const session = getSession(req);
   const txRes = importer.importEntitiesData(session)
@@ -71,15 +71,14 @@ function importDataFromCsv(req, res) {
     .then(() => session.close())
     .then(response => responseHandler.writeResponse(res, response))
     .catch(error => {
-      console.log(error);
       session.close();
-      return;
+      next(error);
     });
 
   Promise.all([txRes]);
 }
 
-function exportDataToCsv(req, res) {  
+function exportDataToCsv(req, res, next) {  
   const savedBookmarks = [];
   const session = getSession(req);
   const txRes = exporter.exportEntitiesData(session)
@@ -91,34 +90,32 @@ function exportDataToCsv(req, res) {
     .then(() => session.close())
     .then(response => responseHandler.writeResponse(res, response))
     .catch(error => {
-      console.log(error);
       session.close();
-      return;
+      next(error);
     });
 
   Promise.all([txRes]);
 }
 
-async function deleteDatabase(req, res) {
+async function deleteDatabase(req, res, next) {
   const savedBookmarks = [];
   const session = getSession(req);
   const txRes = session.writeTransaction(tx => tx.run('MATCH (n) DETACH DELETE n'))       // Clear Database
   .then(() => session.writeTransaction(tx => tx.run('CALL apoc.schema.assert({}, {})')))  // Clear Constraints
-  // .then(() => session.readTransaction(tx => tx.run('MATCH (n) RETURN n')))
-  // .then(result => {
-  //   if (_.isEmpty(result.records)) {
-  //     throw new GeneralError('Database Was Not Deleted Properly!');
-  //   }
-  // })
+  .then(() => session.readTransaction(tx => tx.run('MATCH (n) RETURN n')))
+  .then(result => {
+    if (!_.isEmpty(result.records)) {
+      throw new GeneralError('Database Was Not Deleted Properly!');
+    }
+  })
   .then(() => {
     savedBookmarks.push(session.lastBookmark())
   })
   .then(() => session.close())
   .then(() => responseHandler.writeResponse(res, { message: 'Database Deleted Successfully!' }))
   .catch(error => {
-    // console.log(error);
     session.close();
-    return;
+    next(error);
   });
 
   Promise.all([txRes]);
