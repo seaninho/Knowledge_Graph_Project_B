@@ -32,8 +32,13 @@ function getProductScheme() {
         'entity': 'Product',
         'id': 'productId',
         'name': 'productDescription',
-        'property': ['deviceId', 'productDateCreated', 'productManufacture', 
-                    'endOfManufactureWarrenty'],
+        'activeField': 'isActiveProduct',
+        'property': [
+            'deviceId', 
+            'productDateCreated', 
+            'productManufacture', 
+            'endOfManufactureWarrenty'
+        ],        
         'edges': [
             {
                 'src': 'Product',
