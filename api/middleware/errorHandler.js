@@ -1,6 +1,6 @@
 const { GeneralError, BadRequest, NotFound } = require('../utils/errors');
 
-module.exports = (err, req, res, next) => {
+ function handleErrors(err, req, res, next) {
     if (err instanceof GeneralError) {
         return res.status(err.getCode()).json({
             status: 'error',
@@ -14,7 +14,6 @@ module.exports = (err, req, res, next) => {
     });
 }
 
-
 // const error = function (err, req, res, next) {
 //     // set locals, only providing error in development
 //     res.locals.message = err.message;
@@ -24,3 +23,8 @@ module.exports = (err, req, res, next) => {
 //     res.status(err.status || 500);
 //     res.render('error');
 // }
+
+
+module.exports = {
+    handleErrors: handleErrors
+}
