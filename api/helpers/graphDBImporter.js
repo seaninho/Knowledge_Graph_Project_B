@@ -87,10 +87,10 @@ function _importRelationshipUsing(tx) {
     'CREATE (r) - [: USING { isOwner: row.isOwner }] -> (p)');
 }
 
-function _importRelationshipHasActiveProject(tx) {
-  return tx.run('LOAD CSV WITH HEADERS FROM "file:///import/relationship_tables/HAS_ACTIVE_PROJECT.csv" as row ' +
+function _importRelationshipActiveAt(tx) {
+  return tx.run('LOAD CSV WITH HEADERS FROM "file:///import/relationship_tables/ACTIVE_AT.csv" as row ' +
     'MATCH(r: Researcher { researcherId: row.ResearcherId }), (l: Lab { labId: row.LabId }) ' +
-    'CREATE (r) - [: HAS_ACTIVE_PROJECT { onResearchAreas: [], isActive: row.isActive }] -> (l)');
+    'CREATE (r) - [: HAS_ACTIVE_PROJECT { onResearchAreas: [], hasActiveProject: row.hasActiveProject }] -> (l)');
 }
 
 function _importRelationshipConducts(tx) {
@@ -134,9 +134,9 @@ function _importRelationshipComposedOf(tx) {
 /// Special Property Functions ///
 //////////////////////////////////
 
-function _importSpecialPropertyHasActiveProject(tx) {
+function _importSpecialPropertyOnResearchAreas(tx) {
   return tx.run('LOAD CSV WITH HEADERS FROM "file:///import/special_property_tables/onResearchAreas.csv" as row ' +
-    'MATCH(r: Researcher { researcherId: row.ResearcherId }) - [h: HAS_ACTIVE_PROJECT] -> (l: Lab { labId: row.LabId }) ' +
+    'MATCH(r: Researcher { researcherId: row.ResearcherId }) - [h: ACTIVE_AT] -> (l: Lab { labId: row.LabId }) ' +
     'SET h.onResearchAreas = h.onResearchAreas + row.ResearchAreaId');
 }
 
@@ -160,7 +160,7 @@ function importRelationshipData(session) {
     .then(() => session.writeTransaction(tx => _importRelationshipUsedAt(tx)))
     .then(() => session.writeTransaction(tx => _importRelationshipResearches(tx)))
     .then(() => session.writeTransaction(tx => _importRelationshipUsing(tx)))
-    .then(() => session.writeTransaction(tx => _importRelationshipHasActiveProject(tx)))
+    .then(() => session.writeTransaction(tx => _importRelationshipActiveAt(tx)))
     .then(() => session.writeTransaction(tx => _importRelationshipConducts(tx)))
     .then(() => session.writeTransaction(tx => _importRelationshipPartOf(tx)))
     .then(() => session.writeTransaction(tx => _importRelationshipRelevantTo(tx)))
@@ -170,7 +170,7 @@ function importRelationshipData(session) {
 }
 
 function importSpecialPropertyData(session) {
-  return session.writeTransaction(tx => _importSpecialPropertyHasActiveProject(tx))
+  return session.writeTransaction(tx => _importSpecialPropertyOnResearchAreas(tx))
 }
 
 module.exports = {
