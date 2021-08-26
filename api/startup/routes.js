@@ -1,4 +1,5 @@
 const dbHandler = require('../middleware/graphDBHandler');
+const articles = require("../routes/articles");
 const faculties = require('../routes/faculties');
 const labs = require('../routes/labs');
 const researchAreas = require('../routes/researchAreas');
@@ -8,6 +9,8 @@ const researchSetups = require('../routes/researchSetups');
 const products = require('../routes/products');
 
 function route(app) {
+    app.get("/article", articles.listAllArticles);
+    app.get("/article/:id", articles.getArticleById);
     app.get("/database/import", dbHandler.importDataFromCsv);
     app.get("/database/export", dbHandler.exportDataToCsv);
     app.get("/database/delete", dbHandler.deleteDatabase);
@@ -25,6 +28,7 @@ function route(app) {
     app.get("/researchSetup/:id", researchSetups.getResearchSetupById);
     app.get("/product", products.listAllProducts);
     app.get("/product/:id", products.getProductById);
+    app.get("/scheme/article", articles.getArticleScheme);
     app.get("/scheme/faculty", faculties.getFacultyScheme);
     app.get("/scheme/lab", labs.getLabScheme);
     app.get("/scheme/researcher", researchers.getResearcherScheme);
