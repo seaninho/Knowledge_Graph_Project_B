@@ -2,9 +2,6 @@ const Article = require('../models/article');
 const databaseHandler = require('../middleware/graphDBHandler');
 const writeResponse = require('../helpers/response').writeResponse;
 
-function getArticleScheme(_req, res) {
-    writeResponse(res, Article.getScheme());
-}
 
 function getArticleById(req, res) {
     Article.getArticleById(databaseHandler.getSession(req), req.params.id)
@@ -18,7 +15,6 @@ function listAllArticles(req, res, next) {
 
 // exported functions
 module.exports = {
-    getArticleScheme: getArticleScheme,
     getArticleById: getArticleById,
     listAllArticles: listAllArticles
 }

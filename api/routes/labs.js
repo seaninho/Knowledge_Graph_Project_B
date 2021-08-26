@@ -2,9 +2,6 @@ const Lab = require('../models/lab');
 const databaseHandler = require('../middleware/graphDBHandler');
 const writeResponse = require('../helpers/response').writeResponse;
 
-function getLabScheme(_req, res) {
-    writeResponse(res, Lab.getScheme());
-}
 
 function getLabById(req, res) {
     Lab.getLabById(databaseHandler.getSession(req), req.params.id)
@@ -18,7 +15,6 @@ function listAllLabs(req, res, next) {
 
 // exported functions
 module.exports = {
-    getLabScheme: getLabScheme,
     getLabById: getLabById,
     listAllLabs: listAllLabs
 }

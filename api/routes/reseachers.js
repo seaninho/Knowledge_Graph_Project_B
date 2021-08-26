@@ -2,9 +2,6 @@ const Researcher = require('../models/researcher');
 const databaseHandler = require('../middleware/graphDBHandler');
 const writeResponse = require('../helpers/response').writeResponse;
 
-function getResearcherScheme(_req, res) {
-    writeResponse(res, Researcher.getScheme());
-}
 
 function getResearcherById(req, res) {
     Researcher.getResearcherById(databaseHandler.getSession(req), req.params.id)
@@ -17,7 +14,6 @@ function listAllResearchers(req, res, next) {
 }
 
 module.exports = {
-    getResearcherScheme: getResearcherScheme,
     getResearcherById: getResearcherById,
     listAllResearchers: listAllResearchers
 }

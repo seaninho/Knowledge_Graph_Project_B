@@ -2,9 +2,6 @@ const ResearchSetup = require('../models/researchSetup');
 const databaseHandler = require('../middleware/graphDBHandler');
 const writeResponse = require('../helpers/response').writeResponse;
 
-function getResearchSetupScheme(_req, res) {
-    writeResponse(res, ResearchSetup.getScheme());
-}
 
 function getResearchSetupById(req, res) {
     ResearchSetup.getResearchSetupById(databaseHandler.getSession(req), req.params.id)
@@ -18,7 +15,6 @@ function listAllResearchSetups(req, res, next) {
 
 // exported functions
 module.exports = {
-    getResearchSetupScheme: getResearchSetupScheme,
     getResearchSetupById: getResearchSetupById,
     listAllResearchSetups: listAllResearchSetups
 }
