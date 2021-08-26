@@ -90,7 +90,7 @@ function _importRelationshipUsing(tx) {
 function _importRelationshipActiveAt(tx) {
   return tx.run('LOAD CSV WITH HEADERS FROM "file:///import/relationship_tables/ACTIVE_AT.csv" as row ' +
     'MATCH(r: Researcher { researcherId: row.ResearcherId }), (l: Lab { labId: row.LabId }) ' +
-    'CREATE (r) - [: HAS_ACTIVE_PROJECT { onResearchAreas: [], hasActiveProject: row.hasActiveProject }] -> (l)');
+    'CREATE (r) - [: ACTIVE_AT { onResearchAreas: [], hasActiveProject: row.hasActiveProject }] -> (l)');
 }
 
 function _importRelationshipConducts(tx) {
