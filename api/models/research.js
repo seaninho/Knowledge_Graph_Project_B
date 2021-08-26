@@ -85,33 +85,8 @@ function getResearchById(session, researchId) {
     });
 };
 
-// get all researches in our database
-function getAllResearches(session) {
-const query = [
-    'MATCH (research:Research)',
-    'RETURN COLLECT(DISTINCT research) AS research',    
-    ].join('\n');
-    const params = {};
-
-    return executeQuery(session, query, params)
-    .then(result => {
-        if (!_.isEmpty(result.records)) {
-            return getEntityList(result.records[0], 'research');
-        }
-        else {
-            throw {message: 'No Researches Were Found!', status: 404}
-        }
-    })
-    .catch(error => {
-      console.log(error);
-      session.close();
-      return;
-    });
-};
-
 // exported functions
 module.exports = {
     getResearchScheme: getResearchScheme,
-    getResearchById: getResearchById,
-    getAllResearches: getAllResearches
+    getResearchById: getResearchById
 }

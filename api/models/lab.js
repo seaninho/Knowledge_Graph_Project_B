@@ -85,33 +85,8 @@ function getLabById(session, labId) {
     });
 };
 
-// get all labs in our database
-function getAllLabs(session) {
-const query = [
-    'MATCH (lab:Lab)',
-    'RETURN COLLECT(DISTINCT lab) AS lab',    
-    ].join('\n');
-    const params = {};
-
-    return executeQuery(session, query, params)
-    .then(result => {
-        if (!_.isEmpty(result.records)) {
-            return getEntityList(result.records[0], 'lab');
-        }
-        else {
-            throw {message: 'No Labs Were Found!', status: 404}
-        }
-    })
-    .catch(error => {
-      console.log(error);
-      session.close();
-      return;
-    });
-};
-
 // exported functions
 module.exports = {
     getLabScheme: getLabScheme,
-    getLabById: getLabById,
-    getAllLabs: getAllLabs
+    getLabById: getLabById
 }

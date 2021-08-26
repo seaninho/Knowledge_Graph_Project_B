@@ -64,33 +64,8 @@ function getResearchSetupById(session, researchSetupId) {
     });
 };
 
-// get all research setups in our database
-function getAllResearchSetups(session) {
-const query = [
-    'MATCH (researchSetup:ResearchSetup)',
-    'RETURN COLLECT(DISTINCT researchSetup) AS researchSetup',    
-    ].join('\n');
-    const params = {};
-
-    return executeQuery(session, query, params)
-    .then(result => {
-        if (!_.isEmpty(result.records)) {
-            return getEntityList(result.records[0], 'researchSetup');
-        }
-        else {
-            throw {message: 'No Research Setups Were Found!', status: 404}
-        }
-    })
-    .catch(error => {
-      console.log(error);
-      session.close();
-      return;
-    });
-};
-
 // exported functions
 module.exports = {
     getResearchSetupScheme: getResearchSetupScheme,
-    getResearchSetupById: getResearchSetupById,
-    getAllResearchSetups: getAllResearchSetups
+    getResearchSetupById: getResearchSetupById
 }

@@ -11,8 +11,8 @@ function getResearchAreaById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function listAllResearchAreas(req, res) {
-    ResearchAreas.getAllResearchAreas(databaseHandler.getSession(req))
+function listAllResearchAreas(req, res, next) {
+    databaseHandler.getAllEntitiesByType(req, next, 'ResearchArea')
         .then(response => writeResponse(res, response));
 }
 

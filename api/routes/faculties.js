@@ -11,8 +11,8 @@ function getFacultyById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function listAllFaculties(req, res) {
-    Faculties.getAllFaculties(databaseHandler.getSession(req))
+function listAllFaculties(req, res, next) {
+    databaseHandler.getAllEntitiesByType(req, next, 'Faculty')
         .then(response => writeResponse(res, response));
 }
 

@@ -67,33 +67,8 @@ function getFacultyById(session, facultyId) {
     });
 };
 
-// get all faculties in our database
-function getAllFaculties(session) {
-const query = [
-    'MATCH (faculty:Faculty)',
-    'RETURN COLLECT(DISTINCT faculty) AS faculty',    
-    ].join('\n');
-    const params = {};
-
-    return executeQuery(session, query, params)
-    .then(result => {
-        if (!_.isEmpty(result.records)) {
-            return getEntityList(result.records[0], 'faculty');
-        }
-        else {
-            throw {message: 'No Faculties Were Found!', status: 404}
-        }
-    })
-    .catch(error => {
-      console.log(error);
-      session.close();
-      return;
-    });
-};
-
 // exported functions
 module.exports = {
     getFacultyScheme: getFacultyScheme,
-    getFacultyById: getFacultyById,
-    getAllFaculties: getAllFaculties
+    getFacultyById: getFacultyById
 }

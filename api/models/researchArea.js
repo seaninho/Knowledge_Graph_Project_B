@@ -80,33 +80,8 @@ function getResearchAreaById(session, researchAreaId) {
     });
 };
 
-//get all research areas in our database
-function getAllResearchAreas(session) {
-const query = [
-    'MATCH (researchArea:ResearchArea)',
-    'RETURN COLLECT(DISTINCT researchArea) AS researchArea',    
-    ].join('\n');
-    const params = {};
-
-    return executeQuery(session, query, params)
-    .then(result => {
-        if (!_.isEmpty(result.records)) {
-            return getEntityList(result.records[0], 'researchArea');
-        }
-        else {
-            throw {message: 'No Research Areas Were Found!', status: 404}
-        }
-    })
-    .catch(error => {
-      console.log(error);
-      session.close();
-      return;
-    });
-};
-
 // exported functions
 module.exports = {
     getResearchAreaScheme: getResearchAreaScheme,
-    getResearchAreaById: getResearchAreaById,
-    getAllResearchAreas: getAllResearchAreas
+    getResearchAreaById: getResearchAreaById
 }

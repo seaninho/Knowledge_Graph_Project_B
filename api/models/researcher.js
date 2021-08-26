@@ -91,33 +91,8 @@ function getResearcherById(session, researcherId) {
     });
 };
 
-// get all researchers in our database
-function getAllResearchers(session) {
-const query = [
-    'MATCH (researcher:Researcher)',
-    'RETURN COLLECT(DISTINCT researcher) AS researcher',    
-    ].join('\n');
-    const params = {};
-
-    return executeQuery(session, query, params)
-    .then(result => {
-        if (!_.isEmpty(result.records)) {
-            return getEntityList(result.records[0], 'researcher');
-        }
-        else {
-            throw {message: 'No Researchers Were Found!', status: 404}
-        }
-    })
-    .catch(error => {
-      console.log(error);
-      session.close();
-      return;
-    });
-};
-
 // exported functions
 module.exports = {
     getResearcherScheme: getResearcherScheme,
-    getResearcherById: getResearcherById,
-    getAllResearchers: getAllResearchers
+    getResearcherById: getResearcherById
 }

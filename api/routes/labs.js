@@ -11,8 +11,8 @@ function getLabById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function listAllLabs(req, res) {
-    Labs.getAllLabs(databaseHandler.getSession(req))
+function listAllLabs(req, res, next) {
+    databaseHandler.getAllEntitiesByType(req, next, 'Lab')
         .then(response => writeResponse(res, response));
 }
 

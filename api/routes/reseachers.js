@@ -11,8 +11,8 @@ function getResearcherById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function listAllResearchers(req, res) {
-    Researchers.getAllResearchers(databaseHandler.getSession(req))
+function listAllResearchers(req, res, next) {
+    databaseHandler.getAllEntitiesByType(req, next, 'Researcher')
         .then(response => writeResponse(res, response));
 }
 

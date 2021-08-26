@@ -19,20 +19,6 @@ const driver = neo4j.driver(uri, neo4j.auth.basic(user, password), {
   disableLosslessIntegers: true
 });
 
-function getEntityPropertiesByLabel(record, label) {
-  return _.map(record.get(label), record => record.properties);
-};
-
-function getEntityListByRecordKey(record, recordKey) {
-  if (!_.find(record.keys, recordKey) &&
-      !_.isEmpty(record.get(recordKey))) {
-      return {
-        'entityType': record.get(recordKey)[0].labels[0],
-        'entityList': getEntityPropertiesByLabel(record, recordKey) 
-      };   
-  }
-};
-
 function getSession(context) {
   if (context.neo4jSession) {
     return context.neo4jSession;
@@ -58,6 +44,47 @@ async function executeCypherQuery(session, query, params = {}, op = 'READ') {
   }
 };
 
+function getEntityPropertiesByLabel(record, label) {
+  return _.map(record.get(label), record => record.properties);
+};
+
+function getEntityListByRecordKey(record, recordKey) {
+  if (!_.find(record.keys, recordKey) &&
+      !_.isEmpty(record.get(recordKey))) {
+      return {
+        'entityType': record.get(recordKey)[0].labels[0],
+        'entityList': getEntityPropertiesByLabel(record, recordKey) 
+      };   
+  }
+};
+
+function getAllEntitiesByType(req, next, entityType) {
+  const entityString = _.toLower(entityType)
+  const session = getSession(req);
+  const query = [
+    'MATCH (' + entityString + ':' + entityType + ')',
+    'RETURN COLLECT(DISTINCT ' + entityString + ') AS ' + entityString,    
+    ].join('\n');
+  const params = {};
+
+    return executeCypherQuery(session, query, params)
+    .then(result => {
+        if (!_.isEmpty(result.records) && 
+            !_.isEmpty(result.records[0]._fields[0])) {
+            return getEntityListByRecordKey(result.records[0], entityString);
+        }
+        else {
+            throw {message: 'No ' + entityType + ' Was Found!'}
+        }
+    })
+    .catch(error => {
+      session.close();
+      next(error);
+    });
+};
+
+
+/// IMPORT DATA ///
 function importDataFromCsv(req, res, next) {  
   const savedBookmarks = [];
   const session = getSession(req);
@@ -78,6 +105,7 @@ function importDataFromCsv(req, res, next) {
   Promise.all([txRes]);
 }
 
+/// EXPORT DATA ///
 function exportDataToCsv(req, res, next) {  
   const savedBookmarks = [];
   const session = getSession(req);
@@ -97,6 +125,8 @@ function exportDataToCsv(req, res, next) {
   Promise.all([txRes]);
 }
 
+
+/// DELETE DATA ///
 async function deleteDatabase(req, res, next) {
   const savedBookmarks = [];
   const session = getSession(req);
@@ -122,10 +152,11 @@ async function deleteDatabase(req, res, next) {
 };
 
 module.exports = {
-    getEntityPropertiesByLabel: getEntityPropertiesByLabel,
-    getEntityListByRecordKey: getEntityListByRecordKey,
     getSession: getSession,
     executeCypherQuery: executeCypherQuery,
+    getEntityPropertiesByLabel: getEntityPropertiesByLabel,
+    getEntityListByRecordKey: getEntityListByRecordKey,
+    getAllEntitiesByType: getAllEntitiesByType,
     importDataFromCsv: importDataFromCsv,
     exportDataToCsv: exportDataToCsv, 
     deleteDatabase: deleteDatabase

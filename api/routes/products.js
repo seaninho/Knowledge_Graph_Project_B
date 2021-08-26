@@ -11,8 +11,8 @@ function getProductById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function listAllProducts(req, res) {
-    Products.getAllProducts(databaseHandler.getSession(req))
+function listAllProducts(req, res, next) {
+    databaseHandler.getAllEntitiesByType(req, next, 'Product')
         .then(response => writeResponse(res, response));
 }
 
