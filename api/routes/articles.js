@@ -1,13 +1,13 @@
-const Articles = require('../models/article');
+const Article = require('../models/article');
 const databaseHandler = require('../middleware/graphDBHandler');
 const writeResponse = require('../helpers/response').writeResponse;
 
 function getArticleScheme(_req, res) {
-    writeResponse(res, Articles.getArticleScheme());
+    writeResponse(res, Article.getArticleScheme());
 }
 
 function getArticleById(req, res) {
-    Articles.getArticleById(databaseHandler.getSession(req), req.params.id)
+    Article.getArticleById(databaseHandler.getSession(req), req.params.id)
         .then(response => writeResponse(res, response));
 }
 

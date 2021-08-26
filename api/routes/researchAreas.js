@@ -1,13 +1,13 @@
-const ResearchAreas = require('../models/researchArea');
+const ResearchArea = require('../models/researchArea');
 const databaseHandler = require('../middleware/graphDBHandler');
 const writeResponse = require('../helpers/response').writeResponse;
 
 function getResearchAreaScheme(_req, res) {
-    writeResponse(res, ResearchAreas.getResearchAreaScheme());
+    writeResponse(res, ResearchArea.getResearchAreaScheme());
 }
 
 function getResearchAreaById(req, res) {
-    ResearchAreas.getResearchAreaById(databaseHandler.getSession(req), req.params.id)
+    ResearchArea.getResearchAreaById(databaseHandler.getSession(req), req.params.id)
         .then(response => writeResponse(res, response));
 }
 

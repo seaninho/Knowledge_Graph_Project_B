@@ -1,13 +1,13 @@
-const Labs = require('../models/lab');
+const Lab = require('../models/lab');
 const databaseHandler = require('../middleware/graphDBHandler');
 const writeResponse = require('../helpers/response').writeResponse;
 
 function getLabScheme(_req, res) {
-    writeResponse(res, Labs.getLabScheme());
+    writeResponse(res, Lab.getLabScheme());
 }
 
 function getLabById(req, res) {
-    Labs.getLabById(databaseHandler.getSession(req), req.params.id)
+    Lab.getLabById(databaseHandler.getSession(req), req.params.id)
         .then(response => writeResponse(res, response));
 }
 

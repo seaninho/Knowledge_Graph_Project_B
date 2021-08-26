@@ -1,13 +1,13 @@
-const Products = require('../models/product');
+const Product = require('../models/product');
 const databaseHandler = require('../middleware/graphDBHandler');
 const writeResponse = require('../helpers/response').writeResponse;
 
 function getProductScheme(_req, res) {
-    writeResponse(res, Products.getProductScheme());
+    writeResponse(res, Product.getProductScheme());
 }
 
 function getProductById(req, res) {
-    Products.getProductById(databaseHandler.getSession(req), req.params.id)
+    Product.getProductById(databaseHandler.getSession(req), req.params.id)
         .then(response => writeResponse(res, response));
 }
 

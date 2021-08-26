@@ -1,13 +1,13 @@
-const Researchers = require('../models/researcher');
+const Researcher = require('../models/researcher');
 const databaseHandler = require('../middleware/graphDBHandler');
 const writeResponse = require('../helpers/response').writeResponse;
 
 function getResearcherScheme(_req, res) {
-    writeResponse(res, Researchers.getResearcherScheme());
+    writeResponse(res, Researcher.getResearcherScheme());
 }
 
 function getResearcherById(req, res) {
-    Researchers.getResearcherById(databaseHandler.getSession(req), req.params.id)
+    Researcher.getResearcherById(databaseHandler.getSession(req), req.params.id)
         .then(response => writeResponse(res, response));
 }
 

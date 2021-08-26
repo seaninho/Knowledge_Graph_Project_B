@@ -1,13 +1,13 @@
-const ResearchSetups = require('../models/researchSetup');
+const ResearchSetup = require('../models/researchSetup');
 const databaseHandler = require('../middleware/graphDBHandler');
 const writeResponse = require('../helpers/response').writeResponse;
 
 function getResearchSetupScheme(_req, res) {
-    writeResponse(res, ResearchSetups.getResearchSetupScheme());
+    writeResponse(res, ResearchSetup.getResearchSetupScheme());
 }
 
 function getResearchSetupById(req, res) {
-    ResearchSetups.getResearchSetupById(databaseHandler.getSession(req), req.params.id)
+    ResearchSetup.getResearchSetupById(databaseHandler.getSession(req), req.params.id)
         .then(response => writeResponse(res, response));
 }
 
