@@ -1,4 +1,5 @@
 const dbHandler = require('../middleware/graphDBHandler');
+const entity = require('../models/entity');
 const articles = require("../routes/articles");
 const faculties = require('../routes/faculties');
 const labs = require('../routes/labs');
@@ -18,24 +19,17 @@ function route(app) {
     app.get("/faculty/:id", faculties.getFacultyById);
     app.get("/lab", labs.listAllLabs);
     app.get("/lab/:id", labs.getLabById);
-    app.get("/researcher", researchers.listAllResearchers);
-    app.get("/researcher/:id", researchers.getResearcherById);
-    app.get("/researchArea", researchAreas.listAllResearchAreas);
-    app.get("/researchArea/:id", researchAreas.getResearchAreaById);
-    app.get("/research", researches.listAllResearches);
-    app.get("/research/:id", researches.getResearchById);
-    app.get("/researchSetup", researchSetups.listAllResearchSetups);
-    app.get("/researchSetup/:id", researchSetups.getResearchSetupById);
     app.get("/product", products.listAllProducts);
     app.get("/product/:id", products.getProductById);
-    app.get("/scheme/article", articles.getArticleScheme);
-    app.get("/scheme/faculty", faculties.getFacultyScheme);
-    app.get("/scheme/lab", labs.getLabScheme);
-    app.get("/scheme/researcher", researchers.getResearcherScheme);
-    app.get("/scheme/researchArea", researchAreas.getResearchAreaScheme);
-    app.get("/scheme/research", researches.getResearchScheme);
-    app.get("/scheme/researchSetup", researchSetups.getResearchSetupScheme);
-    app.get("/scheme/product", products.getProductScheme);
+    app.get("/research", researches.listAllResearches);
+    app.get("/research/:id", researches.getResearchById);
+    app.get("/researchArea", researchAreas.listAllResearchAreas);
+    app.get("/researchArea/:id", researchAreas.getResearchAreaById);
+    app.get("/researcher", researchers.listAllResearchers);
+    app.get("/researcher/:id", researchers.getResearcherById);
+    app.get("/researchSetup", researchSetups.listAllResearchSetups);
+    app.get("/researchSetup/:id", researchSetups.getResearchSetupById);
+    app.get("/scheme/:entity", entity.getScheme);
 }
 
 module.exports = {
