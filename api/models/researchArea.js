@@ -20,7 +20,7 @@ function _singleResearchAreaFullInfo(record) {
 }
 
 // get research area scheme ("recipe")
-function getResearchAreaScheme() {
+function getScheme() {
     return {
         'entity': 'ResearchArea',
         'id': 'researchAreaId',
@@ -82,6 +82,6 @@ function getResearchAreaById(session, researchAreaId) {
 
 // exported functions
 module.exports = {
-    getResearchAreaScheme: getResearchAreaScheme,
+    getScheme: getScheme,
     getResearchAreaById: getResearchAreaById
 }

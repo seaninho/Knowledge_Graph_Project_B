@@ -20,7 +20,7 @@ function _singleLabFullInfo(record) {
 }
 
 // get lab scheme ("recipe")
-function getLabScheme() {
+function getScheme() {
     return {
         'entity': 'Lab',
         'id': 'labId',
@@ -87,6 +87,6 @@ function getLabById(session, labId) {
 
 // exported functions
 module.exports = {
-    getLabScheme: getLabScheme,
+    getScheme: getScheme,
     getLabById: getLabById
 }

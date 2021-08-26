@@ -18,7 +18,7 @@ function _singleResearchSetupFullInfo(record) {
 };
 
 // get research setup scheme ("recipe")
-function getResearchSetupScheme() {
+function getScheme() {
     return {
         'entity': 'ResearchSetup',
         'id': 'researchSetupId',
@@ -66,6 +66,6 @@ function getResearchSetupById(session, researchSetupId) {
 
 // exported functions
 module.exports = {
-    getResearchSetupScheme: getResearchSetupScheme,
+    getScheme: getScheme,
     getResearchSetupById: getResearchSetupById
 }

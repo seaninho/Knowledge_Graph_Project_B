@@ -3,7 +3,7 @@ const databaseHandler = require('../middleware/graphDBHandler');
 const writeResponse = require('../helpers/response').writeResponse;
 
 function getResearchAreaScheme(_req, res) {
-    writeResponse(res, ResearchArea.getResearchAreaScheme());
+    writeResponse(res, ResearchArea.getScheme());
 }
 
 function getResearchAreaById(req, res) {

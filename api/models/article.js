@@ -18,7 +18,7 @@ function _singleArticleFullInfo(record) {
 }
 
 // get article scheme ("recipe")
-function getArticleScheme() {
+function getScheme() {
     return {
         'entity': 'Article',
         'id': 'articleId',
@@ -66,6 +66,6 @@ function getArticleById(session, articleId) {
 
 // exported functions
 module.exports = {
-    getArticleScheme: getArticleScheme,
+    getScheme: getScheme,
     getArticleById: getArticleById
 }

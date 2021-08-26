@@ -27,7 +27,7 @@ function _singleProductFullInfo(record) {
 }
 
 // get product scheme ("recipe")
-function getProductScheme() {
+function getScheme() {
     return {
         'entity': 'Product',
         'id': 'productId',
@@ -106,6 +106,6 @@ function getProductById(session, productId) {
 
 // exported functions
 module.exports = {
-    getProductScheme: getProductScheme,
+    getScheme: getScheme,
     getProductById: getProductById
 }

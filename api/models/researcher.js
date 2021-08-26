@@ -22,7 +22,7 @@ function _singleResearcherFullInfo(record) {
 }
 
 // get researcher scheme ("recipe")
-function getResearcherScheme() {
+function getScheme() {
     return {
         'entity': 'Researcher',
         'id': 'researcherId',
@@ -93,6 +93,6 @@ function getResearcherById(session, researcherId) {
 
 // exported functions
 module.exports = {
-    getResearcherScheme: getResearcherScheme,
+    getScheme: getScheme,
     getResearcherById: getResearcherById
 }

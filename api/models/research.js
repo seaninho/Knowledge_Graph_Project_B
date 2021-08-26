@@ -20,7 +20,7 @@ function _singleResearchFullInfo(record) {
 }
 
 // get research scheme ("recipe")
-function getResearchScheme() {
+function getScheme() {
     return {
         'entity': 'Research',
         'id': 'researchId',
@@ -87,6 +87,6 @@ function getResearchById(session, researchId) {
 
 // exported functions
 module.exports = {
-    getResearchScheme: getResearchScheme,
+    getScheme: getScheme,
     getResearchById: getResearchById
 }

@@ -19,7 +19,7 @@ function _singleFacultyFullInfo(record) {
 }
 
 // get faculty scheme ("recipe")
-function getFacultyScheme() {
+function getScheme() {
     return {
         'entity': 'Faculty',
         'id': 'facultyId',
@@ -69,6 +69,6 @@ function getFacultyById(session, facultyId) {
 
 // exported functions
 module.exports = {
-    getFacultyScheme: getFacultyScheme,
+    getScheme: getScheme,
     getFacultyById: getFacultyById
 }
