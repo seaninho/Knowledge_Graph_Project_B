@@ -30,8 +30,9 @@ const entityTypes =
 ];
 
 /**
- * 
+ * get case matched pre-defined entity type
  * @param {*} entity 
+ * @throws GeneralError if 'entity' is not a valid entity type
  */
 function _getEntityType(entity) {
     const entityTypeFound = entityTypes.find((entityType) => 
@@ -44,21 +45,20 @@ function _getEntityType(entity) {
 
 /**
  * get all pre-defined entity types
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
- * @returns
+ * @param {*} req client request
+ * @param {*} res server result
+ * @returns all pre-defined entity types
  */
-function getAllEntityTypes(_req, res, next) {
+function getAllEntityTypes(_req, res) {
     const respone = { 'entityType' : entityTypes };
     return writeResponse(res, respone);
 };
 
 /**
  * get entity scheme by entity type
- * @param {*} req request containing entity type
- * @param {*} res 
- * @param {*} next 
+ * @param {*} req client request containing entity type
+ * @param {*} res server result
+ * @returns requested entity's scheme
  */
 function getScheme(req, res) {
     var entityType;
@@ -93,9 +93,9 @@ function getScheme(req, res) {
 
 /**
  * get entity by entity id
- * @param {*} req request containing entity id
- * @param {*} res 
- * @param {*} next 
+ * @param {*} req client request containing entity type, id
+ * @param {*} res server result
+ * @returns requested entity 
  */
 function getEntityById(req, res) {
     const entityId = req.params.id;
@@ -138,9 +138,9 @@ function getEntityById(req, res) {
 };
 
 /**
- * 
- * @param {*} req 
- * @param {*} res 
+ * get all entities matching passed 'entity'
+ * @param {*} req client request containing entity
+ * @param {*} res server result
  * @param {*} next 
  * @returns 
  */
@@ -160,21 +160,18 @@ function getAllInstances(req, res, next) {
         ].join('\n');
     const params = {};
 
-        return executeCypherQuery(session, query, params)
-        .then(result => {
-            if (!_.isEmpty(result.records) && 
-                !_.isEmpty(result.records[0]._fields[0])) {
-                return getAllRecords(result.records[0], entity);
-            }
-            else {
-                throw new GeneralError('No ' + entityType + ' Was Found!');
-            }
-        })
-        .then(response => writeResponse(res, response))
-        .catch(error => {
+    return executeCypherQuery(session, query, params)
+    .then(result => {
+        if (!_.isEmpty(result.records) && 
+            !_.isEmpty(result.records[0]._fields[0])) {
+            return getAllRecords(result.records[0], entity);
+        }
+    })
+    .then(response => writeResponse(res, response))
+    .catch(error => {
         session.close();
         next(error);
-        });
+    });
 };
 
 module.exports = {
