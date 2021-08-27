@@ -10,7 +10,6 @@ const researchSetups = require('../routes/researchSetups');
 const products = require('../routes/products');
 
 function route(app) {
-    // app.get("/article", articles.listAllArticles);
     app.get("/article/:id", articles.getArticleById);
     app.get("/database/import", dbHandler.importDataFromCsv);
     app.get("/database/export", dbHandler.exportDataToCsv);
