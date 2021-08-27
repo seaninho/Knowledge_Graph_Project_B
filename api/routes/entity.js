@@ -15,7 +15,7 @@ const executeCypherQuery = databaseHandler.executeCypherQuery;
 const getAllRecords = databaseHandler.getAllRecordsByKey;
 const responseHandler = require('../helpers/response');
 const writeResponse = responseHandler.writeResponse;
-const { GeneralError, BadRequest, NotFound } = require('../utils/errors');
+const { EntityTypeNotFound, EntityIdNotFound } = require('../utils/errors');
 
 const entityTypes = 
 [
@@ -38,7 +38,7 @@ function _getEntityType(entity) {
     const entityTypeFound = entityTypes.find((entityType) => 
         entityType.toLowerCase() == entity.toLowerCase())
     if (!entityTypes.includes(entityTypeFound)) {
-        throw new GeneralError('Entity type: \'' + entity + '\' is not a valid entity!');
+        throw new EntityTypeNotFound(entity);
     }
     return entityTypeFound;
 };
@@ -86,8 +86,6 @@ function getScheme(req, res) {
         case 'Product':
             return writeResponse(res, Product.getScheme());
         default:
-            throw new GeneralError('Could not get scheme for entity: ' 
-                + lowerCaseEntityType);
     }
 };
 
@@ -132,8 +130,7 @@ function getEntityById(req, res) {
             return Product.getProductById(getSession(req), entityId)
             .then(response => writeResponse(res, response));
         default:            
-            throw new GeneralError('Could not get instance for entity: ' 
-                + lowerCaseEntityType + ' with id: ' + entityId);
+            throw new EntityIdNotFound(entityType, entityId);
     }
 };
 

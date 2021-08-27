@@ -14,8 +14,8 @@ class GeneralError extends Error {
     }
 
     getMessage() {
-        if (this instanceof NotFound) {
-            return "Error 404. Page Not Found!";
+        if (this instanceof BadRequest) {
+            return "Error 400. Bad Request!";
         } else {
             return this.message;
         }        
@@ -25,8 +25,22 @@ class GeneralError extends Error {
 class BadRequest extends GeneralError { }
 class NotFound extends GeneralError { }
 
+class EntityTypeNotFound extends NotFound { 
+    constructor(entityType) {
+        super('Entity Type: \'' + entityType + '\' is not a valid entity!');
+    }
+}
+
+class EntityIdNotFound extends NotFound {
+    constructor(entityType, entityId) {
+        super('Entity Type: \'' + entityType + '\' With ID: ' + entityId + ' Not Found');
+    }
+}
+
 module.exports = {
     GeneralError,
     BadRequest,
-    NotFound
+    NotFound,
+    EntityTypeNotFound,
+    EntityIdNotFound
 };
