@@ -1,8 +1,12 @@
 const _ = require('lodash');
+
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
+const validateResult = databaseHandler.validateResult;
 const getEntityList = databaseHandler.getAllRecordsByKey;
 const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
+
+const { EntityIdNotFound } = require("../utils/errors");
 
 function _singleResearchAreaFullInfo(record) {
     if (record.length > 0) {
@@ -47,7 +51,7 @@ function getScheme() {
 }
 
 // get research area by id
-function getResearchAreaById(session, researchAreaId) {
+function getResearchAreaById(session, researchAreaId, next) {
     const query = [
     'MATCH (researchArea:ResearchArea) WHERE researchArea.researchAreaId = $researchAreaId',    
     'OPTIONAL MATCH (research:Research)-[:RELEVANT_TO]->(researchArea)',
@@ -66,17 +70,16 @@ function getResearchAreaById(session, researchAreaId) {
 
     return executeQuery(session, query, params)
     .then(result => {
-        if (!_.isEmpty(result.records)) {
+        if (validateResult(result)) {
             return _singleResearchAreaFullInfo(result.records[0]);
         }
         else {
-            throw {message: 'Research Area Not Found!', status: 404}
+            throw new EntityIdNotFound('ResearchArea', researchAreaId);
         }
     })
-    .catch(error => {
-      console.log(error);
+    .catch(error => {      
       session.close();
-      return;
+      next(error);
     });
 };
 

@@ -1,8 +1,12 @@
 const _ = require('lodash');
+
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
+const validateResult = databaseHandler.validateResult;
 const getEntityList = databaseHandler.getAllRecordsByKey;
 const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
+
+const { EntityIdNotFound } = require("../utils/errors");
 
 function _singleLabFullInfo(record) {
     if (record.length > 0) {
@@ -52,7 +56,7 @@ function getScheme() {
 };
 
 // get lab by id
-function getLabById(session, labId) {
+function getLabById(session, labId, next) {
     const query = [
     'MATCH (lab:Lab) WHERE lab.labId = $labId',
     'OPTIONAL MATCH (faculty:Faculty)<-[:PART_OF]-(lab)',
@@ -71,17 +75,16 @@ function getLabById(session, labId) {
 
     return executeQuery(session, query, params)
     .then(result => {
-        if (!_.isEmpty(result.records)) {
+        if (validateResult(result)) {
             return _singleLabFullInfo(result.records[0]);
         }
         else {
-            throw {message: 'Lab Not Found!', status: 404}
+            throw new EntityIdNotFound('Lab', labId);
         }
     })
-    .catch(error => {
-      console.log(error);
+    .catch(error => {      
       session.close();
-      return;
+      next(error);
     });
 };
 

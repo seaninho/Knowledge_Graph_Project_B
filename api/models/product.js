@@ -1,8 +1,12 @@
 const _ = require('lodash');
+
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
+const validateResult = databaseHandler.validateResult;
 const getEntityList = databaseHandler.getAllRecordsByKey;
 const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
+
+const { EntityIdNotFound } = require("../utils/errors");
 
 function _singleProductFullInfo(record) {
     if (record.length > 0) {
@@ -60,7 +64,7 @@ function getScheme() {
 };
 
 // get product by id
-function getProductById(session, productId) {
+function getProductById(session, productId, next) {
     const query = [
     'MATCH (product:Product) WHERE product.productId = $productId',
     'OPTIONAL MATCH (lab:Lab)<-[:USED_AT]-(product)',
@@ -90,17 +94,16 @@ function getProductById(session, productId) {
 
     return executeQuery(session, query, params)
     .then(result => {
-        if (!_.isEmpty(result.records)) {
+        if (validateResult(result)) {
             return _singleProductFullInfo(result.records[0]);
         }
         else {
-            throw {message: 'Product Not Found!', status: 404}
+            throw new EntityIdNotFound('Product', productId);
         }
     })
-    .catch(error => {
-      console.log(error);
+    .catch(error => {      
       session.close();
-      return;
+      next(error);
     });
 };
 

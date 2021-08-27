@@ -1,8 +1,12 @@
 const _ = require('lodash');
+
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
+const validateResult = databaseHandler.validateResult;
 const getEntityList = databaseHandler.getAllRecordsByKey;
 const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
+
+const { EntityIdNotFound } = require("../utils/errors");
 
 function _singleArticleFullInfo(record) {
     if (record.length > 0) {
@@ -35,7 +39,7 @@ function getScheme() {
 };
 
 // get article by id
-function getArticleById(session, articleId) {
+function getArticleById(session, articleId, next) {
     const query = [
     'MATCH (article:Article) WHERE article.articleId = $articleId',
     'OPTIONAL MATCH (research:Research)<-[:WROTE_REGARD_TO]-(article)',    
@@ -50,17 +54,16 @@ function getArticleById(session, articleId) {
 
     return executeQuery(session, query, params)
     .then(result => {
-        if (!_.isEmpty(result.records)) {
+        if (validateResult(result)) {
             return _singleArticleFullInfo(result.records[0]);
         }
         else {
-            throw {message: 'Article Not Found!', status: 404}
+            throw new EntityIdNotFound('Article', articleId);
         }
     })
-    .catch(error => {
-      console.log(error);
+    .catch(error => {      
       session.close();
-      return;
+      next(error);
     });
 };
 

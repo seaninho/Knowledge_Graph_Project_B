@@ -13,59 +13,64 @@ const responseHandler = require('../helpers/response');
 const { GeneralError, BadRequest, NotFound } = require('../utils/errors');
 
 const driver = neo4j.driver(uri, neo4j.auth.basic(user, password), {
-  maxConnectionLifetime: 3 * 60 * 60 * 1000, // 3 hours
-  maxConnectionPoolSize: 50,
-  connectionAcquisitionTimeout: 2 * 60 * 1000, // 120 seconds
-  disableLosslessIntegers: true
+    maxConnectionLifetime: 3 * 60 * 60 * 1000, // 3 hours
+    maxConnectionPoolSize: 50,
+    connectionAcquisitionTimeout: 2 * 60 * 1000, // 120 seconds
+    disableLosslessIntegers: true
 });
 
 function getSession(context) {
-  if (context.neo4jSession) {
-    return context.neo4jSession;
-  }
-  else {
-    context.neo4jSession = driver.session();
-    return context.neo4jSession;
-  }
+    if (context.neo4jSession) {
+        return context.neo4jSession;
+    }
+    else {
+        context.neo4jSession = driver.session();
+        return context.neo4jSession;
+    }
 };
 
 async function executeCypherQuery(session, query, params = {}, op = 'READ') {
-  try {
-    if (op == 'READ') {
-      return await session.readTransaction(tx => tx.run(query, params));
+    try {
+        if (op == 'READ') {
+            return await session.readTransaction(tx => tx.run(query, params));
+        }
+        else {
+            return await session.writeTransaction(tx => tx.run(query, params));
+        }    
     }
-    else {
-      return await session.writeTransaction(tx => tx.run(query, params));
-    }    
-  }
-  catch (error) {
-    session.close();
-    throw error; // logging error at the time of calling this method
-  }
+    catch (error) {
+        session.close();
+        throw error; // logging error at the time of calling this method
+    }
 };
 
+function validateResult(result) {
+    return !_.isEmpty(result.records) && 
+            !result.records[0]._fields.every(e => _.isEmpty(e));
+}
+
 function getRecordPropertiesByLabel(record, label) {
-  return _.map(record.get(label), record => record.properties);
+    return _.map(record.get(label), record => record.properties);
 };
 
 function getAllRecordsByKey(record, recordKey) {
-  if (!_.find(record.keys, recordKey) &&
-      !_.isEmpty(record.get(recordKey))) {
+    if (!_.find(record.keys, recordKey) &&
+        !_.isEmpty(record.get(recordKey))) {
         return {
-        'entityType': record.get(recordKey)[0].labels[0],
-        'entityList': getRecordPropertiesByLabel(record, recordKey) 
-      };   
-  }
+            'entityType': record.get(recordKey)[0].labels[0],
+            'entityList': getRecordPropertiesByLabel(record, recordKey) 
+        };   
+    }
 };
 
 function getAllEntitiesByType(req, next, entityType) {
-  const entityString = _.toLower(entityType)
-  const session = getSession(req);
-  const query = [
-    'MATCH (' + entityString + ':' + entityType + ')',
-    'RETURN COLLECT(DISTINCT ' + entityString + ') AS ' + entityString,    
-    ].join('\n');
-  const params = {};
+    const entityString = _.toLower(entityType)
+    const session = getSession(req);
+    const query = [
+        'MATCH (' + entityString + ':' + entityType + ')',
+        'RETURN COLLECT(DISTINCT ' + entityString + ') AS ' + entityString,    
+        ].join('\n');
+    const params = {};
 
     return executeCypherQuery(session, query, params)
     .then(result => {
@@ -78,28 +83,28 @@ function getAllEntitiesByType(req, next, entityType) {
         }
     })
     .catch(error => {
-      session.close();
-      next(error);
+        session.close();
+        next(error);
     });
 };
 
 
 /// IMPORT DATA ///
 function importDataFromCsv(req, res, next) {  
-  const savedBookmarks = [];
-  const session = getSession(req);
-  const txRes = importer.importEntitiesData(session)
+    const savedBookmarks = [];
+    const session = getSession(req);
+    const txRes = importer.importEntitiesData(session)
     .then(() => importer.importRelationshipData(session))
     .then(() => importer.importSpecialPropertyData(session))
     .then(() => enforcer.createGraphConstraints(session))
     .then(() => {
-      savedBookmarks.push(session.lastBookmark())
+        savedBookmarks.push(session.lastBookmark())
     })
     .then(() => session.close())
     .then(response => responseHandler.writeResponse(res, response))
     .catch(error => {
-      session.close();
-      next(error);
+        session.close();
+        next(error);
     });
 
   Promise.all([txRes]);
@@ -107,53 +112,54 @@ function importDataFromCsv(req, res, next) {
 
 /// EXPORT DATA ///
 function exportDataToCsv(req, res, next) {  
-  const savedBookmarks = [];
-  const session = getSession(req);
-  const txRes = exporter.exportEntitiesData(session)
+    const savedBookmarks = [];
+    const session = getSession(req);
+    const txRes = exporter.exportEntitiesData(session)
     .then(() => exporter.exportRelationshipData(session))
     .then(() => exporter.exportSpecialPropertyData(session))
     .then(() => {
-      savedBookmarks.push(session.lastBookmark())
+        savedBookmarks.push(session.lastBookmark())
     })
     .then(() => session.close())
     .then(response => responseHandler.writeResponse(res, response))
     .catch(error => {
-      session.close();
-      next(error);
+        session.close();
+        next(error);
     });
 
-  Promise.all([txRes]);
+    Promise.all([txRes]);
 }
 
 
 /// DELETE DATA ///
 async function deleteDatabase(req, res, next) {
-  const savedBookmarks = [];
-  const session = getSession(req);
-  const txRes = session.writeTransaction(tx => tx.run('MATCH (n) DETACH DELETE n'))       // Clear Database
-  .then(() => session.writeTransaction(tx => tx.run('CALL apoc.schema.assert({}, {})')))  // Clear Constraints
-  .then(() => session.readTransaction(tx => tx.run('MATCH (n) RETURN n')))
-  .then(result => {
+    const savedBookmarks = [];
+    const session = getSession(req);
+    const txRes = session.writeTransaction(tx => tx.run('MATCH (n) DETACH DELETE n'))       // Clear Database
+    .then(() => session.writeTransaction(tx => tx.run('CALL apoc.schema.assert({}, {})')))  // Clear Constraints
+    .then(() => session.readTransaction(tx => tx.run('MATCH (n) RETURN n')))
+    .then(result => {
     if (!_.isEmpty(result.records)) {
-      throw new GeneralError('Database Was Not Deleted Properly!');
+        throw new GeneralError('Database Was Not Deleted Properly!');
     }
-  })
-  .then(() => {
+    })
+    .then(() => {
     savedBookmarks.push(session.lastBookmark())
-  })
-  .then(() => session.close())
-  .then(() => responseHandler.writeResponse(res, { message: 'Database Deleted Successfully!' }))
-  .catch(error => {
-    session.close();
-    next(error);
-  });
+    })
+    .then(() => session.close())
+    .then(() => responseHandler.writeResponse(res, { message: 'Database Deleted Successfully!' }))
+    .catch(error => {
+        session.close();
+        next(error);
+    });
 
-  Promise.all([txRes]);
+    Promise.all([txRes]);
 };
 
 module.exports = {
     getSession: getSession,
     executeCypherQuery: executeCypherQuery,
+    validateResult: validateResult,
     getRecordPropertiesByLabel: getRecordPropertiesByLabel,
     getAllRecordsByKey: getAllRecordsByKey,
     getAllEntitiesByType: getAllEntitiesByType,

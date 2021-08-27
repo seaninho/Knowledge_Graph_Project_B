@@ -95,7 +95,7 @@ function getScheme(req, res) {
  * @param {*} res server result
  * @returns requested entity 
  */
-function getEntityById(req, res) {
+function getEntityById(req, res, next) {
     const entityId = req.params.id;
     var entityType;
     try {
@@ -106,31 +106,31 @@ function getEntityById(req, res) {
     
     switch(entityType) {
         case 'Article':
-            return Article.getArticleById(getSession(req), entityId)
+            return Article.getArticleById(getSession(req), entityId, next)
             .then(response => writeResponse(res, response));
         case 'Faculty':
-            return Faculty.getFacultyById(getSession(req), entityId)
+            return Faculty.getFacultyById(getSession(req), entityId, next)
             .then(response => writeResponse(res, response));
         case 'Lab':
-            return Lab.getLabById(getSession(req), entityId)
+            return Lab.getLabById(getSession(req), entityId, next)
             .then(response => writeResponse(res, response));
         case 'Research':
-            return Research.getResearchById(getSession(req), entityId)
+            return Research.getResearchById(getSession(req), entityId, next)
             .then(response => writeResponse(res, response));
         case 'ResearchArea':
-            return ResearchArea.getResearchAreaById(getSession(req), entityId)
+            return ResearchArea.getResearchAreaById(getSession(req), entityId, next)
             .then(response => writeResponse(res, response));
         case 'Researcher':
-            return Researcher.getResearcherById(getSession(req), entityId)
+            return Researcher.getResearcherById(getSession(req), entityId, next)
             .then(response => writeResponse(res, response));
         case 'ResearchSetup':
-            return ResearchSetup.getResearchSetupById(getSession(req), entityId)
+            return ResearchSetup.getResearchSetupById(getSession(req), entityId, next)
             .then(response => writeResponse(res, response)); 
         case 'Product':
-            return Product.getProductById(getSession(req), entityId)
+            return Product.getProductById(getSession(req), entityId, next)
             .then(response => writeResponse(res, response));
         default:            
-            throw new EntityIdNotFound(entityType, entityId);
+            throw new EntityIdNotFound(entityType, entityId, next);
     }
 };
 

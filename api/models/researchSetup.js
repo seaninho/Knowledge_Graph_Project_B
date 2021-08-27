@@ -1,8 +1,12 @@
 const _ = require('lodash');
+
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
+const validateResult = databaseHandler.validateResult;
 const getEntityList = databaseHandler.getAllRecordsByKey;
 const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
+
+const { EntityIdNotFound } = require("../utils/errors");
 
 function _singleResearchSetupFullInfo(record) {
     if (record.length > 0) {
@@ -35,7 +39,7 @@ function getScheme() {
 }
 
 // get research setup by id
-function getResearchSetupById(session, researchSetupId) {
+function getResearchSetupById(session, researchSetupId, next) {
     const query = [
     'MATCH (researchSetup:ResearchSetup) WHERE researchSetup.researchSetupId = $researchSetupId',
     'OPTIONAL MATCH (product:Product)<-[:COMPOSED_OF]-(researchSetup)',
@@ -50,17 +54,16 @@ function getResearchSetupById(session, researchSetupId) {
 
     return executeQuery(session, query, params)
     .then(result => {
-        if (!_.isEmpty(result.records)) {
+        if (validateResult(result)) {
             return _singleResearchSetupFullInfo(result.records[0]);
         }
         else {
-            throw {message: 'Research Setup Not Found!', status: 404}
+            throw new EntityIdNotFound('ResearchSetup', researchSetupId);
         }
     })
-    .catch(error => {
-      console.log(error);
+    .catch(error => {      
       session.close();
-      return;
+      next(error);
     });
 };
 
