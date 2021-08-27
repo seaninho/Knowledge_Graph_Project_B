@@ -107,10 +107,10 @@ function _exportRelationshipUsing(tx) {
     'RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data');
 }
 
-function _exportRelationshipHasActiveProject(tx) {
-  return tx.run('WITH "MATCH path = (r:Researcher)-[:HAS_ACTIVE_PROJECT]->(l:Lab) ' +
+function _exportRelationshipActiveAt(tx) {
+  return tx.run('WITH "MATCH path = (r:Researcher)-[:ACTIVE_AT]->(l:Lab) ' +
     'RETURN r.researcherId as ResearcherId, l.labId AS LabId" AS query ' +
-    'CALL apoc.export.csv.query(query, "export/relationship_tables/HAS_ACTIVE_PROJECT.csv", {}) ' +
+    'CALL apoc.export.csv.query(query, "export/relationship_tables/ACTIVE_AT.csv", {}) ' +
     'YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data ' +
     'RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data');
 }
@@ -168,7 +168,7 @@ function _exportRelationshipComposedOf(tx) {
 //////////////////////////////////
 
 function _exportSpecialPropertyHasActiveProject(tx) {
-  return tx.run('WITH "MATCH path = (r:Researcher)-[h:HAS_ACTIVE_PROJECT]->(l:Lab) ' +
+  return tx.run('WITH "MATCH path = (r:Researcher)-[h:ACTIVE_AT]->(l:Lab) ' +
     'UNWIND h.onResearchAreas as H ' +
 	  'RETURN r.researcherId as ResearcherId, l.labId as LabId, H as ResearchAreaId" AS query ' +
     'CALL apoc.export.csv.query(query, "export/special_properties_tables/onResearchAreas.csv", {}) ' +
@@ -196,7 +196,7 @@ function exportRelationshipData(session) {
     .then(() => session.writeTransaction(tx => _exportRelationshipUsedAt(tx)))
     .then(() => session.writeTransaction(tx => _exportRelationshipResearches(tx)))
     .then(() => session.writeTransaction(tx => _exportRelationshipUsing(tx)))
-    .then(() => session.writeTransaction(tx => _exportRelationshipHasActiveProject(tx)))
+    .then(() => session.writeTransaction(tx => _exportRelationshipActiveAt(tx)))
     .then(() => session.writeTransaction(tx => _exportRelationshipConducts(tx)))
     .then(() => session.writeTransaction(tx => _exportRelationshipPartOf(tx)))
     .then(() => session.writeTransaction(tx => _exportRelationshipRelevantTo(tx)))
