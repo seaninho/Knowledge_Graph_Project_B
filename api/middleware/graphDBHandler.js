@@ -44,16 +44,16 @@ async function executeCypherQuery(session, query, params = {}, op = 'READ') {
   }
 };
 
-function getEntityPropertiesByLabel(record, label) {
+function getRecordPropertiesByLabel(record, label) {
   return _.map(record.get(label), record => record.properties);
 };
 
-function getEntityListByRecordKey(record, recordKey) {
+function getAllRecordsByKey(record, recordKey) {
   if (!_.find(record.keys, recordKey) &&
       !_.isEmpty(record.get(recordKey))) {
-      return {
+        return {
         'entityType': record.get(recordKey)[0].labels[0],
-        'entityList': getEntityPropertiesByLabel(record, recordKey) 
+        'entityList': getRecordPropertiesByLabel(record, recordKey) 
       };   
   }
 };
@@ -154,8 +154,8 @@ async function deleteDatabase(req, res, next) {
 module.exports = {
     getSession: getSession,
     executeCypherQuery: executeCypherQuery,
-    getEntityPropertiesByLabel: getEntityPropertiesByLabel,
-    getEntityListByRecordKey: getEntityListByRecordKey,
+    getRecordPropertiesByLabel: getRecordPropertiesByLabel,
+    getAllRecordsByKey: getAllRecordsByKey,
     getAllEntitiesByType: getAllEntitiesByType,
     importDataFromCsv: importDataFromCsv,
     exportDataToCsv: exportDataToCsv, 

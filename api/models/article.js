@@ -2,7 +2,7 @@ const _ = require('lodash');
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
 const getEntityList = databaseHandler.getEntityListByRecordKey;
-const getEntityProperties = databaseHandler.getEntityPropertiesByLabel;
+const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
 
 function _singleArticleFullInfo(record) {
     if (record.length > 0) {
