@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
-const getEntityList = databaseHandler.getEntityListByRecordKey;
+const getEntityList = databaseHandler.getAllRecordsByKey;
 const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
 
 function _singleProductFullInfo(record) {
