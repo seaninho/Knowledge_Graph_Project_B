@@ -15,7 +15,8 @@ function route(app) {
     app.get("/database/export", dbHandler.exportDataToCsv);
     app.get("/database/delete", dbHandler.deleteDatabase);
     app.get("/entity/types", entity.getAllEntityTypes);
-    app.get("/:entity", entity.getAllInstances);     
+    app.get("/entity/:entity", entity.getAllInstances);
+    app.get("/entity/:entity/:id", entity.getEntityById);     
     app.get("/faculty/:id", faculties.getFacultyById);
     app.get("/lab/:id", labs.getLabById);
     app.get("/product/:id", products.getProductById);
