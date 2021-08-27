@@ -144,7 +144,7 @@ function getEntityById(req, res) {
  * @param {*} next 
  * @returns 
  */
-function getAllInstances(req, res, next) {
+function getAllEntitiesByType(req, res, next) {
     const entity = _.toLower(req.params.entity);
     var entityType;
     try {
@@ -178,5 +178,5 @@ module.exports = {
     getAllEntityTypes: getAllEntityTypes,
     getScheme: getScheme,
     getEntityById: getEntityById,
-    getAllInstances: getAllInstances
+    getAllEntitiesByType: getAllEntitiesByType
 }
