@@ -30,6 +30,19 @@ const entityTypes =
 ];
 
 /**
+ * 
+ * @param {*} entity 
+ */
+function _getEntityType(entity) {
+    const entityTypeFound = entityTypes.find((entityType) => 
+        entityType.toLowerCase() == entity.toLowerCase())
+    if (!entityTypes.includes(entityTypeFound)) {
+        throw new GeneralError('Entity type: \'' + entity + '\' is not a valid entity!');
+    }
+    return entityTypeFound;
+};
+
+/**
  * get all pre-defined entity types
  * @param {*} req 
  * @param {*} res 
@@ -38,10 +51,7 @@ const entityTypes =
  */
 function getAllEntityTypes(_req, res, next) {
     const respone = { 'entityType' : entityTypes };
-    writeResponse(res, respone)
-    .catch(error => {      
-      next(error);
-    });
+    return writeResponse(res, respone);
 };
 
 /**
@@ -51,23 +61,29 @@ function getAllEntityTypes(_req, res, next) {
  * @param {*} next 
  */
 function getScheme(req, res) {
-    const lowerCaseEntityType = _.toLower(req.params.entity);
-    switch(lowerCaseEntityType) {
-        case 'article':
+    var entityType;
+    try {
+        entityType = _getEntityType(req.params.entity);
+    } catch (err) {
+        throw err;
+    }
+
+    switch(entityType) {
+        case 'Article':
             return writeResponse(res, Article.getScheme());
-        case 'faculty':
+        case 'Faculty':
             return writeResponse(res, Faculty.getScheme());
-        case 'lab':
+        case 'Lab':
             return writeResponse(res, Lab.getScheme());
-        case 'research':
+        case 'Research':
             return writeResponse(res, Research.getScheme());
-        case 'researchArea':
+        case 'ResearchArea':
             return writeResponse(res, ResearchArea.getScheme());
-        case 'researcher':
+        case 'Researcher':
             return writeResponse(res, Researcher.getScheme());
-        case 'researchSetup':
+        case 'ResearchSetup':
             return writeResponse(res, ResearchSetup.getScheme());    
-        case 'product':
+        case 'Product':
             return writeResponse(res, Product.getScheme());
         default:
             throw new GeneralError('Could not get scheme for entity: ' 
@@ -82,31 +98,37 @@ function getScheme(req, res) {
  * @param {*} next 
  */
 function getEntityById(req, res) {
-    const lowerCaseEntityType = _.toLower(req.params.entity);
     const entityId = req.params.id;
-    switch(lowerCaseEntityType) {
-        case 'article':
+    var entityType;
+    try {
+        entityType = _getEntityType(req.params.entity);
+    } catch (err) {
+        throw err;
+    }    
+    
+    switch(entityType) {
+        case 'Article':
             return Article.getArticleById(getSession(req), entityId)
             .then(response => writeResponse(res, response));
-        case 'faculty':
+        case 'Faculty':
             return Faculty.getFacultyById(getSession(req), entityId)
             .then(response => writeResponse(res, response));
-        case 'lab':
+        case 'Lab':
             return Lab.getLabById(getSession(req), entityId)
             .then(response => writeResponse(res, response));
-        case 'research':
+        case 'Research':
             return Research.getResearchById(getSession(req), entityId)
             .then(response => writeResponse(res, response));
-        case 'researchArea':
+        case 'ResearchArea':
             return ResearchArea.getResearchAreaById(getSession(req), entityId)
             .then(response => writeResponse(res, response));
-        case 'researcher':
+        case 'Researcher':
             return Researcher.getResearcherById(getSession(req), entityId)
             .then(response => writeResponse(res, response));
-        case 'researchSetup':
+        case 'ResearchSetup':
             return ResearchSetup.getResearchSetupById(getSession(req), entityId)
             .then(response => writeResponse(res, response)); 
-        case 'product':
+        case 'Product':
             return Product.getProductById(getSession(req), entityId)
             .then(response => writeResponse(res, response));
         default:            
@@ -123,30 +145,36 @@ function getEntityById(req, res) {
  * @returns 
  */
 function getAllInstances(req, res, next) {
-  const entity = _.toLower(req.params.entity)
-  const entityType = entity.charAt(0).toUpperCase() + entity.slice(1);
-  const session = getSession(req);
-  const query = [
-    'MATCH (' + entity + ':' + entityType + ')',
-    'RETURN COLLECT(DISTINCT ' + entity + ') AS ' + entity,    
-    ].join('\n');
-  const params = {};
+    const entity = _.toLower(req.params.entity);
+    var entityType;
+    try {
+        entityType = _getEntityType(entity);
+    } catch (err) {
+        throw err;
+    }
+                                
+    const session = getSession(req);
+    const query = [
+        'MATCH (' + entity + ':' + entityType + ')',
+        'RETURN COLLECT(DISTINCT ' + entity + ') AS ' + entity,    
+        ].join('\n');
+    const params = {};
 
-    return executeCypherQuery(session, query, params)
-    .then(result => {
-        if (!_.isEmpty(result.records) && 
-            !_.isEmpty(result.records[0]._fields[0])) {
-            return getAllRecords(result.records[0], entity);
-        }
-        else {
-            throw new GeneralError('No ' + entityType + ' Was Found!');
-        }
-    })
-    .then(response => writeResponse(res, response))
-    .catch(error => {
-      session.close();
-      next(error);
-    });
+        return executeCypherQuery(session, query, params)
+        .then(result => {
+            if (!_.isEmpty(result.records) && 
+                !_.isEmpty(result.records[0]._fields[0])) {
+                return getAllRecords(result.records[0], entity);
+            }
+            else {
+                throw new GeneralError('No ' + entityType + ' Was Found!');
+            }
+        })
+        .then(response => writeResponse(res, response))
+        .catch(error => {
+        session.close();
+        next(error);
+        });
 };
 
 module.exports = {
