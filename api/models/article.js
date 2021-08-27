@@ -8,7 +8,7 @@ const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
 
 const { EntityIdNotFound } = require("../utils/errors");
 
-function _singleArticleFullInfo(record) {
+function _getArticlePageInfo(record) {
     if (record.length > 0) {
         var result = {};
         result["Entity"] = getEntityProperties(record, 'article');
@@ -55,7 +55,7 @@ function getArticleById(session, articleId, next) {
     return executeQuery(session, query, params)
     .then(result => {
         if (validateResult(result)) {
-            return _singleArticleFullInfo(result.records[0]);
+            return _getArticlePageInfo(result.records[0]);
         }
         else {
             throw new EntityIdNotFound('Article', articleId);

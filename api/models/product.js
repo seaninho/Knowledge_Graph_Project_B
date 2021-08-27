@@ -8,7 +8,7 @@ const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
 
 const { EntityIdNotFound } = require("../utils/errors");
 
-function _singleProductFullInfo(record) {
+function _getProductPageInfo(record) {
     if (record.length > 0) {
         var result = {};
         var recommendations = {};
@@ -95,7 +95,7 @@ function getProductById(session, productId, next) {
     return executeQuery(session, query, params)
     .then(result => {
         if (validateResult(result)) {
-            return _singleProductFullInfo(result.records[0]);
+            return _getProductPageInfo(result.records[0]);
         }
         else {
             throw new EntityIdNotFound('Product', productId);

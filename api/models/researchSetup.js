@@ -8,7 +8,7 @@ const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
 
 const { EntityIdNotFound } = require("../utils/errors");
 
-function _singleResearchSetupFullInfo(record) {
+function _getResearchSetupPageInfo(record) {
     if (record.length > 0) {
         var result = {};
         result["Entity"] = getEntityProperties(record, 'researchSetup');
@@ -55,7 +55,7 @@ function getResearchSetupById(session, researchSetupId, next) {
     return executeQuery(session, query, params)
     .then(result => {
         if (validateResult(result)) {
-            return _singleResearchSetupFullInfo(result.records[0]);
+            return _getResearchSetupPageInfo(result.records[0]);
         }
         else {
             throw new EntityIdNotFound('ResearchSetup', researchSetupId);
