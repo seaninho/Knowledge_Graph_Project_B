@@ -54,21 +54,21 @@ function getScheme(req, res, next) {
     const lowerCaseEntityType = _.toLower(req.params.entity);
     switch(lowerCaseEntityType) {
         case 'article':
-            writeResponse(res, Article.getScheme());
+            return writeResponse(res, Article.getScheme());
         case 'faculty':
-            writeResponse(res, Faculty.getScheme());
+            return writeResponse(res, Faculty.getScheme());
         case 'lab':
-            writeResponse(res, Lab.getScheme());
+            return writeResponse(res, Lab.getScheme());
         case 'research':
-            writeResponse(res, Research.getScheme());
+            return writeResponse(res, Research.getScheme());
         case 'researchArea':
-            writeResponse(res, ResearchArea.getScheme());
+            return writeResponse(res, ResearchArea.getScheme());
         case 'researcher':
-            writeResponse(res, Researcher.getScheme());
+            return writeResponse(res, Researcher.getScheme());
         case 'researchSetup':
-            writeResponse(res, ResearchSetup.getScheme());    
+            return writeResponse(res, ResearchSetup.getScheme());    
         case 'product':
-            writeResponse(res, Product.getScheme());
+            return writeResponse(res, Product.getScheme());
         default:
             next(new GeneralError('Could not get scheme for entity: ' 
                 + lowerCaseEntityType));
