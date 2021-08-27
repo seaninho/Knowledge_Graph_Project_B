@@ -17,6 +17,18 @@ const responseHandler = require('../helpers/response');
 const writeResponse = responseHandler.writeResponse;
 const { GeneralError, BadRequest, NotFound } = require('../utils/errors');
 
+const entityTypes = 
+[
+    'Article', 
+    'Faculty', 
+    'Lab', 
+    'Product', 
+    'Research', 
+    'ResearchArea', 
+    'Researcher', 
+    'ResearchSetup'
+];
+
 /**
  * get all pre-defined entity types
  * @param {*} req 
@@ -25,20 +37,8 @@ const { GeneralError, BadRequest, NotFound } = require('../utils/errors');
  * @returns
  */
 function getAllEntityTypes(_req, res, next) {
-    const entityTypes = { 
-        'entityType' : 
-        [
-            'Article', 
-            'Faculty', 
-            'Lab', 
-            'Product', 
-            'Research', 
-            'ResearchArea', 
-            'Researcher', 
-            'ResearchSetup'
-        ] 
-    }
-    writeResponse(res, entityTypes)
+    const respone = { 'entityType' : entityTypes };
+    writeResponse(res, respone)
     .catch(error => {      
       next(error);
     });
