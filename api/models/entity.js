@@ -42,7 +42,7 @@ function getAllEntityTypes(_req, res, next) {
     .catch(error => {      
       next(error);
     });
-}
+};
 
 /**
  * get entity scheme by entity type
@@ -72,6 +72,46 @@ function getScheme(req, res) {
         default:
             throw new GeneralError('Could not get scheme for entity: ' 
                 + lowerCaseEntityType);
+    }
+};
+
+/**
+ * get entity by entity id
+ * @param {*} req request containing entity id
+ * @param {*} res 
+ * @param {*} next 
+ */
+function getEntityById(req, res) {
+    const lowerCaseEntityType = _.toLower(req.params.entity);
+    const entityId = req.params.id;
+    switch(lowerCaseEntityType) {
+        case 'article':
+            return Article.getArticleById(getSession(req), entityId)
+            .then(response => writeResponse(res, response));
+        case 'faculty':
+            return Faculty.getFacultyById(getSession(req), entityId)
+            .then(response => writeResponse(res, response));
+        case 'lab':
+            return Lab.getLabById(getSession(req), entityId)
+            .then(response => writeResponse(res, response));
+        case 'research':
+            return Research.getResearchById(getSession(req), entityId)
+            .then(response => writeResponse(res, response));
+        case 'researchArea':
+            return ResearchArea.getResearchAreaById(getSession(req), entityId)
+            .then(response => writeResponse(res, response));
+        case 'researcher':
+            return Researcher.getResearcherById(getSession(req), entityId)
+            .then(response => writeResponse(res, response));
+        case 'researchSetup':
+            return ResearchSetup.getResearchSetupById(getSession(req), entityId)
+            .then(response => writeResponse(res, response)); 
+        case 'product':
+            return Product.getProductById(getSession(req), entityId)
+            .then(response => writeResponse(res, response));
+        default:            
+            throw new GeneralError('Could not get instance for entity: ' 
+                + lowerCaseEntityType + ' with id: ' + entityId);
     }
 };
 
@@ -112,5 +152,6 @@ function getAllInstances(req, res, next) {
 module.exports = {
     getAllEntityTypes: getAllEntityTypes,
     getScheme: getScheme,
+    getEntityById: getEntityById,
     getAllInstances: getAllInstances
 }
