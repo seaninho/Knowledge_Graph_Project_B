@@ -50,7 +50,7 @@ function getAllEntityTypes(_req, res, next) {
  * @param {*} res 
  * @param {*} next 
  */
-function getScheme(req, res, next) {
+function getScheme(req, res) {
     const lowerCaseEntityType = _.toLower(req.params.entity);
     switch(lowerCaseEntityType) {
         case 'article':
@@ -70,10 +70,10 @@ function getScheme(req, res, next) {
         case 'product':
             return writeResponse(res, Product.getScheme());
         default:
-            next(new GeneralError('Could not get scheme for entity: ' 
-                + lowerCaseEntityType));
+            throw new GeneralError('Could not get scheme for entity: ' 
+                + lowerCaseEntityType);
     }
-}
+};
 
 /**
  * 
