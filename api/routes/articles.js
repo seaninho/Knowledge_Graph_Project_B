@@ -8,13 +8,7 @@ function getArticleById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function listAllArticles(req, res, next) {
-    databaseHandler.getAllEntitiesByType(req, next, 'Article')
-        .then(response => writeResponse(res, response));
-}
-
 // exported functions
 module.exports = {
-    getArticleById: getArticleById,
-    listAllArticles: listAllArticles
+    getArticleById: getArticleById
 }

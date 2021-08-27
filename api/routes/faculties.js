@@ -8,13 +8,7 @@ function getFacultyById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function listAllFaculties(req, res, next) {
-    databaseHandler.getAllEntitiesByType(req, next, 'Faculty')
-        .then(response => writeResponse(res, response));
-}
-
 // exported functions
 module.exports = {
-    getFacultyById: getFacultyById,
-    listAllFaculties: listAllFaculties
+    getFacultyById: getFacultyById
 }

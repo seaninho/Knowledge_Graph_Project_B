@@ -8,13 +8,7 @@ function getResearchAreaById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function listAllResearchAreas(req, res, next) {
-    databaseHandler.getAllEntitiesByType(req, next, 'ResearchArea')
-        .then(response => writeResponse(res, response));
-}
-
 // exported functions
 module.exports = {
-    getResearchAreaById: getResearchAreaById,
-    listAllResearchAreas: listAllResearchAreas
+    getResearchAreaById: getResearchAreaById
 }

@@ -8,13 +8,7 @@ function getLabById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function listAllLabs(req, res, next) {
-    databaseHandler.getAllEntitiesByType(req, next, 'Lab')
-        .then(response => writeResponse(res, response));
-}
-
 // exported functions
 module.exports = {
-    getLabById: getLabById,
-    listAllLabs: listAllLabs
+    getLabById: getLabById
 }

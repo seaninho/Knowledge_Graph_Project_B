@@ -8,13 +8,7 @@ function getResearchSetupById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function listAllResearchSetups(req, res, next) {
-    databaseHandler.getAllEntitiesByType(req, next, 'ResearchSetup')
-        .then(response => writeResponse(res, response));
-}
-
 // exported functions
 module.exports = {
-    getResearchSetupById: getResearchSetupById,
-    listAllResearchSetups: listAllResearchSetups
+    getResearchSetupById: getResearchSetupById
 }

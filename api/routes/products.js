@@ -8,12 +8,6 @@ function getProductById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function listAllProducts(req, res, next) {
-    databaseHandler.getAllEntitiesByType(req, next, 'Product')
-        .then(response => writeResponse(res, response));
-}
-
 module.exports = {
-    getProductById: getProductById,
-    listAllProducts: listAllProducts
+    getProductById: getProductById
 }

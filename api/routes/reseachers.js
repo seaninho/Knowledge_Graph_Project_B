@@ -8,12 +8,6 @@ function getResearcherById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function listAllResearchers(req, res, next) {
-    databaseHandler.getAllEntitiesByType(req, next, 'Researcher')
-        .then(response => writeResponse(res, response));
-}
-
 module.exports = {
-    getResearcherById: getResearcherById,
-    listAllResearchers: listAllResearchers
+    getResearcherById: getResearcherById
 }

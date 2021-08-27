@@ -8,13 +8,7 @@ function getResearchById(req, res) {
         .then(response => writeResponse(res, response));
 }
 
-function listAllResearches(req, res, next) {
-    databaseHandler.getAllEntitiesByType(req, next, 'Research')
-        .then(response => writeResponse(res, response));
-}
-
 // exported functions
 module.exports = {
-    getResearchById: getResearchById,
-    listAllResearches: listAllResearches
+    getResearchById: getResearchById
 }
