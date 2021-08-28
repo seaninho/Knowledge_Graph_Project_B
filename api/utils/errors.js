@@ -23,13 +23,13 @@ class NotFound extends GeneralError { }
 
 class EntityTypeNotFound extends NotFound { 
     constructor(entityType) {
-        super('Entity Type: \'' + entityType + '\' is not a valid entity!');
+        super('Entity type: \'' + entityType + '\' is not a valid entity!');
     }
 }
 
 class EntityIdNotFound extends NotFound {
     constructor(entityType, entityId) {
-        super('Entity Type: \'' + entityType + '\' With ID: ' + entityId + ' Not Found');
+        super('Entity type: \'' + entityType + '\' with id: ' + entityId + ' not found!');
     }
 }
 
