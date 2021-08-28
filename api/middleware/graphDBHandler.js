@@ -76,31 +76,6 @@ function getAllRecordsByKey(record, recordKey) {
     }
 };
 
-function getAllEntitiesByType(req, next, entityType) {
-    const entityString = _.toLower(entityType)
-    const session = getSession(req);
-    const query = [
-        'MATCH (' + entityString + ':' + entityType + ')',
-        'RETURN COLLECT(DISTINCT ' + entityString + ') AS ' + entityString,    
-        ].join('\n');
-    const params = {};
-
-    return executeCypherQuery(session, query, params)
-    .then(result => {
-        if (!_.isEmpty(result.records) && 
-            !_.isEmpty(result.records[0]._fields[0])) {
-            return getEntityListByRecordKey(result.records[0], entityString);
-        }
-        else {
-            throw {message: 'No ' + entityType + ' Was Found!'}
-        }
-    })
-    .catch(error => {
-        session.close();
-        next(error);
-    });
-};
-
 
 /// IMPORT DATA ///
 function importDataFromCsv(req, res, next) {  
@@ -176,7 +151,6 @@ module.exports = {
     validateResult: validateResult,
     getRecordPropertiesByLabel: getRecordPropertiesByLabel,
     getAllRecordsByKey: getAllRecordsByKey,
-    getAllEntitiesByType: getAllEntitiesByType,
     importDataFromCsv: importDataFromCsv,
     exportDataToCsv: exportDataToCsv, 
     deleteDatabase: deleteDatabase
