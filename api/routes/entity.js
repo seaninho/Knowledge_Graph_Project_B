@@ -99,7 +99,7 @@ function getAllEntityTypes(_req, res) {
  * @returns requested entity's scheme
  */
 function getScheme(req, res, writeRes = true) {
-    var entityType = _getEntityType(req.params.entity);
+    const entityType = _getEntityType(req.params.entity);
     var entityScheme;
 
     switch(entityType) {
@@ -141,7 +141,7 @@ function getScheme(req, res, writeRes = true) {
  */
 function getEntityById(req, res, next) {
     const entityId = req.params.id;
-    var entityType = _getEntityType(req.params.entity);
+    const entityType = _getEntityType(req.params.entity);
         
     switch(entityType) {
         case 'Article':
@@ -181,8 +181,8 @@ function getEntityById(req, res, next) {
  * @returns 
  */
 function getAllEntitiesByType(req, res, next) {
-    const entity = _.toLower(req.params.entity);
-    var entityType = _getEntityType(entity);
+    const entity = req.params.entity.toLowerCase();
+    const entityType = _getEntityType(entity);
                                 
     const session = getSession(req);
     const query = [
@@ -216,8 +216,8 @@ function getAllEntitiesByType(req, res, next) {
  */
 function setEntityProperties(req, res, next) {
     const reqBody = _validateRequestBody(req, res);
-    const entity = _.toLower(req.params.entity);
-    var entityType = _getEntityType(entity);
+    const entity = req.params.entity.toLowerCase();
+    const entityType = _getEntityType(entity);
     const entityId = req.params.id;
     const entityScheme = getScheme(req, res, false);
 

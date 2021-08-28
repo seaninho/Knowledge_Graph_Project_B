@@ -131,11 +131,15 @@ async function deleteDatabase(req, res, next) {
         throw new GeneralError('Database Was Not Deleted Properly!');
     }
     })
-    .then(() => {
-    savedBookmarks.push(session.lastBookmark())
-    })
+    .then(() => { savedBookmarks.push(session.lastBookmark()) })
     .then(() => session.close())
-    .then(() => responseHandler.writeResponse(res, { message: 'Database Deleted Successfully!' }))
+    .then(() => {
+        const response = {
+            status: 'ok',
+            message: 'Database Deleted Successfully!'
+        };
+        responseHandler.writeResponse(res, response);
+    })       
     .catch(error => {
         session.close();
         next(error);
