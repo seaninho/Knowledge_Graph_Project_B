@@ -19,6 +19,11 @@ const driver = neo4j.driver(uri, neo4j.auth.basic(user, password), {
     disableLosslessIntegers: true
 });
 
+/**
+ * get neo4j session
+ * @param {*} context 
+ * @returns neo4j session
+ */
 function getSession(context) {
     if (context.neo4jSession) {
         return context.neo4jSession;
@@ -29,6 +34,14 @@ function getSession(context) {
     }
 };
 
+/**
+ * execute a Cypher query on graph database
+ * @param {*} session neo4j session
+ * @param {*} query Cypher query to be executed
+ * @param {*} params query parameters
+ * @param {*} op operation (read/write)
+ * @returns 
+ */
 async function executeCypherQuery(session, query, params = {}, op = 'READ') {
     try {
         if (op == 'READ') {
@@ -40,15 +53,27 @@ async function executeCypherQuery(session, query, params = {}, op = 'READ') {
     }
     catch (error) {
         session.close();
-        throw error; // logging error at the time of calling this method
+        throw error; 
     }
 };
 
+/**
+ * validate database response
+ * @param {*} result 
+ * @returns true if response is valid, false otherwise
+ */
 function validateResult(result) {
     return !_.isEmpty(result.records) && 
             !result.records[0]._fields.every(e => _.isEmpty(e));
 }
 
+/**
+ * validate entity's properties were successfully set
+ * @param {*} result neo4j result object
+ * @param {*} possibleProprtiesSet number of properties to be set
+ * @returns Notifing the client of success in setting the desired properties. 
+ * Otherwise, throws an exception notifing of failure.
+ */
 function validatePropertiesSet(result, possibleProprtiesSet) {
     const actualPropertiesSet = result.summary['counters']['_stats']['propertiesSet'];
     if (actualPropertiesSet == possibleProprtiesSet) {
@@ -62,10 +87,22 @@ function validatePropertiesSet(result, possibleProprtiesSet) {
     }
 }
 
+/**
+ * 
+ * @param {*} record 
+ * @param {*} label 
+ * @returns 
+ */
 function getRecordPropertiesByLabel(record, label) {
     return _.map(record.get(label), record => record.properties);
 };
 
+/**
+ * 
+ * @param {*} record 
+ * @param {*} recordKey 
+ * @returns 
+ */
 function getAllRecordsByKey(record, recordKey) {
     if (!_.find(record.keys, recordKey) &&
         !_.isEmpty(record.get(recordKey))) {
@@ -77,7 +114,12 @@ function getAllRecordsByKey(record, recordKey) {
 };
 
 
-/// IMPORT DATA ///
+/**
+ * import data from csv files
+ * @param {*} req client's request
+ * @param {*} res server's response
+ * @param {*} next next function to execute
+ */
 function importDataFromCsv(req, res, next) {  
     const savedBookmarks = [];
     const session = getSession(req);
@@ -98,7 +140,12 @@ function importDataFromCsv(req, res, next) {
   Promise.all([txRes]);
 }
 
-/// EXPORT DATA ///
+/**
+ * export data to csv files
+ * @param {*} req client's request
+ * @param {*} res server's response
+ * @param {*} next next function to execute
+ */
 function exportDataToCsv(req, res, next) {  
     const savedBookmarks = [];
     const session = getSession(req);
@@ -118,8 +165,14 @@ function exportDataToCsv(req, res, next) {
     Promise.all([txRes]);
 }
 
-
-/// DELETE DATA ///
+/**
+ * delete graph database
+ * @param {*} req client's request
+ * @param {*} res server's response
+ * @param {*} next next function to execute
+ * @returns Notifing the client of success in deleting the database. 
+ * Otherwise, throws an exception notifing of failure.
+ */
 async function deleteDatabase(req, res, next) {
     const savedBookmarks = [];
     const session = getSession(req);

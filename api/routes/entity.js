@@ -46,8 +46,8 @@ function _getEntityType(entity) {
 
 /**
  * validate request body according to request body object
- * @param {*} req client request containing: object, entity, id
- * @param {*} res 
+ * @param {*} req client's request
+ * @param {*} res server's response
  * @returns 
  */
 function _validateRequestBody(req, res) {
@@ -82,8 +82,8 @@ function _validateRequestBody(req, res) {
 
 /**
  * get all pre-defined entity types
- * @param {*} req client request
- * @param {*} res server result
+ * @param {*} req client's request
+ * @param {*} res server's response
  * @returns all pre-defined entity types
  */
 function getAllEntityTypes(_req, res) {
@@ -93,8 +93,8 @@ function getAllEntityTypes(_req, res) {
 
 /**
  * get entity scheme by entity type
- * @param {*} req client request containing entity type
- * @param {*} res server result
+ * @param {*} req client's request (containing entity's type)
+ * @param {*} res server's response
  * @param {*} writeRes if true, write result back. else, return result object.
  * @returns requested entity's scheme
  */
@@ -135,8 +135,8 @@ function getScheme(req, res, writeRes = true) {
 
 /**
  * get entity by entity id
- * @param {*} req client request containing: entity type, id
- * @param {*} res server result
+ * @param {*} req client's request (containing entity's info: type, id)
+ * @param {*} res server's response
  * @returns requested entity 
  */
 function getEntityById(req, res, next) {
@@ -175,9 +175,9 @@ function getEntityById(req, res, next) {
 
 /**
  * get all entities matching passed 'entity'
- * @param {*} req client request containing entity
- * @param {*} res server result
- * @param {*} next 
+ * @param {*} req client's request (containing entity's type)
+ * @param {*} res server's response
+ * @param {*} next next function to execute
  * @returns 
  */
 function getAllEntitiesByType(req, res, next) {
@@ -207,9 +207,9 @@ function getAllEntitiesByType(req, res, next) {
 
 /**
  * set entity properties according to request
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
+ * @param {*} req client's request (containing entity's info: type, id)
+ * @param {*} res server's response
+ * @param {*} next next function to execute
  * @returns if successful, 
  * a message notifing the client of successfully setting desired properties.
  * if not, throws an exception notifing the client of failure.
