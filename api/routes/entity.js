@@ -61,13 +61,8 @@ function getAllEntityTypes(_req, res) {
  * @returns requested entity's scheme
  */
 function getScheme(req, res) {
-    var entityType;
-    try {
-        entityType = _getEntityType(req.params.entity);
-    } catch (err) {
-        throw err;
-    }
-
+    var entityType = _getEntityType(req.params.entity);
+    
     switch(entityType) {
         case 'Article':
             return writeResponse(res, Article.getScheme());
@@ -97,13 +92,8 @@ function getScheme(req, res) {
  */
 function getEntityById(req, res, next) {
     const entityId = req.params.id;
-    var entityType;
-    try {
-        entityType = _getEntityType(req.params.entity);
-    } catch (err) {
-        throw err;
-    }    
-    
+    var entityType = _getEntityType(req.params.entity);
+        
     switch(entityType) {
         case 'Article':
             return Article.getArticleById(getSession(req), entityId, next)
@@ -143,12 +133,7 @@ function getEntityById(req, res, next) {
  */
 function getAllEntitiesByType(req, res, next) {
     const entity = _.toLower(req.params.entity);
-    var entityType;
-    try {
-        entityType = _getEntityType(entity);
-    } catch (err) {
-        throw err;
-    }
+    var entityType = _getEntityType(entity);
                                 
     const session = getSession(req);
     const query = [
@@ -170,6 +155,7 @@ function getAllEntitiesByType(req, res, next) {
         next(error);
     });
 };
+
 
 module.exports = {
     getAllEntityTypes: getAllEntityTypes,
