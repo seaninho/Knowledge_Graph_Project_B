@@ -58,13 +58,13 @@ async function executeCypherQuery(session, query, params = {}, op = 'READ') {
 };
 
 /**
- * validate database response
- * @param {*} result 
+ * validate database response for a 'getById' request
+ * @param {*} response neo4j response
  * @returns true if response is valid, false otherwise
  */
-function validateResult(result) {
-    return !_.isEmpty(result.records) && 
-            !result.records[0]._fields.every(e => _.isEmpty(e));
+function validateDatabaseGetByIdResponse(response) {
+    return !_.isEmpty(response.records) && 
+        !response.records[0]._fields.every(field => _.isEmpty(field));
 }
 
 /**
@@ -205,7 +205,7 @@ module.exports = {
     getSession: getSession,
     executeCypherQuery: executeCypherQuery,
     validatePropertiesSet: validatePropertiesSet,
-    validateResult: validateResult,
+    validateDatabaseGetByIdResponse: validateDatabaseGetByIdResponse,
     getRecordPropertiesByLabel: getRecordPropertiesByLabel,
     getAllRecordsByKey: getAllRecordsByKey,
     importDataFromCsv: importDataFromCsv,

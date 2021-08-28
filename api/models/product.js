@@ -2,7 +2,7 @@ const _ = require('lodash');
 
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
-const validateResult = databaseHandler.validateResult;
+const validateResponse = databaseHandler.validateDatabaseGetByIdResponse;
 const getEntityList = databaseHandler.getAllRecordsByKey;
 const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
 
@@ -93,9 +93,9 @@ function getProductById(session, productId, next) {
     const params = { productId: productId };
 
     return executeQuery(session, query, params)
-    .then(result => {
-        if (validateResult(result)) {
-            return _getProductPageInfo(result.records[0]);
+    .then(response => {
+        if (validateResponse(response)) {
+            return _getProductPageInfo(response.records[0]);
         }
         else {
             throw new EntityIdNotFound('Product', productId);

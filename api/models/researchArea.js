@@ -2,7 +2,7 @@ const _ = require('lodash');
 
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
-const validateResult = databaseHandler.validateResult;
+const validateResponse = databaseHandler.validateDatabaseGetByIdResponse;
 const getEntityList = databaseHandler.getAllRecordsByKey;
 const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
 
@@ -69,9 +69,9 @@ function getResearchAreaById(session, researchAreaId, next) {
     const params = { researchAreaId: researchAreaId };
 
     return executeQuery(session, query, params)
-    .then(result => {
-        if (validateResult(result)) {
-            return _getResearchAreaPageInfo(result.records[0]);
+    .then(response => {
+        if (validateResponse(response)) {
+            return _getResearchAreaPageInfo(response.records[0]);
         }
         else {
             throw new EntityIdNotFound('ResearchArea', researchAreaId);
