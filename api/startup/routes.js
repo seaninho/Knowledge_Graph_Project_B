@@ -3,6 +3,7 @@ const entity = require('../routes/entity');
 
 
 function route(app) {
+    // GET REQUEST
     app.get("/database/import", dbHandler.importDataFromCsv);
     app.get("/database/export", dbHandler.exportDataToCsv);
     app.get("/database/delete", dbHandler.deleteDatabase);
@@ -10,6 +11,9 @@ function route(app) {
     app.get("/entity/:entity", entity.getAllEntitiesByType);
     app.get("/entity/:entity/:id", entity.getEntityById);     
     app.get("/scheme/:entity", entity.getScheme);
+    // PUT REQUEST
+    app.put("/:entity/:id", entity.setEntityProperties);
+
 }
 
 module.exports = {

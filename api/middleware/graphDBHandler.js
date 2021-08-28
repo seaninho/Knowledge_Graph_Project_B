@@ -49,6 +49,19 @@ function validateResult(result) {
             !result.records[0]._fields.every(e => _.isEmpty(e));
 }
 
+function validatePropertiesSet(result, possibleProprtiesSet) {
+    const actualPropertiesSet = result.summary['counters']['_stats']['propertiesSet'];
+    if (actualPropertiesSet == possibleProprtiesSet) {
+        return { 
+            status: 'ok', 
+            message: 'Properties were successfully set!' 
+        };
+    } 
+    else {
+        throw new GeneralError('Properties failed to be set!');
+    }
+}
+
 function getRecordPropertiesByLabel(record, label) {
     return _.map(record.get(label), record => record.properties);
 };
@@ -159,6 +172,7 @@ async function deleteDatabase(req, res, next) {
 module.exports = {
     getSession: getSession,
     executeCypherQuery: executeCypherQuery,
+    validatePropertiesSet: validatePropertiesSet,
     validateResult: validateResult,
     getRecordPropertiesByLabel: getRecordPropertiesByLabel,
     getAllRecordsByKey: getAllRecordsByKey,

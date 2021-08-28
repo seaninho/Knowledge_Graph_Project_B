@@ -13,9 +13,10 @@ const databaseHandler = require('../middleware/graphDBHandler');
 const getSession = databaseHandler.getSession;
 const executeCypherQuery = databaseHandler.executeCypherQuery;
 const getAllRecords = databaseHandler.getAllRecordsByKey;
+const validatePropertiesSet = databaseHandler.validatePropertiesSet;
 const responseHandler = require('../helpers/response');
 const writeResponse = responseHandler.writeResponse;
-const { EntityTypeNotFound, EntityIdNotFound } = require('../utils/errors');
+const { EntityTypeNotFound, EntityIdNotFound, BadRequest } = require('../utils/errors');
 
 const entityTypes = 
 [
@@ -44,6 +45,42 @@ function _getEntityType(entity) {
 };
 
 /**
+ * validate request body according to request body object
+ * @param {*} req client request containing: object, entity, id
+ * @param {*} res 
+ * @returns 
+ */
+function _validateRequestBody(req, res) {
+    const reqBody = req.body;
+    const reqObject = reqBody['object'];
+    switch (reqObject) {        
+        case 'entity':
+            break;
+        case 'relationship':
+            break;
+        case 'properties':
+            const entityType = _getEntityType(reqBody['entityType']);
+            if (entityType.toLowerCase() != req.params.entity) {
+                throw new BadRequest('Request body entity mismatch!');  
+            }
+            const properties = reqBody['properties'];
+            const entityScheme = getScheme(req, res, false);
+            for (const [property, _value] of Object.entries(properties)) {
+                if (property != entityScheme['name'] && 
+                    !entityScheme['property'].includes(property)) {
+                        console.log(property);
+                    throw new BadRequest('Unknown request property in request body \'properties\''); 
+                }
+            }
+            break;
+        default:
+            throw new BadRequest('Unknown request object: ' + reqObject);
+    }
+
+    return req.body;
+}
+
+/**
  * get all pre-defined entity types
  * @param {*} req client request
  * @param {*} res server result
@@ -52,12 +89,13 @@ function _getEntityType(entity) {
 function getAllEntityTypes(_req, res) {
     const respone = { 'entityType' : entityTypes };
     return writeResponse(res, respone);
-};
+}
 
 /**
  * get entity scheme by entity type
  * @param {*} req client request containing entity type
  * @param {*} res server result
+ * @param {*} writeRes if true, write result back. else, return result object.
  * @returns requested entity's scheme
  */
 function getScheme(req, res, writeRes = true) {
@@ -93,11 +131,11 @@ function getScheme(req, res, writeRes = true) {
     }
     
     return writeRes ? writeResponse(res, entityScheme) : entityScheme;
-};
+}
 
 /**
  * get entity by entity id
- * @param {*} req client request containing entity type, id
+ * @param {*} req client request containing: entity type, id
  * @param {*} res server result
  * @returns requested entity 
  */
@@ -133,7 +171,7 @@ function getEntityById(req, res, next) {
         default:            
             throw new EntityIdNotFound(entityType, entityId, next);
     }
-};
+}
 
 /**
  * get all entities matching passed 'entity'
@@ -165,12 +203,49 @@ function getAllEntitiesByType(req, res, next) {
         session.close();
         next(error);
     });
-};
+}
+
+/**
+ * set entity properties according to request
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns if successful, 
+ * a message notifing the client of successfully setting desired properties.
+ * if not, throws an exception notifing the client of failure.
+ */
+function setEntityProperties(req, res, next) {
+    const reqBody = _validateRequestBody(req, res);
+    const entity = _.toLower(req.params.entity);
+    var entityType = _getEntityType(entity);
+    const entityId = req.params.id;
+    const entityScheme = getScheme(req, res, false);
+
+    const session = getSession(req);
+    var query = [
+        'MATCH (' + entity + ':' + entityType + ')',
+        'WHERE ' + entity + '.' + entityScheme['id'] + ' = ' + '\'' + entityId + '\''           
+    ].join('\n');
+
+    const properties = reqBody['properties'];
+    for (const [property, value] of Object.entries(properties)) {
+        query += '\n' + 'SET ' + entity + '.' + property + ' = ' + '\'' + value + '\'';
+    }
+
+    return executeCypherQuery(session, query, {}, 'WRITE')
+    .then(result => validatePropertiesSet(result, Object.keys(properties).length))
+    .then(response => writeResponse(res, response))
+    .catch(error => {
+        session.close();
+        next(error);
+    });
+}
 
 
 module.exports = {
     getAllEntityTypes: getAllEntityTypes,
     getScheme: getScheme,
     getEntityById: getEntityById,
-    getAllEntitiesByType: getAllEntitiesByType
+    getAllEntitiesByType: getAllEntitiesByType,
+    setEntityProperties: setEntityProperties
 }
