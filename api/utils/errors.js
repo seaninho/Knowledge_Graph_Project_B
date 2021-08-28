@@ -13,12 +13,8 @@ class GeneralError extends Error {
         return 500;
     }
 
-    getMessage() {
-        if (this instanceof BadRequest) {
-            return "Error 400. Bad Request!";
-        } else {
-            return this.message;
-        }        
+    getMessage() {        
+        return this.message;
     }
 }
 
