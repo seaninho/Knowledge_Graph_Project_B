@@ -60,28 +60,39 @@ function getAllEntityTypes(_req, res) {
  * @param {*} res server result
  * @returns requested entity's scheme
  */
-function getScheme(req, res) {
+function getScheme(req, res, writeRes = true) {
     var entityType = _getEntityType(req.params.entity);
-    
+    var entityScheme;
+
     switch(entityType) {
         case 'Article':
-            return writeResponse(res, Article.getScheme());
+            entityScheme = Article.getScheme();
+            break;
         case 'Faculty':
-            return writeResponse(res, Faculty.getScheme());
+            entityScheme = Faculty.getScheme();
+            break;
         case 'Lab':
-            return writeResponse(res, Lab.getScheme());
+            entityScheme = Lab.getScheme();
+            break;
         case 'Research':
-            return writeResponse(res, Research.getScheme());
+            entityScheme = Research.getScheme();
+            break;
         case 'ResearchArea':
-            return writeResponse(res, ResearchArea.getScheme());
+            entityScheme = ResearchArea.getScheme();
+            break;
         case 'Researcher':
-            return writeResponse(res, Researcher.getScheme());
+            entityScheme = Researcher.getScheme();
+            break;
         case 'ResearchSetup':
-            return writeResponse(res, ResearchSetup.getScheme());    
+            entityScheme = ResearchSetup.getScheme();    
+            break;
         case 'Product':
-            return writeResponse(res, Product.getScheme());
+            entityScheme = Product.getScheme();
+            break;
         default:
     }
+    
+    return writeRes ? writeResponse(res, entityScheme) : entityScheme;
 };
 
 /**
