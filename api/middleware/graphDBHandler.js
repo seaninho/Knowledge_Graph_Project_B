@@ -68,7 +68,7 @@ function validateDatabaseGetByIdResponse(response) {
 }
 
 /**
- * validate entity's properties were successfully set
+ * validate all provided properties were successfully set
  * @param {*} result neo4j result object
  * @param {*} possibleProprtiesSet number of properties to be set
  * @returns Notifing the client of success in setting the desired properties. 
@@ -83,7 +83,7 @@ function validatePropertiesSet(result, possibleProprtiesSet) {
         };
     } 
     else {
-        throw new GeneralError('Properties failed to be set!');
+        throw new GeneralError('Failed to set properties!');
     }
 }
 
