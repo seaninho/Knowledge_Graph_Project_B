@@ -10,6 +10,7 @@ function route(app) {
     app.get("/entity/types", entity.getAllEntityTypes);
     app.get("/entity/:entity", entity.getAllEntitiesByType);
     app.get("/entity/:entity/:id", entity.getEntityById); 
+    app.get("/relationship/types", entity.getAllRelationshipTypes);
     app.get("/scheme/:entity", entity.getScheme);
     // PUT REQUEST
     app.put("/entity/:entity/:id", entity.setEntityProperties);

@@ -88,7 +88,7 @@ function _validateRequestBody(req, res) {
     switch (reqObject) {        
         case 'entity':
             break;
-        case 'relationships':            
+        case 'relationships':
             break;
         case 'properties':
             const entityType = _getEntityType(reqBody['entityType']);
@@ -110,6 +110,47 @@ function _validateRequestBody(req, res) {
     }
 
     return req.body;
+}
+
+/**
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
+function getAllRelationshipTypes(req, res, next) {
+    const session = getSession(req);
+    const query = [
+        'MATCH (a)-[r]->(b)', 
+        'RETURN DISTINCT TYPE(r)'
+    ].join('\n');
+    const params = {};
+
+    return executeCypherQuery(session, query, params)
+    .then(result => {        
+        if (!_.isEmpty(result.records) ) {
+            var relationshipTypes = [];
+            result.records.forEach((record) => {
+                relationshipTypes.push(record._fields[0]);
+            }) 
+            return relationshipTypes;
+        }
+    })
+    .then(relationshipTypesFound => {
+        relationshipTypesFound.forEach((type) => {
+            if (!relationshipTypes.includes(type)) {
+                throw new GeneralError('Database does not match model. ' +
+                'relationship type: ' + type + ' found in database but not in model!');
+            }
+        })
+        const response = { 'relationshipType': relationshipTypesFound };
+        writeResponse(res, response);
+    })
+    .catch(error => {
+        session.close();
+        next(error);
+    });
 }
 
 /**
@@ -349,6 +390,7 @@ function addEntityRelationship(req, res, next) {
 
 module.exports = {
     getAllEntityTypes: getAllEntityTypes,
+    getAllRelationshipTypes: getAllRelationshipTypes,
     getScheme: getScheme,
     getEntityById: getEntityById,
     getAllEntitiesByType: getAllEntitiesByType,
