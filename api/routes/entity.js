@@ -16,7 +16,7 @@ const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 const validatePropertiesSet = databaseHandler.validatePropertiesSet;
 const responseHandler = require('../helpers/response');
 const writeResponse = responseHandler.writeResponse;
-const { EntityTypeNotFound, EntityIdNotFound, BadRequest } = require('../utils/errors');
+const { EntityTypeNotFound, EntityIdNotFound, BadRequest, GeneralError } = require('../utils/errors');
 
 
 const entityTypes = 
@@ -118,9 +118,35 @@ function _validateRequestBody(req, res) {
  * @param {*} res server's response
  * @returns all pre-defined entity types
  */
-function getAllEntityTypes(_req, res) {
-    const respone = { 'entityType' : entityTypes };
-    return writeResponse(res, respone);
+function getAllEntityTypes(req, res, next) {
+    const session = getSession(req);
+    const query = 'call db.labels()';
+    const params = {};
+
+    return executeCypherQuery(session, query, params)
+    .then(result => {        
+        if (!_.isEmpty(result.records) ) {
+            var nodeLabels = [];
+            result.records.forEach((record) => {
+                nodeLabels.push(record._fields[0]);
+            }) 
+            return nodeLabels;
+        }
+    })
+    .then(entityTypesFound => {
+        entityTypesFound.forEach((type) => {
+            if (!entityTypes.includes(type)) {
+                throw new GeneralError('Database does not match model. ' +
+                'entity type: ' + type + ' found in database but not in model!');
+            }
+        })
+        const response = { 'entityType': entityTypesFound };
+        writeResponse(res, response);
+    })
+    .catch(error => {
+        session.close();
+        next(error);
+    });
 }
 
 /**
