@@ -3,7 +3,7 @@ const _ = require('lodash');
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
 const validateResponse = databaseHandler.validateDatabaseGetByIdResponse;
-const getEntityList = databaseHandler.getAllRecordsByKey;
+const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
 
 const { EntityIdNotFound } = require("../utils/errors");
@@ -13,15 +13,15 @@ function _getProductPageInfo(record) {
         var result = {};
         var recommendations = {};
         result["Entity"] = getEntityProperties(record, 'product');
-        result["Labs That Use This Product"] = getEntityList(record, 'labs');
-        result["Research Areas That Use This Product"] = getEntityList(record, 'researchAreas');
-        result["Researches That Use This Product"] = getEntityList(record, 'researches');
-        result["Owned By This Researcher"] = getEntityList(record, 'owner');
-        result["Researchers That Use This Product"] = getEntityList(record, 'researchers');
-        result["Part of This Research Setup"] = getEntityList(record, 'researchSetups');        
-        recommendations["Other Products Purchase By Owner"] = getEntityList(record, 'otherProducts');
-        recommendations["Other Products Used At The Same Lab"] = getEntityList(record, 'labCommonProducts');
-        recommendations["Other Products Used In The Same Research Area"] = getEntityList(record, 'raCommonProducts');
+        result["Labs That Use This Product"] = getAllNodesByFieldKey(record, 'labs');
+        result["Research Areas That Use This Product"] = getAllNodesByFieldKey(record, 'researchAreas');
+        result["Researches That Use This Product"] = getAllNodesByFieldKey(record, 'researches');
+        result["Owned By This Researcher"] = getAllNodesByFieldKey(record, 'owner');
+        result["Researchers That Use This Product"] = getAllNodesByFieldKey(record, 'researchers');
+        result["Part of This Research Setup"] = getAllNodesByFieldKey(record, 'researchSetups');        
+        recommendations["Other Products Purchase By Owner"] = getAllNodesByFieldKey(record, 'otherProducts');
+        recommendations["Other Products Used At The Same Lab"] = getAllNodesByFieldKey(record, 'labCommonProducts');
+        recommendations["Other Products Used In The Same Research Area"] = getAllNodesByFieldKey(record, 'raCommonProducts');
         result["recommendations"] = recommendations;
         return result;
     }

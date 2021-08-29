@@ -98,17 +98,18 @@ function getRecordPropertiesByLabel(record, label) {
 };
 
 /**
- * 
- * @param {*} record 
- * @param {*} recordKey 
- * @returns 
+ * get all nodes stored in record by field key
+ * @param {*} record neo4j result record
+ * @param {*} fieldKey lookup key
+ * @returns an object containing all nodes found matching the label key provided.
+ * If no nodes were found, returns an empty object.
  */
-function getAllRecordsByKey(record, recordKey) {
-    if (!_.find(record.keys, recordKey) &&
-        !_.isEmpty(record.get(recordKey))) {
+function getAllNodesByFieldKey(record, fieldKey) {
+    if (!_.find(record.keys, fieldKey) &&
+        !_.isEmpty(record.get(fieldKey))) {
         return {
-            'entityType': record.get(recordKey)[0].labels[0],
-            'entityList': getRecordPropertiesByLabel(record, recordKey) 
+            'entityType': record.get(fieldKey)[0].labels[0],
+            'entityList': getRecordPropertiesByLabel(record, fieldKey) 
         };   
     }
 };
@@ -207,7 +208,7 @@ module.exports = {
     validatePropertiesSet: validatePropertiesSet,
     validateDatabaseGetByIdResponse: validateDatabaseGetByIdResponse,
     getRecordPropertiesByLabel: getRecordPropertiesByLabel,
-    getAllRecordsByKey: getAllRecordsByKey,
+    getAllNodesByFieldKey: getAllNodesByFieldKey,
     importDataFromCsv: importDataFromCsv,
     exportDataToCsv: exportDataToCsv, 
     deleteDatabase: deleteDatabase

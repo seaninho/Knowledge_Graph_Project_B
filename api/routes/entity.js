@@ -12,7 +12,7 @@ const Product = require('../models/product');
 const databaseHandler = require('../middleware/graphDBHandler');
 const getSession = databaseHandler.getSession;
 const executeCypherQuery = databaseHandler.executeCypherQuery;
-const getAllRecords = databaseHandler.getAllRecordsByKey;
+const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 const validatePropertiesSet = databaseHandler.validatePropertiesSet;
 const responseHandler = require('../helpers/response');
 const writeResponse = responseHandler.writeResponse;
@@ -195,7 +195,7 @@ function getAllEntitiesByType(req, res, next) {
     .then(result => {
         if (!_.isEmpty(result.records) && 
             !_.isEmpty(result.records[0]._fields[0])) {
-            return getAllRecords(result.records[0], entity);
+            return getAllNodesByFieldKey(result.records[0], entity);
         }
     })
     .then(response => writeResponse(res, response))

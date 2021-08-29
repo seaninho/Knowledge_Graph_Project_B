@@ -3,7 +3,7 @@ const _ = require('lodash');
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
 const validateResponse = databaseHandler.validateDatabaseGetByIdResponse;
-const getEntityList = databaseHandler.getAllRecordsByKey;
+const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
 
 const { EntityIdNotFound } = require("../utils/errors");
@@ -12,12 +12,12 @@ function _getResearcherPageInfo(record) {
     if (record.length > 0) {
         var result = {};
         result["Entity"] = getEntityProperties(record, 'researcher');
-        result["Member Of Labs"] = getEntityList(record, 'labs');
-        result["Areas of Research"] = getEntityList(record, 'researchAreas');
-        result["Active Researches"] = getEntityList(record, 'researches');
-        result["Published Articles"] = getEntityList(record, 'articles');
-        result["Purchased Products"] = getEntityList(record, 'purchasedProducts');
-        result["Shared Products"] = getEntityList(record, 'sharedProducts');
+        result["Member Of Labs"] = getAllNodesByFieldKey(record, 'labs');
+        result["Areas of Research"] = getAllNodesByFieldKey(record, 'researchAreas');
+        result["Active Researches"] = getAllNodesByFieldKey(record, 'researches');
+        result["Published Articles"] = getAllNodesByFieldKey(record, 'articles');
+        result["Purchased Products"] = getAllNodesByFieldKey(record, 'purchasedProducts');
+        result["Shared Products"] = getAllNodesByFieldKey(record, 'sharedProducts');
         return result;
     }
     else {

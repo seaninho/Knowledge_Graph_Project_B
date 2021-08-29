@@ -3,7 +3,7 @@ const _ = require('lodash');
 const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
 const validateResponse = databaseHandler.validateDatabaseGetByIdResponse;
-const getEntityList = databaseHandler.getAllRecordsByKey;
+const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
 
 const { EntityIdNotFound } = require("../utils/errors");
@@ -12,10 +12,10 @@ function _getResearchPageInfo(record) {
     if (record.length > 0) {
         var result = {};
         result["Entity"] = getEntityProperties(record, 'research');
-        result["Researchers"] = getEntityList(record, 'researchers');
-        result["Areas of Research"] = getEntityList(record, 'researchAreas');
-        result["Research Setup Used"] = getEntityList(record, 'researchSetups');
-        result["Articles Published"] = getEntityList(record, 'articles');
+        result["Researchers"] = getAllNodesByFieldKey(record, 'researchers');
+        result["Areas of Research"] = getAllNodesByFieldKey(record, 'researchAreas');
+        result["Research Setup Used"] = getAllNodesByFieldKey(record, 'researchSetups');
+        result["Articles Published"] = getAllNodesByFieldKey(record, 'articles');
         return result;
     }
     else {
