@@ -88,29 +88,20 @@ function validatePropertiesSet(result, possibleProprtiesSet) {
 }
 
 /**
- * 
- * @param {*} record 
- * @param {*} label 
- * @returns 
- */
-function getRecordPropertiesByLabel(record, label) {
-    return _.map(record.get(label), record => record.properties);
-};
-
-/**
  * get all nodes stored in record by field key
  * @param {*} record neo4j result record
  * @param {*} fieldKey lookup key
  * @returns an object containing all nodes found matching the label key provided.
  * If no nodes were found, returns an empty object.
  */
-function getAllNodesByFieldKey(record, fieldKey) {
+function getAllNodesByFieldKey(record, fieldKey, isSingleNode = false) {
     if (!_.find(record.keys, fieldKey) &&
         !_.isEmpty(record.get(fieldKey))) {
-        return {
+        const result = {
             'entityType': record.get(fieldKey)[0].labels[0],
-            'entityList': getRecordPropertiesByLabel(record, fieldKey) 
+            'entityList': _.map(record.get(fieldKey), record => record.properties) 
         };   
+        return isSingleNode ? result['entityList'][0] : result;
     }
 };
 
@@ -207,7 +198,6 @@ module.exports = {
     executeCypherQuery: executeCypherQuery,
     validatePropertiesSet: validatePropertiesSet,
     validateDatabaseGetByIdResponse: validateDatabaseGetByIdResponse,
-    getRecordPropertiesByLabel: getRecordPropertiesByLabel,
     getAllNodesByFieldKey: getAllNodesByFieldKey,
     importDataFromCsv: importDataFromCsv,
     exportDataToCsv: exportDataToCsv, 

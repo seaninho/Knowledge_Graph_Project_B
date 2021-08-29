@@ -4,14 +4,13 @@ const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
 const validateResponse = databaseHandler.validateDatabaseGetByIdResponse;
 const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
-const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
 
 const { EntityIdNotFound } = require("../utils/errors");
 
 function _getArticlePageInfo(record) {
     if (record.length > 0) {
         var result = {};
-        result["Entity"] = getEntityProperties(record, 'article');
+        result["Entity"] = getAllNodesByFieldKey(record, 'article', true); 
         result["Written By"] = getAllNodesByFieldKey(record, 'researchers');
         result["Written About"] = getAllNodesByFieldKey(record, 'researches');   
         return result;

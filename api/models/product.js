@@ -4,7 +4,7 @@ const databaseHandler = require('../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
 const validateResponse = databaseHandler.validateDatabaseGetByIdResponse;
 const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
-const getEntityProperties = databaseHandler.getRecordPropertiesByLabel;
+
 
 const { EntityIdNotFound } = require("../utils/errors");
 
@@ -12,7 +12,7 @@ function _getProductPageInfo(record) {
     if (record.length > 0) {
         var result = {};
         var recommendations = {};
-        result["Entity"] = getEntityProperties(record, 'product');
+        result["Entity"] = getAllNodesByFieldKey(record, 'product', true);
         result["Labs That Use This Product"] = getAllNodesByFieldKey(record, 'labs');
         result["Research Areas That Use This Product"] = getAllNodesByFieldKey(record, 'researchAreas');
         result["Researches That Use This Product"] = getAllNodesByFieldKey(record, 'researches');
