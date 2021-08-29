@@ -13,6 +13,8 @@ function route(app) {
     app.get("/scheme/:entity", entity.getScheme);
     // PUT REQUEST
     app.put("/entity/:entity/:id", entity.setEntityProperties);
+    // POST REQUEST
+    app.post("/entity/:entity/:id", entity.addEntityRelationship);
 }
 
 module.exports = {

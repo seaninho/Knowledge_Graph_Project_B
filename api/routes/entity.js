@@ -18,6 +18,7 @@ const responseHandler = require('../helpers/response');
 const writeResponse = responseHandler.writeResponse;
 const { EntityTypeNotFound, EntityIdNotFound, BadRequest } = require('../utils/errors');
 
+
 const entityTypes = 
 [
     'Article', 
@@ -30,18 +31,49 @@ const entityTypes =
     'ResearchSetup'
 ];
 
+const relationshipTypes = 
+[
+    'PART_OF',
+    'ACTIVE_AT',
+    'USING',
+    'RESEARCHES',
+    'CONDUCTS',
+    'WAS_RESEARCHED_AT',
+    'USED_AT',
+    'COMPOSED_OF',
+    'USED_IN',
+    'RELEVANT_TO',
+    'WROTE_REGARD_TO'
+];
+
 /**
- * get case matched pre-defined entity type
- * @param {*} entity 
- * @throws GeneralError if 'entity' is not a valid entity type
+ * get a pre-defined entity type matching 'entity' parameter
+ * @param {*} entity entity to match
+ * @returns entity in upper-case if 'entity' parameter matches one of the 
+ * pre-defined entity types. Otherwise, throws EntityNotFound exception.
  */
 function _getEntityType(entity) {
     const entityTypeFound = entityTypes.find((entityType) => 
-        entityType.toLowerCase() == entity.toLowerCase())
+        entityType.toLowerCase() == entity.toLowerCase());
     if (!entityTypes.includes(entityTypeFound)) {
         throw new EntityTypeNotFound(entity);
     }
     return entityTypeFound;
+};
+
+/**
+ * get a pre-defined relationship type matching 'relationship' parameter
+ * @param {*} relatioship relationship to match
+ * @returns relationship in upper-case if 'relationship' parameter matches one of the 
+ * pre-defined relationship types. Otherwise, throws RelationshipNotFound exception.
+ */
+function _getRelationshipType(relatioship) {
+    const relationshipTypeFound = relationshipTypes.find((relationshipType) => 
+        relationshipType.toUpperCase() == relatioship.toUpperCase());
+    if (!relationshipTypes.includes(relationshipTypeFound)) {
+        throw new EntityTypeNotFound(relatioship);
+    }
+    return relationshipTypeFound;
 };
 
 /**
@@ -56,7 +88,7 @@ function _validateRequestBody(req, res) {
     switch (reqObject) {        
         case 'entity':
             break;
-        case 'relationship':
+        case 'relationships':            
             break;
         case 'properties':
             const entityType = _getEntityType(reqBody['entityType']);
@@ -98,10 +130,12 @@ function getAllEntityTypes(_req, res) {
  * @param {*} writeRes if true, write result back. else, return result object.
  * @returns requested entity's scheme
  */
-function getScheme(req, res, writeRes = true) {
-    const entityType = _getEntityType(req.params.entity);
+function getScheme(req, res, writeRes = true, entity = '') {
+    const entityType = entity == '' ? 
+        _getEntityType(req.params.entity) :
+        _getEntityType(entity);
+    
     var entityScheme;
-
     switch(entityType) {
         case 'Article':
             entityScheme = Article.getScheme();
@@ -188,7 +222,7 @@ function getAllEntitiesByType(req, res, next) {
     const query = [
         'MATCH (' + entity + ':' + entityType + ')',
         'RETURN COLLECT(DISTINCT ' + entity + ') AS ' + entity,    
-        ].join('\n');
+    ].join('\n');
     const params = {};
 
     return executeCypherQuery(session, query, params)
@@ -241,11 +275,57 @@ function setEntityProperties(req, res, next) {
     });
 }
 
+/**
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
+function addEntityRelationship(req, res, next) {
+    const reqBody = _validateRequestBody(req, res);
+    const relationshipType = _getRelationshipType(reqBody['edgeName']);
+    const srcEntityType = _getEntityType(reqBody['src']);
+    const dstEntityType = _getEntityType(reqBody['dst']);    
+    const srcEntityScheme = getScheme(req, res, false, srcEntityType);
+    const dstEntityScheme = getScheme(req, res, false, dstEntityType);
+    
+    const session = getSession(req);
+    var finalQuery = [];
+    var addEdgeQuery;
+    const relationships = reqBody['edges'];
+    relationships.forEach((relationship) => {
+        addEdgeQuery = 
+        [
+            'MATCH (src:' + srcEntityType + '), ' + '(dst:' + dstEntityType + ')',
+            'WHERE src.' + srcEntityScheme['id'] + ' = ' + '\'' + relationship['src'] + '\' ' + 
+            'AND dst.' + dstEntityScheme['id'] + ' = ' + '\'' + relationship['dst'] + '\'',
+            'CREATE (src)-[:' + relationshipType + ']->(dst)'
+        ].join('\n');
+
+        if (relationships.indexOf(relationship) != relationships.length - 1) {
+            addEdgeQuery += '\nUNION\n';
+        }
+        finalQuery += addEdgeQuery;
+    });
+
+    return executeCypherQuery(session, finalQuery, {}, 'WRITE')
+    .then(response => {
+        console.log(response);
+        writeResponse(res, response);
+    })
+    .catch(error => {
+        session.close();
+        next(error);
+    });
+}
+
 
 module.exports = {
     getAllEntityTypes: getAllEntityTypes,
     getScheme: getScheme,
     getEntityById: getEntityById,
     getAllEntitiesByType: getAllEntitiesByType,
-    setEntityProperties: setEntityProperties
+    setEntityProperties: setEntityProperties,
+    addEntityRelationship: addEntityRelationship
 }
