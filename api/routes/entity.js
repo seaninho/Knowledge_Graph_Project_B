@@ -14,6 +14,7 @@ const getSession = databaseHandler.getSession;
 const executeCypherQuery = databaseHandler.executeCypherQuery;
 const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 const validatePropertiesSet = databaseHandler.validatePropertiesSet;
+const validateRelationShipsCreated = databaseHandler.validateRelationShipsCreated;
 const responseHandler = require('../helpers/response');
 const writeResponse = responseHandler.writeResponse;
 const { EntityTypeNotFound, EntityIdNotFound, BadRequest, GeneralError } = require('../utils/errors');
@@ -377,6 +378,7 @@ function addEntityRelationship(req, res, next) {
     });
 
     return executeCypherQuery(session, finalQuery, {}, 'WRITE')
+    .then(result => validateRelationShipsCreated(result, Object.keys(relationships).length))
     .then(response => {
         console.log(response);
         writeResponse(res, response);

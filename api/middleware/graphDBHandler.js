@@ -88,6 +88,26 @@ function validatePropertiesSet(result, possibleProprtiesSet) {
 }
 
 /**
+ * validate all provided relationships were successfully created
+ * @param {*} result neo4j result object
+ * @param {*} possibleRelationshipsCreated number of relationships to be created
+ * @returns Notifing the client of success in creating the desired relationships. 
+ * Otherwise, throws an exception notifing of failure.
+ */
+function validateRelationShipsCreated(result, possibleRelationshipsCreated) {
+    const actualRelationshipsCreated = result.summary['counters']['_stats']['relationshipsCreated'];
+    if (actualRelationshipsCreated == possibleRelationshipsCreated) {
+        return { 
+            status: 'ok', 
+            message: 'Relationships were successfully created!' 
+        };
+    } 
+    else {
+        throw new GeneralError('Falied to create relationships!');
+    }
+}
+
+/**
  * get all nodes stored in record by field key
  * @param {*} record neo4j result record
  * @param {*} fieldKey lookup key
@@ -197,6 +217,7 @@ module.exports = {
     getSession: getSession,
     executeCypherQuery: executeCypherQuery,
     validatePropertiesSet: validatePropertiesSet,
+    validateRelationShipsCreated: validateRelationShipsCreated,
     validateDatabaseGetByIdResponse: validateDatabaseGetByIdResponse,
     getAllNodesByFieldKey: getAllNodesByFieldKey,
     importDataFromCsv: importDataFromCsv,
