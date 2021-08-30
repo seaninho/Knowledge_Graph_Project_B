@@ -171,7 +171,7 @@ function _exportSpecialPropertyHasActiveProject(tx) {
   return tx.run('WITH "MATCH path = (r:Researcher)-[h:ACTIVE_AT]->(l:Lab) ' +
     'UNWIND h.onResearchAreas as H ' +
 	  'RETURN r.researcherId as ResearcherId, l.labId as LabId, H as ResearchAreaId" AS query ' +
-    'CALL apoc.export.csv.query(query, "export/special_properties_tables/onResearchAreas.csv", {}) ' +
+    'CALL apoc.export.csv.query(query, "export/special_property_tables/onResearchAreas.csv", {}) ' +
     'YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data ' +
     'RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data');
 }
