@@ -44,12 +44,12 @@ function getSession(context) {
  */
 async function executeCypherQuery(session, query, params = {}, op = 'READ') {
     try {
-        if (op == 'READ') {
+        if (op == 'READ') {            
             return await session.readTransaction(tx => tx.run(query, params));
         }
         else {
             return await session.writeTransaction(tx => tx.run(query, params));
-        }    
+        }
     }
     catch (error) {
         session.close();
