@@ -3,17 +3,6 @@ function writeResponse(res, response, status) {
     res.status(status || 200).json(response);
 };
 
-function formatResponse(resultObj) {
-    var result = [];
-    if (resultObj.records.length > 0) {      
-        resultObj.records.map(record => {
-            result.push(record._fields[0].properties);
-        });
-    }
-    return result;
-}
-
 module.exports = {
-    writeResponse: writeResponse,
-    formatResponse: formatResponse
+    writeResponse: writeResponse
 }
