@@ -77,40 +77,68 @@ function _getRelationshipType(relatioship) {
     return relationshipTypeFound;
 };
 
+async function _entityExists(session, entityType, entityIdField, entityIdValue) {
+    const entity = entityType.toLowerCase();
+    const query = [
+        'MATCH (' + entity + ': ' + entityType + ')',
+        'WHERE ' + entity + '.' + entityIdField + ' = $entityId', 
+        'RETURN count(' + entity + ')=1 as exists'
+    ].join('\n');
+    const params = { entityId: entityIdValue };
+
+    const result = await session.run(query, params);
+    if (!_.isEmpty(result.records)) {
+        return result.records[0].get('exists')
+    }
+}
+
+async function _validatePropertiesObject(req, res, reqBody) {
+    const entityType = _getEntityType(reqBody['entityType']);
+    if (entityType.toLowerCase() != req.params.entity) {
+        throw new BadRequest('Request bodys entity type does not match route entity type!');  
+    }
+
+    const entityId = reqBody['entityId'];
+    if (entityId != req.params.id) {
+        throw new BadRequest('Request bodys entity id does not match route entity id!');
+    }
+
+    const session = getSession(req);
+    const entityScheme = getScheme(req, res, false);
+    const exists = await _entityExists(session, entityType, entityScheme['id'], entityId);
+    if (exists !== true) {
+        session.close();
+        throw new EntityIdNotFound(entityType, entityId);
+    }    
+
+    const properties = reqBody['properties'];
+    for (const [property, _value] of Object.entries(properties)) {
+        if (property != entityScheme['name'] && 
+            !entityScheme['property'].includes(property)) {
+            throw new BadRequest('Unknown request property in request body \'properties\''); 
+        }
+    }
+}
+
 /**
  * validate request body according to request body object
  * @param {*} req client's request
  * @param {*} res server's response
  * @returns 
  */
-function _validateRequestBody(req, res) {
-    const reqBody = req.body;
+async function _validateRequestBody(req, res) {
+    const reqBody = req.body;    
     const reqObject = reqBody['object'];
     switch (reqObject) {        
+        case 'properties':
+            return await _validatePropertiesObject(req, res, reqBody);            
         case 'entity':
             break;
-        case 'relationships':
-            break;
-        case 'properties':
-            const entityType = _getEntityType(reqBody['entityType']);
-            if (entityType.toLowerCase() != req.params.entity) {
-                throw new BadRequest('Request body entity mismatch!');  
-            }
-            const properties = reqBody['properties'];
-            const entityScheme = getScheme(req, res, false);
-            for (const [property, _value] of Object.entries(properties)) {
-                if (property != entityScheme['name'] && 
-                    !entityScheme['property'].includes(property)) {
-                        console.log(property);
-                    throw new BadRequest('Unknown request property in request body \'properties\''); 
-                }
-            }
+        case 'relationships':            
             break;
         default:
             throw new BadRequest('Unknown request object: ' + reqObject);
     }
-
-    return req.body;
 }
 
 /**
@@ -317,30 +345,37 @@ function getAllEntitiesByType(req, res, next) {
  * if not, throws an exception notifing the client of failure.
  */
 function setEntityProperties(req, res, next) {
-    const reqBody = _validateRequestBody(req, res);
-    const entity = req.params.entity.toLowerCase();
-    const entityType = _getEntityType(entity);
-    const entityId = req.params.id;
-    const entityScheme = getScheme(req, res, false);
+    _validateRequestBody(req, res)
+    .then(async () => {
+        const reqBody = req.body;
+        const entity = req.params.entity.toLowerCase();
+        const entityType = _getEntityType(entity);
+        const entityId = req.params.id;
+        const entityScheme = getScheme(req, res, false);
+        
+        const session = getSession(req);
+        var query = [
+            'MATCH (' + entity + ':' + entityType + ')',
+            'WHERE ' + entity + '.' + entityScheme['id'] + ' = ' + '\'' + entityId + '\''           
+        ].join('\n');
 
-    const session = getSession(req);
-    var query = [
-        'MATCH (' + entity + ':' + entityType + ')',
-        'WHERE ' + entity + '.' + entityScheme['id'] + ' = ' + '\'' + entityId + '\''           
-    ].join('\n');
-
-    const properties = reqBody['properties'];
-    for (const [property, value] of Object.entries(properties)) {
-        query += '\n' + 'SET ' + entity + '.' + property + ' = ' + '\'' + value + '\'';
-    }
-
-    return executeCypherQuery(session, query, {}, 'WRITE')
-    .then(result => validatePropertiesSet(result, Object.keys(properties).length))
-    .then(response => writeResponse(res, response))
+        const properties = reqBody['properties'];    
+        for (const [property, value] of Object.entries(properties)) {
+            query += '\n' + 'SET ' + entity + '.' + property + ' = ' + '\'' + value + '\'';
+        }
+        
+        try {
+            const result = await executeCypherQuery(session, query, {}, 'WRITE');
+            const response = validatePropertiesSet(result, Object.keys(properties).length);
+            return writeResponse(res, response);
+        } catch (error) {
+            session.close();
+            throw error;
+        }
+    })
     .catch(error => {
-        session.close();
         next(error);
-    });
+    })    
 }
 
 /**
@@ -351,7 +386,7 @@ function setEntityProperties(req, res, next) {
  * @returns 
  */
 function addEntityRelationship(req, res, next) {
-    const reqBody = _validateRequestBody(req, res);
+    const reqBody = _validateRequestBody(req, res, next);
     const relationshipType = _getRelationshipType(reqBody['edgeName']);
     const srcEntityType = _getEntityType(reqBody['src']);
     const dstEntityType = _getEntityType(reqBody['dst']);    
@@ -380,7 +415,6 @@ function addEntityRelationship(req, res, next) {
     return executeCypherQuery(session, finalQuery, {}, 'WRITE')
     .then(result => validateRelationShipsCreated(result, Object.keys(relationships).length))
     .then(response => {
-        console.log(response);
         writeResponse(res, response);
     })
     .catch(error => {
