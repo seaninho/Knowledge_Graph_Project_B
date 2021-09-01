@@ -80,13 +80,13 @@ function _getRelationshipType(relatioship) {
 async function _verifyEntityExists(session, entityType, entityIdField, entityIdValue) {
     const entity = entityType.toLowerCase();
     const query = [
-        'MATCH (' + entity + ': ' + entityType + ')',
-        'WHERE ' + entity + '.' + entityIdField + ' = $entityId', 
-        'RETURN count(' + entity + ')=1 as exists'
+        'MATCH (' + entity + ':' + entityType + ')',        
+        'WHERE ' + entity + '.' + entityIdField + ' = ' + '\'' + entityIdValue +'\'', 
+        'RETURN count(' + entity + ')=1 AS exists'
     ].join('\n');
-    const params = { entityId: entityIdValue };
-
-    const result = await session.run(query, params);
+    const params = {};
+    
+    const result = await executeCypherQuery(session, query, params);    
     if (!_.isEmpty(result.records)) {
         return result.records[0].get('exists')
     }
