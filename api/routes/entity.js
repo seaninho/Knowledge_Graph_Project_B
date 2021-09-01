@@ -96,12 +96,12 @@ async function _verifyEntityExists(session, entityType, entityIdField, entityIdV
 async function _validatePropertiesObject(req, res, reqBody) {
     const entityType = _getEntityType(reqBody['entityType']);
     if (entityType.toLowerCase() != req.params.entity) {
-        throw new BadRequest('Request bodys entity type does not match route entity type!');  
+        throw new BadRequest('Request body entity type does not match route\'s entity type!');  
     }
 
     const entityId = reqBody['entityId'];
     if (entityId != req.params.id) {
-        throw new BadRequest('Request bodys entity id does not match route entity id!');
+        throw new BadRequest('Request body entity id does not match route\'s entity id!');
     }
 
     const session = getSession(req);
