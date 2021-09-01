@@ -17,7 +17,8 @@ const validatePropertiesSet = databaseHandler.validatePropertiesSet;
 const validateRelationShipsCreated = databaseHandler.validateRelationShipsCreated;
 const responseHandler = require('../helpers/response');
 const writeResponse = responseHandler.writeResponse;
-const { EntityTypeNotFound, EntityIdNotFound, BadRequest, GeneralError } = require('../utils/errors');
+const { EntityTypeNotFound, EntityIdNotFound, BadRequest, GeneralError, 
+    RelationshipTypeNotFound } = require('../utils/errors');
 
 
 const entityTypes = 
@@ -72,7 +73,7 @@ function _getRelationshipType(relatioship) {
     const relationshipTypeFound = relationshipTypes.find((relationshipType) => 
         relationshipType.toUpperCase() == relatioship.toUpperCase());
     if (!relationshipTypes.includes(relationshipTypeFound)) {
-        throw new EntityTypeNotFound(relatioship);
+        throw new RelationshipTypeNotFound(relatioship);
     }
     return relationshipTypeFound;
 };
