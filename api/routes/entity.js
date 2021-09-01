@@ -17,8 +17,8 @@ const validatePropertiesSet = databaseHandler.validatePropertiesSet;
 const validateRelationShipsCreated = databaseHandler.validateRelationShipsCreated;
 const responseHandler = require('../helpers/response');
 const writeResponse = responseHandler.writeResponse;
-const { EntityTypeNotFound, EntityIdNotFound, BadRequest, GeneralError, 
-    RelationshipTypeNotFound } = require('../utils/errors');
+const { GeneralError, BadRequest, EntityTypeNotFound, EntityIdNotFound, 
+    EntityHasNoSuchRelationship, RelationshipTypeNotFound, RelationshoipAlreadyExists } = require('../utils/errors');
 
 
 const entityTypes = 
@@ -121,6 +121,96 @@ async function _validatePropertiesObject(req, res, reqBody) {
     }
 }
 
+async function _verifyRelationshipExists(session, srcEntityType, dstEntityType,
+    relationshipType, srcEntityIdField, dstEntityIdField, srcEntityIdValue, dstEntityIdValue) {
+    const query = [         
+        'RETURN EXISTS',
+        '( (:' + srcEntityType + ' {' + srcEntityIdField + ': \'' + srcEntityIdValue +'\'})',
+        '-[:' + relationshipType + ']->',
+        '(:' + dstEntityType + ' {' + dstEntityIdField + ': \'' + dstEntityIdValue +'\'}) )',
+        'AS exists'
+    ].join('');
+    const params = {};
+
+    const result = await executeCypherQuery(session, query, params);    
+    if (!_.isEmpty(result.records)) {
+        return(result.records[0].get('exists'));
+    }
+}
+
+async function _validateRelationshipsObject(req, res, reqBody) {
+    const relationshipType = _getRelationshipType(reqBody['edgeName']);
+    const srcEntityType = _getEntityType(reqBody['src']);
+    const dstEntityType = _getEntityType(reqBody['dst']);
+    
+    if (srcEntityType.toLowerCase() != req.params.entity &&
+        dstEntityType.toLowerCase() != req.params.entity) {
+            throw new BadRequest('Request body entity type does not match route\'s entity type!');
+    }
+    if (srcEntityType === dstEntityType) {
+        throw new BadRequest('Self-loop are not allowed! ' + 
+            '[Source entity is of the same entity type as destination entity]');
+    }
+    
+    const srcEntityScheme = getScheme(req, res, false, srcEntityType);
+    if (srcEntityScheme['edges'].findIndex(edge => edge['edgeName'] === relationshipType) === -1) {
+        throw new EntityHasNoSuchRelationship(srcEntityType, relationshipType);
+    }
+    const dstEntityScheme = getScheme(req, res, false, dstEntityType);
+    if (dstEntityScheme['edges'].findIndex(edge => edge['edgeName'] === relationshipType) === -1) {
+        throw new EntityHasNoSuchRelationship(srcEntityType, relationshipType);
+    }
+
+    const srcEdges = srcEntityScheme['edges'];
+    for (srcEdge of srcEdges) {
+        if (srcEdge['edgeName'] === relationshipType) {
+            if (srcEdge['src'] !== srcEntityType || srcEdge['dst'] !== dstEntityType) {
+                throw new BadRequest('Each relationship is uni-directional! ' + 
+                    '[entity types for source and destionation in reuest body does not match relationship model]');
+            }
+            break;
+        }
+    }
+
+
+    var srcEntityId, srcExists, dstEntityId, dstExists, relationshipExist;
+    for (edge of edges) {
+        srcEntityId = edge['src'];
+        dstEntityId = edge['dst'];
+        if (srcEntityType.toLowerCase() == req.params.entity) {
+            if (srcEntityId != req.params.id) {
+                throw new BadRequest('Request body source entity id ' + 
+                    'does not match route\'s entity id!');
+            }
+        } 
+        else {
+            if (dstEntityId != req.params.id) {
+                throw new BadRequest('Request body destination entity id ' + 
+                    'does not match route\'s entity id!');
+            }
+        }
+
+        srcExists = await _verifyEntityExists(getSession(req, true), srcEntityType, 
+            srcEntityScheme['id'], srcEntityId);
+        if (srcExists !== true) {
+            throw new EntityIdNotFound(srcEntityType, srcEntityId);
+        }        
+        dstExists = await _verifyEntityExists(getSession(req, true), dstEntityType, 
+            dstEntityScheme['id'], dstEntityId);
+        if (dstExists !== true) {
+            throw new EntityIdNotFound(dstEntityType, dstEntityId);
+        }
+
+        relationshipExist = await _verifyRelationshipExists(getSession(req, true), 
+            srcEntityType, dstEntityType, relationshipType, srcEntityScheme['id'], 
+            dstEntityScheme['id'], srcEntityId, dstEntityId);
+        if (relationshipExist === true) {
+            throw new RelationshoipAlreadyExists(srcEntityType, dstEntityType, 
+                relationshipType, srcEntityId, dstEntityId);
+        }
+    }
+}
+
 /**
  * validate request body according to request body object
  * @param {*} req client's request
@@ -136,7 +226,7 @@ async function _validateRequestBody(req, res) {
         case 'entity':
             break;
         case 'relationships':            
-            break;
+            return await _validateRelationshipsObject(req, res, reqBody);
         default:
             throw new BadRequest('Unknown request object: ' + reqObject);
     }
@@ -376,7 +466,7 @@ function setEntityProperties(req, res, next) {
     })
     .catch(error => {
         next(error);
-    })    
+    });    
 }
 
 /**
