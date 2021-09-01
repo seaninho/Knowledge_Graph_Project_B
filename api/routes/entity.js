@@ -386,39 +386,44 @@ function setEntityProperties(req, res, next) {
  * @returns 
  */
 function addEntityRelationship(req, res, next) {
-    const reqBody = _validateRequestBody(req, res, next);
-    const relationshipType = _getRelationshipType(reqBody['edgeName']);
-    const srcEntityType = _getEntityType(reqBody['src']);
-    const dstEntityType = _getEntityType(reqBody['dst']);    
-    const srcEntityScheme = getScheme(req, res, false, srcEntityType);
-    const dstEntityScheme = getScheme(req, res, false, dstEntityType);
-    
-    const session = getSession(req);
-    var finalQuery = [];
-    var addEdgeQuery;
-    const relationships = reqBody['edges'];
-    relationships.forEach((relationship) => {
-        addEdgeQuery = 
-        [
-            'MATCH (src:' + srcEntityType + '), ' + '(dst:' + dstEntityType + ')',
-            'WHERE src.' + srcEntityScheme['id'] + ' = ' + '\'' + relationship['src'] + '\' ' + 
-            'AND dst.' + dstEntityScheme['id'] + ' = ' + '\'' + relationship['dst'] + '\'',
-            'CREATE (src)-[:' + relationshipType + ']->(dst)'
-        ].join('\n');
+    _validateRequestBody(req, res)
+    .then(async () => {
+        const reqBody = req.body;
+        const relationshipType = _getRelationshipType(reqBody['edgeName']);
+        const srcEntityType = _getEntityType(reqBody['src']);
+        const dstEntityType = _getEntityType(reqBody['dst']);    
+        const srcEntityScheme = getScheme(req, res, false, srcEntityType);
+        const dstEntityScheme = getScheme(req, res, false, dstEntityType);
+        
+        const session = getSession(req);
+        var finalQuery = [];
+        var addEdgeQuery;
+        const relationships = reqBody['edges'];
+        relationships.forEach((relationship) => {
+            addEdgeQuery = 
+            [
+                'MATCH (src:' + srcEntityType + '), ' + '(dst:' + dstEntityType + ')',
+                'WHERE src.' + srcEntityScheme['id'] + ' = ' + '\'' + relationship['src'] + '\' ' + 
+                'AND dst.' + dstEntityScheme['id'] + ' = ' + '\'' + relationship['dst'] + '\'',
+                'CREATE (src)-[:' + relationshipType + ']->(dst)'
+            ].join('\n');
 
-        if (relationships.indexOf(relationship) != relationships.length - 1) {
-            addEdgeQuery += '\nUNION\n';
+            if (relationships.indexOf(relationship) != relationships.length - 1) {
+                addEdgeQuery += '\nUNION\n';
+            }
+            finalQuery += addEdgeQuery;
+        });
+        
+        try {
+            const result = await executeCypherQuery(session, finalQuery, {}, 'WRITE');
+            const response = validateRelationShipsCreated(result, Object.keys(relationships).length);
+            writeResponse(res, response);
+        } catch (error) {
+            session.close();
+            throw error;
         }
-        finalQuery += addEdgeQuery;
-    });
-
-    return executeCypherQuery(session, finalQuery, {}, 'WRITE')
-    .then(result => validateRelationShipsCreated(result, Object.keys(relationships).length))
-    .then(response => {
-        writeResponse(res, response);
     })
     .catch(error => {
-        session.close();
         next(error);
     });
 }
