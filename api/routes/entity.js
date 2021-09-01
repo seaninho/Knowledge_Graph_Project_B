@@ -77,7 +77,7 @@ function _getRelationshipType(relatioship) {
     return relationshipTypeFound;
 };
 
-async function _entityExists(session, entityType, entityIdField, entityIdValue) {
+async function _verifyEntityExists(session, entityType, entityIdField, entityIdValue) {
     const entity = entityType.toLowerCase();
     const query = [
         'MATCH (' + entity + ': ' + entityType + ')',
@@ -105,7 +105,7 @@ async function _validatePropertiesObject(req, res, reqBody) {
 
     const session = getSession(req);
     const entityScheme = getScheme(req, res, false);
-    const exists = await _entityExists(session, entityType, entityScheme['id'], entityId);
+    const exists = await _verifyEntityExists(session, entityType, entityScheme['id'], entityId);
     if (exists !== true) {
         session.close();
         throw new EntityIdNotFound(entityType, entityId);
