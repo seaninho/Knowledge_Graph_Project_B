@@ -29,7 +29,26 @@ class EntityTypeNotFound extends NotFound {
 
 class EntityIdNotFound extends NotFound {
     constructor(entityType, entityId) {
-        super('Entity type: \'' + entityType + '\' with id: ' + entityId + ' not found!');
+        super('Entity type: \'' + entityType + '\' with id: \'' + entityId + '\' was not found!');
+    }
+}
+
+class EntityHasNoSuchRelationship extends NotFound {
+    constructor(entityType, relationshipType) {
+        super('Entity type: \'' + entityType + '\' has no relationship type named: \'' + relationshipType + '\'!');
+    }
+}
+
+class RelationshipTypeNotFound extends NotFound { 
+    constructor(relationshipType) {
+        super('Relationship type: \'' + relationshipType + '\' is not a valid relationship!');
+    }
+}
+
+class RelationshipAlreadyExists extends GeneralError {
+    constructor(srcEntityType, dstEntityType, relationshipType, srcEntityId, dstEntityId) {
+        super(srcEntityType + ' with id: \'' + srcEntityId + '\' is already ' + relationshipType +
+            ' ' + dstEntityType + ' with id: \'' + dstEntityId + '\'');
     }
 }
 
@@ -38,5 +57,8 @@ module.exports = {
     BadRequest,
     NotFound,
     EntityTypeNotFound,
-    EntityIdNotFound
+    EntityIdNotFound,
+    EntityHasNoSuchRelationship,
+    RelationshipTypeNotFound,
+    RelationshipAlreadyExists: RelationshipAlreadyExists
 };
