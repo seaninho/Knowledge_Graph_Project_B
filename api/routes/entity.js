@@ -78,6 +78,14 @@ function _getRelationshipType(relatioship) {
     return relationshipTypeFound;
 };
 
+/**
+ * verify entity exists
+ * @param {*} session neo4j session
+ * @param {*} entityType entity's type
+ * @param {*} entityIdField entity's id field according to entity's scheme
+ * @param {*} entityIdValue entity's id
+ * @returns true if entity exists; false otherwise.
+ */
 async function _verifyEntityExists(session, entityType, entityIdField, entityIdValue) {
     const entity = entityType.toLowerCase();
     const query = [
@@ -93,6 +101,12 @@ async function _verifyEntityExists(session, entityType, entityIdField, entityIdV
     }
 }
 
+/**
+ * validate request body properties object
+ * @param {*} req client's request
+ * @param {*} res server's response
+ * @param {*} reqBody request body
+ */
 async function _validatePropertiesObject(req, res, reqBody) {
     const entityType = _getEntityType(reqBody['entityType']);
     if (entityType.toLowerCase() != req.params.entity) {
@@ -121,6 +135,18 @@ async function _validatePropertiesObject(req, res, reqBody) {
     }
 }
 
+/**
+ * verify relationship exists
+ * @param {*} session neo4j session
+ * @param {*} srcEntityType source entity's type
+ * @param {*} dstEntityType destination entity's type
+ * @param {*} relationshipType relationship type
+ * @param {*} srcEntityIdField source entity's id field according to entity's scheme
+ * @param {*} dstEntityIdField destination entity's id field according to entity's scheme
+ * @param {*} srcEntityIdValue source entity's id
+ * @param {*} dstEntityIdValue destination entity's id
+ * @returns true if relationship exists; false otherwise.
+ */
 async function _verifyRelationshipExists(session, srcEntityType, dstEntityType,
     relationshipType, srcEntityIdField, dstEntityIdField, srcEntityIdValue, dstEntityIdValue) {
     const query = [         
@@ -138,6 +164,12 @@ async function _verifyRelationshipExists(session, srcEntityType, dstEntityType,
     }
 }
 
+/**
+ * validate request body relationships object
+ * @param {*} req client's request
+ * @param {*} res server's response
+ * @param {*} reqBody request body
+ */
 async function _validateRelationshipsObject(req, res, reqBody) {
     const relationshipType = _getRelationshipType(reqBody['edgeName']);
     const srcEntityType = _getEntityType(reqBody['src']);
@@ -233,11 +265,10 @@ async function _validateRequestBody(req, res) {
 }
 
 /**
- * 
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
- * @returns 
+ * get all relationship types existing in database
+ * @param {*} req client's request
+ * @param {*} res server's response
+ * @returns all existing relationship types
  */
 function getAllRelationshipTypes(req, res, next) {
     const session = getSession(req);
@@ -274,10 +305,10 @@ function getAllRelationshipTypes(req, res, next) {
 }
 
 /**
- * get all pre-defined entity types
+ * get all entity types existing in database
  * @param {*} req client's request
  * @param {*} res server's response
- * @returns all pre-defined entity types
+ * @returns all existing entity types
  */
 function getAllEntityTypes(req, res, next) {
     const session = getSession(req);
