@@ -24,8 +24,8 @@ const driver = neo4j.driver(uri, neo4j.auth.basic(user, password), {
  * @param {*} context 
  * @returns neo4j session
  */
-function getSession(context) {
-    if (context.neo4jSession) {
+function getSession(context, getNewSession = false) {
+    if (context.neo4jSession && getNewSession === false) {
         return context.neo4jSession;
     }
     else {
@@ -44,7 +44,7 @@ function getSession(context) {
  */
 async function executeCypherQuery(session, query, params = {}, op = 'READ') {
     try {
-        if (op == 'READ') {            
+        if (op == 'READ') {
             return await session.readTransaction(tx => tx.run(query, params));
         }
         else {
