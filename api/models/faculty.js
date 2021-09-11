@@ -49,9 +49,9 @@ function getFacultyById(session, facultyId, next) {
     'WITH DISTINCT faculty,',
     'lab, researcher, researchArea',
     'RETURN COLLECT(DISTINCT faculty) AS faculty,',
-    'COLLECT(DISTINCT lab) as labs,',
-    'COLLECT(DISTINCT researcher) AS researchers,',
-    'COLLECT(DISTINCT researchArea) AS researchAreas',
+    'COLLECT(DISTINCT lab)[0..20] AS labs,',
+    'COLLECT(DISTINCT researcher)[0..20] AS researchers,',
+    'COLLECT(DISTINCT researchArea)[0..20] AS researchAreas',
     ].join('\n');
     const params = { facultyId: facultyId };
 

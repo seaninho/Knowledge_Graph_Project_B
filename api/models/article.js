@@ -46,8 +46,8 @@ function getArticleById(session, articleId, next) {
     'WITH DISTINCT article,',
     'research, researcher',
     'RETURN COLLECT(DISTINCT article) AS article,',
-    'COLLECT(DISTINCT research) AS researches,',
-    'COLLECT(DISTINCT researcher) AS researchers',
+    'COLLECT(DISTINCT research)[0..20] AS researches,',
+    'COLLECT(DISTINCT researcher)[0..20] AS researchers',
     ].join('\n');
     const params = { articleId: articleId };
 

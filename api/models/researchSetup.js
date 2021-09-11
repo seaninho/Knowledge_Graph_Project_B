@@ -47,8 +47,8 @@ function getResearchSetupById(session, researchSetupId, next) {
     'WITH DISTINCT researchSetup,',
     'product, research',
     'RETURN COLLECT(DISTINCT researchSetup) AS researchSetup,',
-    'COLLECT(DISTINCT product) as products,',
-    'COLLECT(DISTINCT research) AS researches',
+    'COLLECT(DISTINCT product)[0..20] AS products,',
+    'COLLECT(DISTINCT research)[0..20] AS researches',
     ].join('\n');
     const params = { researchSetupId: researchSetupId };
 

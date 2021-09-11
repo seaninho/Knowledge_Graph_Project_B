@@ -66,10 +66,10 @@ function getLabById(session, labId, next) {
     'WITH DISTINCT lab,',
     'researcher, product, faculty, researchArea',
     'RETURN COLLECT(DISTINCT lab) AS lab,',
-    'COLLECT(DISTINCT faculty) as faculty,',
-    'COLLECT(DISTINCT researcher) AS researchers,',
-    'COLLECT(DISTINCT product) AS products,',
-    'COLLECT(DISTINCT researchArea) AS researchAreas',
+    'COLLECT(DISTINCT faculty)[0..20] AS faculty,',
+    'COLLECT(DISTINCT researcher)[0..20] AS researchers,',
+    'COLLECT(DISTINCT product)[0..20] AS products,',
+    'COLLECT(DISTINCT researchArea)[0..20] AS researchAreas',
     ].join('\n');
     const params = { labId: labId };
 

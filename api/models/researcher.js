@@ -70,12 +70,12 @@ function getResearcherById(session, researcherId, next) {
     'WITH DISTINCT researcher,',
     'lab, researchArea, research, article, purchasedProduct, sharedProduct',
     'RETURN COLLECT(DISTINCT researcher) AS researcher,',
-    'COLLECT(DISTINCT lab) AS labs,',
-    'COLLECT(DISTINCT researchArea) AS researchAreas,',
-    'COLLECT(DISTINCT research) as researches,',
-    'COLLECT(DISTINCT article) as articles,',
-    'COLLECT(DISTINCT purchasedProduct) AS purchasedProducts,',
-    'COLLECT(DISTINCT sharedProduct) AS sharedProducts',
+    'COLLECT(DISTINCT lab)[0..20] AS labs,',
+    'COLLECT(DISTINCT researchArea)[0..20] AS researchAreas,',
+    'COLLECT(DISTINCT research)[0..20] AS researches,',
+    'COLLECT(DISTINCT article)[0..20] AS articles,',
+    'COLLECT(DISTINCT purchasedProduct)[0..20] AS purchasedProducts,',
+    'COLLECT(DISTINCT sharedProduct)[0..20] AS sharedProducts',
     ].join('\n');
     const params = { researcherId: researcherId };
 
