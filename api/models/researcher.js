@@ -8,16 +8,16 @@ const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 
 const { EntityIdNotFound } = require("../utils/errors");
 
-function _getResearcherPageInfo(record) {
-    if (record.length > 0) {
+function _getResearcherPageInfo(records) {
+    if (records.length > 0) {
         var result = {};
-        result["Entity"] = getAllNodesByFieldKey(record, 'researcher', true);
-        result["Member Of Labs"] = getAllNodesByFieldKey(record, 'labs');
-        result["Areas of Research"] = getAllNodesByFieldKey(record, 'researchAreas');
-        result["Active Researches"] = getAllNodesByFieldKey(record, 'researches');
-        result["Published Articles"] = getAllNodesByFieldKey(record, 'articles');
-        result["Purchased Products"] = getAllNodesByFieldKey(record, 'purchasedProducts');
-        result["Shared Products"] = getAllNodesByFieldKey(record, 'sharedProducts');
+        result["Entity"] = getAllNodesByFieldKey(records, 'researcher', true);
+        result["Member Of Labs"] = getAllNodesByFieldKey(records, 'labs');
+        result["Areas of Research"] = getAllNodesByFieldKey(records, 'researchAreas');
+        result["Active Researches"] = getAllNodesByFieldKey(records, 'researches');
+        result["Published Articles"] = getAllNodesByFieldKey(records, 'articles');
+        result["Purchased Products"] = getAllNodesByFieldKey(records, 'purchasedProducts');
+        result["Shared Products"] = getAllNodesByFieldKey(records, 'sharedProducts');
         return result;
     }
     else {
@@ -82,7 +82,7 @@ function getResearcherById(session, researcherId, next) {
     return executeQuery(session, query, params)
     .then(response => {
         if (validateResponse(response)) {
-            return _getResearcherPageInfo(response.records[0]);
+            return _getResearcherPageInfo(response.records);
         }
         else {
             throw new EntityIdNotFound('Researcher', researcherId);

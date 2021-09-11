@@ -8,14 +8,14 @@ const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 
 const { EntityIdNotFound } = require("../utils/errors");
 
-function _getResearchAreaPageInfo(record) {
-    if (record.length > 0) {
+function _getResearchAreaPageInfo(records) {
+    if (records.length > 0) {
         var result = {};
-        result["Entity"] = getAllNodesByFieldKey(record, 'researchArea', true);
-        result["Researched In Labs"] = getAllNodesByFieldKey(record, 'labs');
-        result["Researches In This Area"] = getAllNodesByFieldKey(record, 'researches');
-        result["Researchers In This Area"] = getAllNodesByFieldKey(record, 'researchers');
-        result["Products Used In This Area"] = getAllNodesByFieldKey(record, 'products');       
+        result["Entity"] = getAllNodesByFieldKey(records, 'researchArea', true);
+        result["Researched In Labs"] = getAllNodesByFieldKey(records, 'labs');
+        result["Researches In This Area"] = getAllNodesByFieldKey(records, 'researches');
+        result["Researchers In This Area"] = getAllNodesByFieldKey(records, 'researchers');
+        result["Products Used In This Area"] = getAllNodesByFieldKey(records, 'products');       
         return result;
     }
     else {
@@ -71,7 +71,7 @@ function getResearchAreaById(session, researchAreaId, next) {
     return executeQuery(session, query, params)
     .then(response => {
         if (validateResponse(response)) {
-            return _getResearchAreaPageInfo(response.records[0]);
+            return _getResearchAreaPageInfo(response.records);
         }
         else {
             throw new EntityIdNotFound('ResearchArea', researchAreaId);

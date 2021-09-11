@@ -8,14 +8,14 @@ const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 
 const { EntityIdNotFound } = require("../utils/errors");
 
-function _getLabPageInfo(record) {
-    if (record.length > 0) {
+function _getLabPageInfo(records) {
+    if (records.length > 0) {
         var result = {};
-        result["Entity"] = getAllNodesByFieldKey(record, 'lab', true);
-        result["Department of"] = getAllNodesByFieldKey(record, 'faculty');
-        result["Areas of Research"] = getAllNodesByFieldKey(record, 'researchAreas');
-        result["Researchers"] = getAllNodesByFieldKey(record, 'researchers');
-        result["Products"] = getAllNodesByFieldKey(record, 'products');        
+        result["Entity"] = getAllNodesByFieldKey(records, 'lab', true);
+        result["Department of"] = getAllNodesByFieldKey(records, 'faculty');
+        result["Areas of Research"] = getAllNodesByFieldKey(records, 'researchAreas');
+        result["Researchers"] = getAllNodesByFieldKey(records, 'researchers');
+        result["Products"] = getAllNodesByFieldKey(records, 'products');        
         return result;
     }
     else {
@@ -76,7 +76,7 @@ function getLabById(session, labId, next) {
     return executeQuery(session, query, params)
     .then(response => {
         if (validateResponse(response)) {
-            return _getLabPageInfo(response.records[0]);
+            return _getLabPageInfo(response.records);
         }
         else {
             throw new EntityIdNotFound('Lab', labId);

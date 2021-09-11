@@ -8,14 +8,14 @@ const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 
 const { EntityIdNotFound } = require("../utils/errors");
 
-function _getResearchPageInfo(record) {
-    if (record.length > 0) {
+function _getResearchPageInfo(records) {
+    if (records.length > 0) {
         var result = {};
-        result["Entity"] = getAllNodesByFieldKey(record, 'research', true);
-        result["Researchers"] = getAllNodesByFieldKey(record, 'researchers');
-        result["Areas of Research"] = getAllNodesByFieldKey(record, 'researchAreas');
-        result["Research Setup Used"] = getAllNodesByFieldKey(record, 'researchSetups');
-        result["Articles Published"] = getAllNodesByFieldKey(record, 'articles');
+        result["Entity"] = getAllNodesByFieldKey(records, 'research', true);
+        result["Researchers"] = getAllNodesByFieldKey(records, 'researchers');
+        result["Areas of Research"] = getAllNodesByFieldKey(records, 'researchAreas');
+        result["Research Setup Used"] = getAllNodesByFieldKey(records, 'researchSetups');
+        result["Articles Published"] = getAllNodesByFieldKey(records, 'articles');
         return result;
     }
     else {
@@ -76,7 +76,7 @@ function getResearchById(session, researchId, next) {
     return executeQuery(session, query, params)
     .then(response => {
         if (validateResponse(response)) {
-            return _getResearchPageInfo(response.records[0]);
+            return _getResearchPageInfo(response.records);
         }
         else {
             throw new EntityIdNotFound('Research', researchId);

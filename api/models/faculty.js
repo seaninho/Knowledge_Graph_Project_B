@@ -8,13 +8,13 @@ const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 
 const { EntityIdNotFound } = require("../utils/errors");
 
-function _getFacultyPageInfo(record) {
-    if (record.length > 0) {
+function _getFacultyPageInfo(records) {
+    if (records.length > 0) {
         var result = {};
-        result["Entity"] = getAllNodesByFieldKey(record, 'faculty', true);
-        result["Faculty Labs"] = getAllNodesByFieldKey(record, 'labs');
-        result["Faculty Research Areas"] = getAllNodesByFieldKey(record, 'researchAreas');
-        result["Faculty Researchers"] = getAllNodesByFieldKey(record, 'researchers');      
+        result["Entity"] = getAllNodesByFieldKey(records, 'faculty', true);
+        result["Faculty Labs"] = getAllNodesByFieldKey(records, 'labs');
+        result["Faculty Research Areas"] = getAllNodesByFieldKey(records, 'researchAreas');
+        result["Faculty Researchers"] = getAllNodesByFieldKey(records, 'researchers');      
         return result;
     }
     else {
@@ -58,7 +58,7 @@ function getFacultyById(session, facultyId, next) {
     return executeQuery(session, query, params)
     .then(response => {
         if (validateResponse(response)) {
-            return _getFacultyPageInfo(response.records[0]);
+            return _getFacultyPageInfo(response.records);
         }
         else {
             throw new EntityIdNotFound('Faculty', facultyId);

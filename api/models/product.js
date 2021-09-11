@@ -8,20 +8,20 @@ const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 
 const { EntityIdNotFound } = require("../utils/errors");
 
-function _getProductPageInfo(record) {
-    if (record.length > 0) {
+function _getProductPageInfo(records) {
+    if (records.length > 0) {
         var result = {};
         var recommendations = {};
-        result["Entity"] = getAllNodesByFieldKey(record, 'product', true);
-        result["Labs That Use This Product"] = getAllNodesByFieldKey(record, 'labs');
-        result["Research Areas That Use This Product"] = getAllNodesByFieldKey(record, 'researchAreas');
-        result["Researches That Use This Product"] = getAllNodesByFieldKey(record, 'researches');
-        result["Owned By This Researcher"] = getAllNodesByFieldKey(record, 'owner');
-        result["Researchers That Use This Product"] = getAllNodesByFieldKey(record, 'researchers');
-        result["Part of This Research Setup"] = getAllNodesByFieldKey(record, 'researchSetups');        
-        recommendations["Other Products Purchase By Owner"] = getAllNodesByFieldKey(record, 'otherProducts');
-        recommendations["Other Products Used At The Same Lab"] = getAllNodesByFieldKey(record, 'labCommonProducts');
-        recommendations["Other Products Used In The Same Research Area"] = getAllNodesByFieldKey(record, 'raCommonProducts');
+        result["Entity"] = getAllNodesByFieldKey(records, 'product', true);
+        result["Labs That Use This Product"] = getAllNodesByFieldKey(records, 'labs');
+        result["Research Areas That Use This Product"] = getAllNodesByFieldKey(records, 'researchAreas');
+        result["Researches That Use This Product"] = getAllNodesByFieldKey(records, 'researches');
+        result["Owned By This Researcher"] = getAllNodesByFieldKey(records, 'owner');
+        result["Researchers That Use This Product"] = getAllNodesByFieldKey(records, 'researchers');
+        result["Part of This Research Setup"] = getAllNodesByFieldKey(records, 'researchSetups');        
+        recommendations["Other Products Purchase By Owner"] = getAllNodesByFieldKey(records, 'otherProducts');
+        recommendations["Other Products Used At The Same Lab"] = getAllNodesByFieldKey(records, 'labCommonProducts');
+        recommendations["Other Products Used In The Same Research Area"] = getAllNodesByFieldKey(records, 'raCommonProducts');
         result["recommendations"] = recommendations;
         return result;
     }
@@ -95,7 +95,7 @@ function getProductById(session, productId, next) {
     return executeQuery(session, query, params)
     .then(response => {
         if (validateResponse(response)) {
-            return _getProductPageInfo(response.records[0]);
+            return _getProductPageInfo(response.records);
         }
         else {
             throw new EntityIdNotFound('Product', productId);

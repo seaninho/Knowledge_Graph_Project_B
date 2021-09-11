@@ -8,12 +8,12 @@ const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 
 const { EntityIdNotFound } = require("../utils/errors");
 
-function _getResearchSetupPageInfo(record) {
-    if (record.length > 0) {
+function _getResearchSetupPageInfo(records) {
+    if (records.length > 0) {
         var result = {};
-        result["Entity"] = getAllNodesByFieldKey(record, 'researchSetup', true);
-        result["Setup Products"] = getAllNodesByFieldKey(record, 'products');
-        result["Used In Researches"] = getAllNodesByFieldKey(record, 'researches');
+        result["Entity"] = getAllNodesByFieldKey(records, 'researchSetup', true);
+        result["Setup Products"] = getAllNodesByFieldKey(records, 'products');
+        result["Used In Researches"] = getAllNodesByFieldKey(records, 'researches');
         return result;
     }
     else {
@@ -55,7 +55,7 @@ function getResearchSetupById(session, researchSetupId, next) {
     return executeQuery(session, query, params)
     .then(response => {
         if (validateResponse(response)) {
-            return _getResearchSetupPageInfo(response.records[0]);
+            return _getResearchSetupPageInfo(response.records);
         }
         else {
             throw new EntityIdNotFound('ResearchSetup', researchSetupId);

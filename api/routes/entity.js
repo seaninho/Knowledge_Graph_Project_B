@@ -78,6 +78,18 @@ function _getRelationshipType(relatioship) {
     return relationshipTypeFound;
 };
 
+async function _validateSearchObject(req, reqBody) {
+    const entityType = _getEntityType(reqBody['entityType']);
+    if (entityType.toLowerCase() != req.params.entity) {
+        throw new BadRequest('Request body entity type does not match route\'s entity type!');  
+    }
+
+    const searchQuery = reqBody['searchQuery'];
+    if (searchQuery == null) {
+        throw new BadRequest('Request body has no search query!');
+    }
+}
+
 /**
  * verify entity exists
  * @param {*} session neo4j session
@@ -252,7 +264,9 @@ async function _validateRelationshipsObject(req, res, reqBody) {
 async function _validateRequestBody(req, res) {
     const reqBody = req.body;    
     const reqObject = reqBody['object'];
-    switch (reqObject) {        
+    switch (reqObject) {
+        case 'search':
+            return await _validateSearchObject(req, reqBody);
         case 'properties':
             return await _validatePropertiesObject(req, res, reqBody);            
         case 'entity':
@@ -457,6 +471,45 @@ function getAllEntitiesByType(req, res, next) {
     });
 }
 
+function searchForEntity(req, res, next) {
+    _validateRequestBody(req, res)
+    .then(async () => {
+        const reqBody = req.body;
+        const entity = req.params.entity.toLowerCase();
+        const entityType = _getEntityType(entity);
+        const entityScheme = getScheme(req, res, false);
+
+        const session = getSession(req);
+        const entityDescField = entityScheme['name'];
+        const searchQuery = reqBody['searchQuery'];
+        const similarityThreshold = 0.55;
+        var query = [
+            'MATCH (' + entity + ':' + entityType + ')',
+            'WITH DISTINCT ' + entity + ', ', 
+            'apoc.text.jaroWinklerDistance(',
+                'toLower('+ entity + '.' + entityDescField +'), ',
+                'toLower(\'' + searchQuery + '\')',
+            ') as similarity',
+            'WHERE similarity >= ' + similarityThreshold,
+            'RETURN ' + entity,
+            'ORDER BY similarity DESC',
+            'LIMIT 20'
+        ].join('\n');
+        
+        try {
+            const result = await executeCypherQuery(session, query, {});
+            const response = getAllNodesByFieldKey(result.records, entity);
+            return writeResponse(res, response);
+        } catch (error) {
+            session.close();
+            throw error;
+        }
+    })
+    .catch(error => {
+        next(error);
+    });
+}
+
 /**
  * set entity properties according to request
  * @param {*} req client's request (containing entity's info: type, id)
@@ -557,6 +610,7 @@ module.exports = {
     getScheme: getScheme,
     getEntityById: getEntityById,
     getAllEntitiesByType: getAllEntitiesByType,
+    searchForEntity: searchForEntity,
     setEntityProperties: setEntityProperties,
     addEntityRelationship: addEntityRelationship
 }

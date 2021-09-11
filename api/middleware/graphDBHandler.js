@@ -108,21 +108,37 @@ function validateRelationShipsCreated(result, possibleRelationshipsCreated) {
 }
 
 /**
- * get all nodes stored in record by field key
- * @param {*} record neo4j result record
+ * get all nodes stored in records by field key
+ * @param {*} records neo4j result records
  * @param {*} fieldKey lookup key
  * @returns an object containing all nodes found matching the label key provided.
  * If no nodes were found, returns an empty object.
  */
-function getAllNodesByFieldKey(record, fieldKey, isSingleNode = false) {
-    if (!_.find(record.keys, fieldKey) &&
-        !_.isEmpty(record.get(fieldKey))) {
-        const result = {
-            'entityType': record.get(fieldKey)[0].labels[0],
-            'entityList': _.map(record.get(fieldKey), record => record.properties) 
-        };   
-        return isSingleNode ? result['entityList'][0] : result;
+function getAllNodesByFieldKey(records, fieldKey, isSingleNode = false) {
+    var nodes, nodeLabel;
+    var nodesProperties = [];
+    for (let record of records) {
+        nodes = record.get(fieldKey);
+        if (!_.isEmpty(nodes)) {
+            if (Array.isArray(nodes)) {
+                nodeLabel = nodes[0].labels[0];
+                nodesProperties = nodesProperties.concat(_.map(nodes, node => node.properties));
+            }
+            else {
+                nodeLabel = nodes.labels[0];
+                nodesProperties = nodesProperties.concat(nodes.properties);
+            } 
+        }
     }
+    
+    var result;
+    if (typeof nodeLabel !== 'undefined' && !_.isEmpty(nodesProperties)) {
+        result = {
+            'entityType': nodeLabel,
+            'entityList': nodesProperties
+        }; 
+    }        
+    return isSingleNode ? nodesProperties[0] : result;
 };
 
 

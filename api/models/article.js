@@ -7,12 +7,12 @@ const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 
 const { EntityIdNotFound } = require("../utils/errors");
 
-function _getArticlePageInfo(record) {
-    if (record.length > 0) {
+function _getArticlePageInfo(records) {
+    if (records.length > 0) {
         var result = {};
-        result["Entity"] = getAllNodesByFieldKey(record, 'article', true); 
-        result["Written By"] = getAllNodesByFieldKey(record, 'researchers');
-        result["Written About"] = getAllNodesByFieldKey(record, 'researches');   
+        result["Entity"] = getAllNodesByFieldKey(records, 'article', true); 
+        result["Written By"] = getAllNodesByFieldKey(records, 'researchers');
+        result["Written About"] = getAllNodesByFieldKey(records, 'researches');   
         return result;
     }
     else {
@@ -54,7 +54,7 @@ function getArticleById(session, articleId, next) {
     return executeQuery(session, query, params)
     .then(response => {
         if (validateResponse(response)) {
-            return _getArticlePageInfo(response.records[0]);
+            return _getArticlePageInfo(response.records);
         }
         else {
             throw new EntityIdNotFound('Article', articleId);
