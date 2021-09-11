@@ -111,10 +111,11 @@ function validateRelationShipsCreated(result, possibleRelationshipsCreated) {
  * get all nodes stored in records by field key
  * @param {*} records neo4j result records
  * @param {*} fieldKey lookup key
+ * @param {*} resultIsSingleNode boolean value indicating whether or not the result object is of a single node
  * @returns an object containing all nodes found matching the label key provided.
  * If no nodes were found, returns an empty object.
  */
-function getAllNodesByFieldKey(records, fieldKey, isSingleNode = false) {
+function getAllNodesByFieldKey(records, fieldKey, resultIsSingleNode = false) {
     var nodes, nodeLabel;
     var nodesProperties = [];
     for (let record of records) {
@@ -138,7 +139,7 @@ function getAllNodesByFieldKey(records, fieldKey, isSingleNode = false) {
             'entityList': nodesProperties
         }; 
     }        
-    return isSingleNode ? nodesProperties[0] : result;
+    return resultIsSingleNode ? nodesProperties[0] : result;
 };
 
 
