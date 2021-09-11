@@ -466,7 +466,7 @@ function getAllEntitiesByType(req, res, next) {
     .then(result => {
         if (!_.isEmpty(result.records) && 
             !_.isEmpty(result.records[0]._fields[0])) {
-            return getAllNodesByFieldKey(result.records[0], entity);
+            return getAllNodesByFieldKey(result.records, entity);
         }
     })
     .then(response => writeResponse(res, response))
