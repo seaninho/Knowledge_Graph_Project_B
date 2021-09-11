@@ -79,6 +79,27 @@ function _getRelationshipType(relatioship) {
 };
 
 /**
+ * get max id used for entity type
+ * @param {*} session neo4j session
+ * @param {*} entityType entity's type
+ * @param {*} entityIdField entity's id field according to entity's scheme
+ * @returns largest id used by an entity of type entityType in graph
+ */
+async function _getMaxIdForEntityType(session, entityType, entityIdField) {
+    const entity = entityType.toLowerCase();
+    const query = [
+        'MATCH (' + entity + ':' + entityType + ')',                 
+        'RETURN max(toInteger(' + entity + '.' + entityIdField + ')) AS maxId'
+    ].join('\n');
+    const params = {};
+    
+    const result = await executeCypherQuery(session, query, params);    
+    if (!_.isEmpty(result.records)) {
+        return result.records[0].get('maxId');
+    }
+}
+
+/**
  * validate request body search object
  * @param {*} req client's request
  * @param {*} reqBody request body
