@@ -44,7 +44,7 @@ function getFacultyById(session, facultyId, next) {
     const query = [
     'MATCH (faculty:Faculty) WHERE faculty.facultyId = $facultyId',
     'OPTIONAL MATCH (lab:Lab)-[:PART_OF]->(faculty)',    
-    'OPTIONAL MATCH (researcher:Researcher)-[:HAS_ACTIVE_PROJECT]->(l:Lab)-[:PART_OF]->(faculty)',
+    'OPTIONAL MATCH (researcher:Researcher)-[:ACTIVE_AT]->(l:Lab)-[:PART_OF]->(faculty)',
     'OPTIONAL MATCH (researchArea:ResearchArea)<-[:RESEARCHES]-(researcher:Researcher)',    
     'WITH DISTINCT faculty,',
     'lab, researcher, researchArea',

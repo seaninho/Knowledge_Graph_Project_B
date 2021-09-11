@@ -57,7 +57,7 @@ function getResearchAreaById(session, researchAreaId, next) {
     'OPTIONAL MATCH (research:Research)-[:RELEVANT_TO]->(researchArea)',
     'OPTIONAL MATCH (researcher:Researcher)-[:RESEARCHES]->(researchArea)',    
     'OPTIONAL MATCH (product:Product)<-[:USING]-(r:Researcher)-[:RESEARCHES]->(researchArea)',
-    'OPTIONAL MATCH (lab:Lab)<-[:HAS_ACTIVE_PROJECT]-(rr:Researcher)-[:RESEARCHES]->(researchArea)',
+    'OPTIONAL MATCH (lab:Lab)<-[:ACTIVE_AT]-(rr:Researcher)-[:RESEARCHES]->(researchArea)',
     'WITH DISTINCT researchArea,',
     'research, researcher, product, lab',
     'RETURN COLLECT(DISTINCT researchArea) AS researchArea,',

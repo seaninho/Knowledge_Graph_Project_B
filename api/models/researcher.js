@@ -61,7 +61,7 @@ function getScheme() {
 function getResearcherById(session, researcherId, next) {
     const query = [
     'MATCH (researcher:Researcher) WHERE researcher.researcherId = $researcherId',
-    'OPTIONAL MATCH (lab:Lab)<-[:HAS_ACTIVE_PROJECT]-(researcher)',
+    'OPTIONAL MATCH (lab:Lab)<-[:ACTIVE_AT]-(researcher)',
     'OPTIONAL MATCH (researchArea:ResearchArea)<-[:RESEARCHES]-(researcher)',
     'OPTIONAL MATCH (research:Research)<-[:CONDUCTS]-(researcher)',
     'OPTIONAL MATCH (article:Article)-[:WROTE_REGARD_TO]->(r:Research)<-[:CONDUCTS]-(researcher)',

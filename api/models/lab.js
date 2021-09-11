@@ -60,9 +60,9 @@ function getLabById(session, labId, next) {
     const query = [
     'MATCH (lab:Lab) WHERE lab.labId = $labId',
     'OPTIONAL MATCH (faculty:Faculty)<-[:PART_OF]-(lab)',
-    'OPTIONAL MATCH (researcher:Researcher)-[:HAS_ACTIVE_PROJECT]->(lab)',
+    'OPTIONAL MATCH (researcher:Researcher)-[:ACTIVE_AT]->(lab)',
     'OPTIONAL MATCH (product:Product)-[:USED_AT]->(lab)',
-    'OPTIONAL MATCH (researchArea:ResearchArea)<-[:RESEARCHES]-(r:Researcher)-[:HAS_ACTIVE_PROJECT]->(lab)',
+    'OPTIONAL MATCH (researchArea:ResearchArea)<-[:RESEARCHES]-(r:Researcher)-[:ACTIVE_AT]->(lab)',
     'WITH DISTINCT lab,',
     'researcher, product, faculty, researchArea',
     'RETURN COLLECT(DISTINCT lab) AS lab,',
