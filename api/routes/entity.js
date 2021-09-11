@@ -566,11 +566,13 @@ function setEntityProperties(req, res, next) {
 }
 
 /**
- * 
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
- * @returns 
+ * add entity relationship according to request
+ * @param {*} req client's request (containing entity's type)
+ * @param {*} res server's response
+ * @param {*} next next function to execute
+ * @returns if successful, 
+ * a message notifing the client of successfully adding desired relationships.
+ * if not, throws an exception notifing the client of failure.
  */
 function addEntityRelationship(req, res, next) {
     _validateRequestBody(req, res)
