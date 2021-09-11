@@ -78,6 +78,11 @@ function _getRelationshipType(relatioship) {
     return relationshipTypeFound;
 };
 
+/**
+ * validate request body search object
+ * @param {*} req client's request
+ * @param {*} reqBody request body
+ */
 async function _validateSearchObject(req, reqBody) {
     const entityType = _getEntityType(reqBody['entityType']);
     if (entityType.toLowerCase() != req.params.entity) {
@@ -471,6 +476,13 @@ function getAllEntitiesByType(req, res, next) {
     });
 }
 
+/**
+ * search for entity description according to request
+ * @param {*} req client's request (containing entity's type)
+ * @param {*} res server's response
+ * @param {*} next next function to execute
+ * @returns search results limited to 20 results
+ */
 function searchForEntity(req, res, next) {
     _validateRequestBody(req, res)
     .then(async () => {
