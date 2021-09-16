@@ -242,19 +242,19 @@ async function _validateRelationshipsObject(req, res, reqBody) {
     }
 
     const srcEdges = srcEntityScheme['edges'];
-    for (srcEdge of srcEdges) {
+    for (let srcEdge of srcEdges) {
         if (srcEdge['edgeName'] === relationshipType) {
             if (srcEdge['src'] !== srcEntityType || srcEdge['dst'] !== dstEntityType) {
                 throw new BadRequest('Each relationship is uni-directional! ' + 
-                    '[entity types for source and destionation in reuest body does not match relationship model]');
+                    '[entity types for source and destionation in request body does not match relationship model]');
             }
             break;
         }
     }
 
-
     var srcEntityId, srcExists, dstEntityId, dstExists, relationshipExist;
-    for (edge of edges) {
+    const edges = reqBody['edges'];
+    for (let edge of edges) {
         srcEntityId = edge['src'];
         dstEntityId = edge['dst'];
         if (srcEntityType.toLowerCase() == req.params.entity) {
