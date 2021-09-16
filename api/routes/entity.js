@@ -140,6 +140,22 @@ async function _verifyEntityExists(session, entityType, entityIdField, entityIdV
 }
 
 /**
+ * validate request body properties
+ * @param {*} reqBody request body
+ * @param {*} entityScheme entity's scheme to validate against
+ * @throws {*} 
+ */
+function _validateRequestBodyProperties(reqBody, entityScheme) {
+    const properties = reqBody['properties'];
+    for (const [property, _value] of Object.entries(properties)) {
+        if (property != entityScheme['name'] && 
+            !entityScheme['property'].includes(property)) {
+            throw new BadRequest('Unknown request property in request body \'properties\': \'' + property +'\''); 
+        }
+    }
+}
+
+/**
  * validate request body properties object
  * @param {*} req client's request
  * @param {*} res server's response
@@ -164,13 +180,7 @@ async function _validatePropertiesObject(req, res, reqBody) {
         throw new EntityIdNotFound(entityType, entityId);
     }    
 
-    const properties = reqBody['properties'];
-    for (const [property, _value] of Object.entries(properties)) {
-        if (property != entityScheme['name'] && 
-            !entityScheme['property'].includes(property)) {
-            throw new BadRequest('Unknown request property in request body \'properties\''); 
-        }
-    }
+    _validateRequestBodyProperties(reqBody, entityScheme);
 }
 
 /**
