@@ -219,7 +219,7 @@ async function _verifyRelationshipExists(session, srcEntityType, dstEntityType,
  * @param {*} typeTuple tuple containing srcEntityType, dstEntityType, relationshipType
  * @param {*} schemeTuple tuple containing srcEntityScheme, dstEntityScheme
  */
-async function _validateRequestBodyEdges(req, reqBody, typeTuple, schemeTuple) {
+async function _validateEdgesObjectForExistingEntity(req, reqBody, typeTuple, schemeTuple) {
     const [srcEntityType, dstEntityType, relationshipType] = typeTuple;
     const [srcEntityScheme, dstEntityScheme] = schemeTuple;
     const edges = reqBody['edges'];
@@ -263,12 +263,59 @@ async function _validateRequestBodyEdges(req, reqBody, typeTuple, schemeTuple) {
 }
 
 /**
+ * validate request body edges for a newly created entity
+ * @param {*} req client's request
+ * @param {*} reqBody request body
+ * @param {*} typeTuple tuple containing srcEntityType, dstEntityType
+ * @param {*} schemeTuple tuple containing srcEntityScheme, dstEntityScheme
+ */
+async function _validateEdgesObjectForNewEntity(req, reqBody, typeTuple, schemeTuple) {
+    const [srcEntityType, dstEntityType, _] = typeTuple;
+    const [srcEntityScheme, dstEntityScheme] = schemeTuple;
+    const edges = reqBody['edges']; 
+    var srcEntityId, srcExists, dstEntityId, dstExists, createdEntityIsSource;
+
+    for (let edge of edges) {
+        srcEntityId = edge['src'];
+        dstEntityId = edge['dst'];
+        createdEntityIsSource = 
+            req.params.entity == srcEntityType.toLowerCase() ? true : false;
+
+        if (createdEntityIsSource) {
+            if (srcEntityId != -1) {
+                throw new BadRequest('Request body source entity id ' + 
+                    'does not match a newly entity id!');
+            }
+
+            srcExists = await _verifyEntityExists(getSession(req, true), srcEntityType, 
+            srcEntityScheme['id'], srcEntityId);
+            if (srcExists !== true) {
+                throw new EntityIdNotFound(srcEntityType, srcEntityId);
+            }
+        } 
+        else {
+            if (dstEntityId != -1) {
+                throw new BadRequest('Request body destination entity id ' + 
+                    'does not match a newly entity id!');
+            }
+            
+            dstExists = await _verifyEntityExists(getSession(req, true), dstEntityType, 
+            dstEntityScheme['id'], dstEntityId);
+            if (dstExists !== true) {
+                throw new EntityIdNotFound(dstEntityType, dstEntityId);
+            }
+        }
+    }
+}
+
+/**
  * validate request body relationships object
  * @param {*} req client's request
  * @param {*} res server's response
  * @param {*} reqBody request body
+ * @param {*} newlyCreated true if relationship includes a newly created entity; false otherwise 
  */
-async function _validateRelationshipsObject(req, res, reqBody) {
+async function _validateRelationshipsObject(req, res, reqBody, newlyCreated = false) {
     const relationshipType = _getRelationshipType(reqBody['edgeName']);
     const srcEntityType = _getEntityType(reqBody['src']);
     const dstEntityType = _getEntityType(reqBody['dst']);
@@ -304,7 +351,12 @@ async function _validateRelationshipsObject(req, res, reqBody) {
 
     const typeTuple = [srcEntityType, dstEntityType, relationshipType];
     const schemeTuple = [srcEntityScheme, dstEntityScheme];
-    await _validateRequestBodyEdges(req, reqBody, typeTuple, schemeTuple);
+    if (newlyCreated) {
+        await _validateEdgesObjectForNewEntity(req, reqBody, typeTuple, schemeTuple);
+    }
+    else {
+        await _validateEdgesObjectForExistingEntity(req, reqBody, typeTuple, schemeTuple);
+    }    
 }
 
 /**
