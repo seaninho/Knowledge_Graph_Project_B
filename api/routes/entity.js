@@ -213,6 +213,56 @@ async function _verifyRelationshipExists(session, srcEntityType, dstEntityType,
 }
 
 /**
+ * validate request body edges for a existing entities
+ * @param {*} req client's request
+ * @param {*} reqBody request body
+ * @param {*} typeTuple tuple containing srcEntityType, dstEntityType, relationshipType
+ * @param {*} schemeTuple tuple containing srcEntityScheme, dstEntityScheme
+ */
+async function _validateRequestBodyEdges(req, reqBody, typeTuple, schemeTuple) {
+    const [srcEntityType, dstEntityType, relationshipType] = typeTuple;
+    const [srcEntityScheme, dstEntityScheme] = schemeTuple;
+    const edges = reqBody['edges'];
+    var srcEntityId, srcExists, dstEntityId, dstExists, relationshipExist;
+
+    for (let edge of edges) {
+        srcEntityId = edge['src'];
+        dstEntityId = edge['dst'];
+        if (srcEntityType.toLowerCase() == req.params.entity) {
+            if (srcEntityId != req.params.id) {
+                throw new BadRequest('Request body source entity id ' + 
+                    'does not match route\'s entity id!');
+            }
+        } 
+        else {
+            if (dstEntityId != req.params.id) {
+                throw new BadRequest('Request body destination entity id ' + 
+                    'does not match route\'s entity id!');
+            }
+        }
+
+        srcExists = await _verifyEntityExists(getSession(req, true), srcEntityType, 
+            srcEntityScheme['id'], srcEntityId);
+        if (srcExists !== true) {
+            throw new EntityIdNotFound(srcEntityType, srcEntityId);
+        }        
+        dstExists = await _verifyEntityExists(getSession(req, true), dstEntityType, 
+            dstEntityScheme['id'], dstEntityId);
+        if (dstExists !== true) {
+            throw new EntityIdNotFound(dstEntityType, dstEntityId);
+        }
+
+        relationshipExist = await _verifyRelationshipExists(getSession(req, true), 
+            srcEntityType, dstEntityType, relationshipType, srcEntityScheme['id'], 
+            dstEntityScheme['id'], srcEntityId, dstEntityId);
+        if (relationshipExist === true) {
+            throw new RelationshoipAlreadyExists(srcEntityType, dstEntityType, 
+                relationshipType, srcEntityId, dstEntityId);
+        }
+    }
+}
+
+/**
  * validate request body relationships object
  * @param {*} req client's request
  * @param {*} res server's response
@@ -252,43 +302,9 @@ async function _validateRelationshipsObject(req, res, reqBody) {
         }
     }
 
-    var srcEntityId, srcExists, dstEntityId, dstExists, relationshipExist;
-    const edges = reqBody['edges'];
-    for (let edge of edges) {
-        srcEntityId = edge['src'];
-        dstEntityId = edge['dst'];
-        if (srcEntityType.toLowerCase() == req.params.entity) {
-            if (srcEntityId != req.params.id) {
-                throw new BadRequest('Request body source entity id ' + 
-                    'does not match route\'s entity id!');
-            }
-        } 
-        else {
-            if (dstEntityId != req.params.id) {
-                throw new BadRequest('Request body destination entity id ' + 
-                    'does not match route\'s entity id!');
-            }
-        }
-
-        srcExists = await _verifyEntityExists(getSession(req, true), srcEntityType, 
-            srcEntityScheme['id'], srcEntityId);
-        if (srcExists !== true) {
-            throw new EntityIdNotFound(srcEntityType, srcEntityId);
-        }        
-        dstExists = await _verifyEntityExists(getSession(req, true), dstEntityType, 
-            dstEntityScheme['id'], dstEntityId);
-        if (dstExists !== true) {
-            throw new EntityIdNotFound(dstEntityType, dstEntityId);
-        }
-
-        relationshipExist = await _verifyRelationshipExists(getSession(req, true), 
-            srcEntityType, dstEntityType, relationshipType, srcEntityScheme['id'], 
-            dstEntityScheme['id'], srcEntityId, dstEntityId);
-        if (relationshipExist === true) {
-            throw new RelationshoipAlreadyExists(srcEntityType, dstEntityType, 
-                relationshipType, srcEntityId, dstEntityId);
-        }
-    }
+    const typeTuple = [srcEntityType, dstEntityType, relationshipType];
+    const schemeTuple = [srcEntityScheme, dstEntityScheme];
+    await _validateRequestBodyEdges(req, reqBody, typeTuple, schemeTuple);
 }
 
 /**
