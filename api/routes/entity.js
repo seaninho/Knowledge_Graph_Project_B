@@ -313,7 +313,7 @@ async function _validateEdgesObjectForNewEntity(req, reqBody, typeTuple, schemeT
  * @param {*} req client's request
  * @param {*} res server's response
  * @param {*} reqBody request body
- * @param {*} newlyCreated true if relationship includes a newly created entity; false otherwise 
+ * @param {*} newlyCreated true if relationship includes a newly created entity; false otherwise.
  */
 async function _validateRelationshipsObject(req, res, reqBody, newlyCreated = false) {
     const relationshipType = _getRelationshipType(reqBody['edgeName']);
@@ -356,7 +356,33 @@ async function _validateRelationshipsObject(req, res, reqBody, newlyCreated = fa
     }
     else {
         await _validateEdgesObjectForExistingEntity(req, reqBody, typeTuple, schemeTuple);
-    }    
+    }
+}
+
+/**
+ * validate request body entity object
+ * @param {*} req client's request
+ * @param {*} res server's response
+ * @param {*} reqBody request body 
+ */
+async function _validateEntityObject(req, res, reqBody) {
+    const entityType = _getEntityType(reqBody['entityType']);
+    if (entityType.toLowerCase() != req.params.entity) {
+        throw new BadRequest('Request body entity type does not match route\'s entity type!');  
+    }
+
+    const entityId = reqBody['entityId'];
+    if (entityId != -1) {
+        throw new BadRequest('Request body entity id does not match an invalid entity id!');
+    }
+
+    const entityScheme = getScheme(req, res, false);
+    _validateRequestBodyProperties(reqBody, entityScheme);
+
+    const relationships = reqBody['relationships'];
+    for (const [_, relationshipData] of relationships) {
+        await _validateRelationshipsObject(req, res, relationshipData, true);
+    }
 }
 
 /**
@@ -374,7 +400,7 @@ async function _validateRequestBody(req, res) {
         case 'properties':
             return await _validatePropertiesObject(req, res, reqBody);            
         case 'entity':
-            break;
+            return await _validateEntityObject(req, res, reqBody);
         case 'relationships':            
             return await _validateRelationshipsObject(req, res, reqBody);
         default:
