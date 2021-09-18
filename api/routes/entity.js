@@ -406,6 +406,39 @@ async function _validateRequestBody(req) {
 }
 
 /**
+ * build Cypher query for creating all relationships as described in relationshipData object
+ * @param {*} relationshipData all src-dst relationships
+ * @returns Cypher query
+ */
+function _buildCreateRelationshipsQuery(relationshipData) {
+    const relationshipType = _getRelationshipType(relationshipData['edgeName']);
+    const srcEntityType = _getEntityType(relationshipData['src']);
+    const dstEntityType = _getEntityType(relationshipData['dst']);    
+    const srcEntityScheme = getEntityScheme(srcEntityType);
+    const dstEntityScheme = getEntityScheme(dstEntityType);
+    
+    var query = [];
+    var addEdgeQuery;
+    const edges = relationshipData['edges'];
+    edges.forEach((edge) => {   // each edge constitutes a relationship
+        addEdgeQuery = 
+        [
+            'MATCH (src:' + srcEntityType + '), ' + '(dst:' + dstEntityType + ')',
+            'WHERE src.' + srcEntityScheme['id'] + ' = ' + '\'' + edge['src'] + '\' ' + 
+            'AND dst.' + dstEntityScheme['id'] + ' = ' + '\'' + edge['dst'] + '\'',
+            'CREATE (src)-[:' + relationshipType + ']->(dst)'
+        ].join('\n');
+
+        if (edges.indexOf(edge) != edges.length - 1) {
+            addEdgeQuery += '\nUNION\n';
+        }
+        query += addEdgeQuery;
+    });
+
+    return query;
+}
+
+/**
  * get all relationship types existing in database
  * @param {*} req client's request
  * @param {*} res server's response
@@ -696,35 +729,13 @@ function setEntityProperties(req, res, next) {
 function addEntityRelationships(req, res, next) {
     _validateRequestBody(req)
     .then(async () => {
-        const reqBody = req.body;
-        const relationshipType = _getRelationshipType(reqBody['edgeName']);
-        const srcEntityType = _getEntityType(reqBody['src']);
-        const dstEntityType = _getEntityType(reqBody['dst']);    
-        const srcEntityScheme = getEntityScheme(srcEntityType);
-        const dstEntityScheme = getEntityScheme(dstEntityType);
-        
         const session = getSession(req);
-        var finalQuery = [];
-        var addEdgeQuery;
-        const edges = reqBody['edges'];
-        edges.forEach((edge) => {   // each edge constitutes a relationship
-            addEdgeQuery = 
-            [
-                'MATCH (src:' + srcEntityType + '), ' + '(dst:' + dstEntityType + ')',
-                'WHERE src.' + srcEntityScheme['id'] + ' = ' + '\'' + edge['src'] + '\' ' + 
-                'AND dst.' + dstEntityScheme['id'] + ' = ' + '\'' + edge['dst'] + '\'',
-                'CREATE (src)-[:' + relationshipType + ']->(dst)'
-            ].join('\n');
-
-            if (edges.indexOf(edge) != edges.length - 1) {
-                addEdgeQuery += '\nUNION\n';
-            }
-            finalQuery += addEdgeQuery;
-        });
+        const reqBody = req.body;
+        const query = _buildCreateRelationshipsQuery(reqBody);
         
         try {
-            const result = await executeCypherQuery(session, finalQuery, {}, 'WRITE');
-            const response = validateRelationShipsCreated(result, Object.keys(edges).length);
+            const result = await executeCypherQuery(session, query, {}, 'WRITE');
+            const response = validateRelationShipsCreated(result, Object.keys(reqBody['edges']).length);
             writeResponse(res, response);
         } catch (error) {
             session.close();
