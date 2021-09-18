@@ -172,7 +172,7 @@ async function _validatePropertiesObject(req, res, reqBody) {
     }
 
     const session = getSession(req);
-    const entityScheme = getScheme(req, res, false);
+    const entityScheme = getEntityScheme(req, res, false);
     const entityIdProfile = [entityType, entityScheme['id'], entityId];
     const exists = await _verifyEntityExists(session, entityIdProfile);
     if (exists !== true) {
@@ -327,11 +327,11 @@ async function _validateRelationshipsObject(req, res, reqBody, newlyCreated = fa
             '[Source entity is of the same entity type as destination entity]');
     }
     
-    const srcEntityScheme = getScheme(req, res, false, srcEntityType);
+    const srcEntityScheme = getEntityScheme(req, res, false, srcEntityType);
     if (srcEntityScheme['edges'].findIndex(edge => edge['edgeName'] === relationshipType) === -1) {
         throw new EntityHasNoSuchRelationship(srcEntityType, relationshipType);
     }
-    const dstEntityScheme = getScheme(req, res, false, dstEntityType);
+    const dstEntityScheme = getEntityScheme(req, res, false, dstEntityType);
     if (dstEntityScheme['edges'].findIndex(edge => edge['edgeName'] === relationshipType) === -1) {
         throw new EntityHasNoSuchRelationship(srcEntityType, relationshipType);
     }
@@ -374,7 +374,7 @@ async function _validateEntityObject(req, res, reqBody) {
         throw new BadRequest('Request body entity id does not match an invalid entity id!');
     }
 
-    const entityScheme = getScheme(req, res, false);
+    const entityScheme = getEntityScheme(req, res, false);
     _validateEntityProperties(reqBody, entityScheme);
 
     const relationships = reqBody['relationships'];
@@ -490,7 +490,7 @@ function getAllEntityTypes(req, res, next) {
  * @param {*} writeRes if true, write result back. else, return result object.
  * @returns requested entity's scheme
  */
-function getScheme(req, res, writeRes = true, entity = '') {
+function getEntityScheme(req, res, writeRes = true, entity = '') {
     const entityType = entity == '' ? 
         _getEntityType(req.params.entity) :
         _getEntityType(entity);
@@ -612,7 +612,7 @@ function searchForEntity(req, res, next) {
         const reqBody = req.body;
         const entity = req.params.entity.toLowerCase();
         const entityType = _getEntityType(entity);
-        const entityScheme = getScheme(req, res, false);
+        const entityScheme = getEntityScheme(req, res, false);
 
         const session = getSession(req);
         const entityDescField = entityScheme['name'];
@@ -661,7 +661,7 @@ function setEntityProperties(req, res, next) {
         const entity = req.params.entity.toLowerCase();
         const entityType = _getEntityType(entity);
         const entityId = req.params.id;
-        const entityScheme = getScheme(req, res, false);
+        const entityScheme = getEntityScheme(req, res, false);
         
         const session = getSession(req);
         var query = [
@@ -704,8 +704,8 @@ function addEntityRelationships(req, res, next) {
         const relationshipType = _getRelationshipType(reqBody['edgeName']);
         const srcEntityType = _getEntityType(reqBody['src']);
         const dstEntityType = _getEntityType(reqBody['dst']);    
-        const srcEntityScheme = getScheme(req, res, false, srcEntityType);
-        const dstEntityScheme = getScheme(req, res, false, dstEntityType);
+        const srcEntityScheme = getEntityScheme(req, res, false, srcEntityType);
+        const dstEntityScheme = getEntityScheme(req, res, false, dstEntityType);
         
         const session = getSession(req);
         var finalQuery = [];
@@ -744,7 +744,7 @@ function addEntityRelationships(req, res, next) {
 module.exports = {
     getAllEntityTypes: getAllEntityTypes,
     getAllRelationshipTypes: getAllRelationshipTypes,
-    getScheme: getScheme,
+    getEntityScheme: getEntityScheme,
     getEntityById: getEntityById,
     getAllEntitiesByType: getAllEntitiesByType,
     searchForEntity: searchForEntity,
