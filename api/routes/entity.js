@@ -119,12 +119,11 @@ async function _validateSearchObject(req, reqBody) {
 /**
  * verify entity exists
  * @param {*} session neo4j session
- * @param {*} entityType entity's type
- * @param {*} entityIdField entity's id field according to entity's scheme
- * @param {*} entityIdValue entity's id
+ * @param {*} entityIdProfile entity's id profile (type, id field, id value)
  * @returns true if entity exists; false otherwise.
  */
-async function _verifyEntityExists(session, entityType, entityIdField, entityIdValue) {
+async function _verifyEntityExists(session, entityIdProfile) {
+    const [entityType, entityIdField, entityIdValue] = entityIdProfile;
     const entity = entityType.toLowerCase();
     const query = [
         'MATCH (' + entity + ':' + entityType + ')',        
@@ -174,7 +173,8 @@ async function _validatePropertiesObject(req, res, reqBody) {
 
     const session = getSession(req);
     const entityScheme = getScheme(req, res, false);
-    const exists = await _verifyEntityExists(session, entityType, entityScheme['id'], entityId);
+    const entityIdProfile = [entityType, entityScheme['id'], entityId];
+    const exists = await _verifyEntityExists(session, entityIdProfile);
     if (exists !== true) {
         session.close();
         throw new EntityIdNotFound(entityType, entityId);
@@ -186,17 +186,15 @@ async function _validatePropertiesObject(req, res, reqBody) {
 /**
  * verify relationship exists
  * @param {*} session neo4j session
- * @param {*} srcEntityType source entity's type
- * @param {*} dstEntityType destination entity's type
- * @param {*} relationshipType relationship type
- * @param {*} srcEntityIdField source entity's id field according to entity's scheme
- * @param {*} dstEntityIdField destination entity's id field according to entity's scheme
- * @param {*} srcEntityIdValue source entity's id
- * @param {*} dstEntityIdValue destination entity's id
+ * @param {*} srcEntityIdProfile source entity's id profile (type, id field, id value)
+ * @param {*} dstEntityIdProfile destination entity's id profile (type, id field, id value)
+ * @param {*} relationshipType relationship type 
  * @returns true if relationship exists; false otherwise.
  */
-async function _verifyRelationshipExists(session, srcEntityType, dstEntityType,
-    relationshipType, srcEntityIdField, dstEntityIdField, srcEntityIdValue, dstEntityIdValue) {
+async function _verifyRelationshipExists(session, srcEntityIdProfile, 
+    dstEntityIdProfile, relationshipType) {
+    const [srcEntityType, srcEntityIdField, srcEntityIdValue] = srcEntityIdProfile;
+    const [dstEntityType, dstEntityIdField, dstEntityIdValue] = dstEntityIdProfile;
     const query = [         
         'RETURN EXISTS',
         '( (:' + srcEntityType + ' {' + srcEntityIdField + ': \'' + srcEntityIdValue +'\'})',
@@ -224,10 +222,13 @@ async function _validateEdgesObjectForExistingEntity(req, reqBody, typeTuple, sc
     const [srcEntityScheme, dstEntityScheme] = schemeTuple;
     const edges = reqBody['edges'];
     var srcEntityId, srcExists, dstEntityId, dstExists, relationshipExist;
-
+    var srcEntityIdProfile, dstEntityIdProfile;
     for (let edge of edges) {
         srcEntityId = edge['src'];
         dstEntityId = edge['dst'];
+        srcEntityIdProfile = [srcEntityType, srcEntityScheme['id'], srcEntityId];
+        dstEntityIdProfile = [dstEntityType, dstEntityScheme['id'], dstEntityId];
+
         if (srcEntityType.toLowerCase() == req.params.entity) {
             if (srcEntityId != req.params.id) {
                 throw new BadRequest('Request body source entity id ' + 
@@ -241,20 +242,17 @@ async function _validateEdgesObjectForExistingEntity(req, reqBody, typeTuple, sc
             }
         }
 
-        srcExists = await _verifyEntityExists(getSession(req, true), srcEntityType, 
-            srcEntityScheme['id'], srcEntityId);
+        srcExists = await _verifyEntityExists(getSession(req, true), srcEntityIdProfile);
         if (srcExists !== true) {
             throw new EntityIdNotFound(srcEntityType, srcEntityId);
         }        
-        dstExists = await _verifyEntityExists(getSession(req, true), dstEntityType, 
-            dstEntityScheme['id'], dstEntityId);
+        dstExists = await _verifyEntityExists(getSession(req, true), dstEntityIdProfile);
         if (dstExists !== true) {
             throw new EntityIdNotFound(dstEntityType, dstEntityId);
         }
-
+        
         relationshipExist = await _verifyRelationshipExists(getSession(req, true), 
-            srcEntityType, dstEntityType, relationshipType, srcEntityScheme['id'], 
-            dstEntityScheme['id'], srcEntityId, dstEntityId);
+            srcEntityIdProfile, dstEntityIdProfile, relationshipType);
         if (relationshipExist === true) {
             throw new RelationshoipAlreadyExists(srcEntityType, dstEntityType, 
                 relationshipType, srcEntityId, dstEntityId);
@@ -274,10 +272,12 @@ async function _validateEdgesObjectForNewEntity(req, reqBody, typeTuple, schemeT
     const [srcEntityScheme, dstEntityScheme] = schemeTuple;
     const edges = reqBody['edges']; 
     var srcEntityId, srcExists, dstEntityId, dstExists, createdEntityIsSource;
-
+    var srcEntityIdProfile, dstEntityIdProfile;
     for (let edge of edges) {
         srcEntityId = edge['src'];
         dstEntityId = edge['dst'];
+        srcEntityIdProfile = [srcEntityType, srcEntityScheme['id'], srcEntityId];
+        dstEntityIdProfile = [dstEntityType, dstEntityScheme['id'], dstEntityId];
         createdEntityIsSource = 
             req.params.entity == srcEntityType.toLowerCase() ? true : false;
 
@@ -287,8 +287,7 @@ async function _validateEdgesObjectForNewEntity(req, reqBody, typeTuple, schemeT
                     'does not match a newly entity id!');
             }
 
-            dstExists = await _verifyEntityExists(getSession(req, true), dstEntityType, 
-            dstEntityScheme['id'], dstEntityId);
+            dstExists = await _verifyEntityExists(getSession(req, true), dstEntityIdProfile);
             if (dstExists !== true) {
                 throw new EntityIdNotFound(dstEntityType, dstEntityId);
             }
@@ -299,8 +298,7 @@ async function _validateEdgesObjectForNewEntity(req, reqBody, typeTuple, schemeT
                     'does not match a newly entity id!');
             }
             
-            srcExists = await _verifyEntityExists(getSession(req, true), srcEntityType, 
-            srcEntityScheme['id'], srcEntityId);
+            srcExists = await _verifyEntityExists(getSession(req, true), srcEntityIdProfile);
             if (srcExists !== true) {
                 throw new EntityIdNotFound(srcEntityType, srcEntityId);
             }            
