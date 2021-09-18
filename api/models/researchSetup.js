@@ -33,6 +33,11 @@ function getScheme() {
                 'src': 'ResearchSetup',
                 'dst': 'Product',
                 'edgeName': 'COMPOSED_OF'
+            },
+            {
+                'src': 'ResearchSetup',
+                'dst': 'Research',
+                'edgeName': 'USED_IN'
             }
         ]
     };
