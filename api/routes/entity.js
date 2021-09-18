@@ -157,10 +157,9 @@ function _validateEntityProperties(reqBody, entityScheme) {
 /**
  * validate request body properties object
  * @param {*} req client's request
- * @param {*} res server's response
  * @param {*} reqBody request body
  */
-async function _validatePropertiesObject(req, res, reqBody) {
+async function _validatePropertiesObject(req, reqBody) {
     const entityType = _getEntityType(reqBody['entityType']);
     if (entityType.toLowerCase() != req.params.entity) {
         throw new BadRequest('Request body entity type does not match route\'s entity type!');  
@@ -309,11 +308,10 @@ async function _validateEdgesObjectForNewEntity(req, reqBody, typeTuple, schemeT
 /**
  * validate request body relationships object
  * @param {*} req client's request
- * @param {*} res server's response
  * @param {*} reqBody request body
  * @param {*} newlyCreated true if relationship includes a newly created entity; false otherwise.
  */
-async function _validateRelationshipsObject(req, res, reqBody, newlyCreated = false) {
+async function _validateRelationshipsObject(req, reqBody, newlyCreated = false) {
     const relationshipType = _getRelationshipType(reqBody['edgeName']);
     const srcEntityType = _getEntityType(reqBody['src']);
     const dstEntityType = _getEntityType(reqBody['dst']);
@@ -360,10 +358,9 @@ async function _validateRelationshipsObject(req, res, reqBody, newlyCreated = fa
 /**
  * validate request body entity object
  * @param {*} req client's request
- * @param {*} res server's response
  * @param {*} reqBody request body 
  */
-async function _validateEntityObject(req, res, reqBody) {
+async function _validateEntityObject(req, reqBody) {
     const entityType = _getEntityType(reqBody['entityType']);
     if (entityType.toLowerCase() != req.params.entity) {
         throw new BadRequest('Request body entity type does not match route\'s entity type!');  
@@ -379,28 +376,30 @@ async function _validateEntityObject(req, res, reqBody) {
 
     const relationships = reqBody['relationships'];
     for (const [_, relationshipData] of Object.entries(relationships)) {
-        await _validateRelationshipsObject(req, res, relationshipData, true);
+        await _validateRelationshipsObject(req, relationshipData, true);
     }
 }
 
 /**
  * validate request body according to request body object
  * @param {*} req client's request
- * @param {*} res server's response
- * @returns 
  */
-async function _validateRequestBody(req, res) {
+async function _validateRequestBody(req) {
     const reqBody = req.body;    
     const reqObject = reqBody['object'];
     switch (reqObject) {
         case 'search':
-            return await _validateSearchObject(req, reqBody);
+            await _validateSearchObject(req, reqBody);
+            break;
         case 'properties':
-            return await _validatePropertiesObject(req, res, reqBody);            
+            await _validatePropertiesObject(req, reqBody);
+            break;
         case 'entity':
-            return await _validateEntityObject(req, res, reqBody);
+            await _validateEntityObject(req, reqBody);
+            break;
         case 'relationships':            
-            return await _validateRelationshipsObject(req, res, reqBody);
+            await _validateRelationshipsObject(req, reqBody);
+            break;
         default:
             throw new BadRequest('Unknown request object: ' + reqObject);
     }
@@ -604,7 +603,7 @@ function getAllEntitiesByType(req, res, next) {
  * @returns search results limited to 20 results
  */
 function searchForEntity(req, res, next) {
-    _validateRequestBody(req, res)
+    _validateRequestBody(req)
     .then(async () => {
         const reqBody = req.body;
         const entity = req.params.entity.toLowerCase();
@@ -652,7 +651,7 @@ function searchForEntity(req, res, next) {
  * if not, throws an exception notifing the client of failure.
  */
 function setEntityProperties(req, res, next) {
-    _validateRequestBody(req, res)
+    _validateRequestBody(req)
     .then(async () => {
         const reqBody = req.body;
         const entity = req.params.entity.toLowerCase();
@@ -695,7 +694,7 @@ function setEntityProperties(req, res, next) {
  * if not, throws an exception notifing the client of failure.
  */
 function addEntityRelationships(req, res, next) {
-    _validateRequestBody(req, res)
+    _validateRequestBody(req)
     .then(async () => {
         const reqBody = req.body;
         const relationshipType = _getRelationshipType(reqBody['edgeName']);
