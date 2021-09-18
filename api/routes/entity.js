@@ -287,10 +287,10 @@ async function _validateEdgesObjectForNewEntity(req, reqBody, typeTuple, schemeT
                     'does not match a newly entity id!');
             }
 
-            srcExists = await _verifyEntityExists(getSession(req, true), srcEntityType, 
-            srcEntityScheme['id'], srcEntityId);
-            if (srcExists !== true) {
-                throw new EntityIdNotFound(srcEntityType, srcEntityId);
+            dstExists = await _verifyEntityExists(getSession(req, true), dstEntityType, 
+            dstEntityScheme['id'], dstEntityId);
+            if (dstExists !== true) {
+                throw new EntityIdNotFound(dstEntityType, dstEntityId);
             }
         } 
         else {
@@ -299,11 +299,11 @@ async function _validateEdgesObjectForNewEntity(req, reqBody, typeTuple, schemeT
                     'does not match a newly entity id!');
             }
             
-            dstExists = await _verifyEntityExists(getSession(req, true), dstEntityType, 
-            dstEntityScheme['id'], dstEntityId);
-            if (dstExists !== true) {
-                throw new EntityIdNotFound(dstEntityType, dstEntityId);
-            }
+            srcExists = await _verifyEntityExists(getSession(req, true), srcEntityType, 
+            srcEntityScheme['id'], srcEntityId);
+            if (srcExists !== true) {
+                throw new EntityIdNotFound(srcEntityType, srcEntityId);
+            }            
         }
     }
 }
@@ -380,7 +380,7 @@ async function _validateEntityObject(req, res, reqBody) {
     _validateRequestBodyProperties(reqBody, entityScheme);
 
     const relationships = reqBody['relationships'];
-    for (const [_, relationshipData] of relationships) {
+    for (const [_, relationshipData] of Object.entries(relationships)) {
         await _validateRelationshipsObject(req, res, relationshipData, true);
     }
 }
