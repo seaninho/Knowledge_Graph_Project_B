@@ -689,7 +689,7 @@ function setEntityProperties(req, res, next) {
 }
 
 /**
- * add entity relationship according to request
+ * add entity relationships according to request
  * @param {*} req client's request (containing entity's type)
  * @param {*} res server's response
  * @param {*} next next function to execute
@@ -697,7 +697,7 @@ function setEntityProperties(req, res, next) {
  * a message notifing the client of successfully adding desired relationships.
  * if not, throws an exception notifing the client of failure.
  */
-function addEntityRelationship(req, res, next) {
+function addEntityRelationships(req, res, next) {
     _validateRequestBody(req, res)
     .then(async () => {
         const reqBody = req.body;
@@ -710,17 +710,17 @@ function addEntityRelationship(req, res, next) {
         const session = getSession(req);
         var finalQuery = [];
         var addEdgeQuery;
-        const relationships = reqBody['edges'];
-        relationships.forEach((relationship) => {
+        const edges = reqBody['edges'];
+        edges.forEach((edge) => {   // each edge constitutes a relationship
             addEdgeQuery = 
             [
                 'MATCH (src:' + srcEntityType + '), ' + '(dst:' + dstEntityType + ')',
-                'WHERE src.' + srcEntityScheme['id'] + ' = ' + '\'' + relationship['src'] + '\' ' + 
-                'AND dst.' + dstEntityScheme['id'] + ' = ' + '\'' + relationship['dst'] + '\'',
+                'WHERE src.' + srcEntityScheme['id'] + ' = ' + '\'' + edge['src'] + '\' ' + 
+                'AND dst.' + dstEntityScheme['id'] + ' = ' + '\'' + edge['dst'] + '\'',
                 'CREATE (src)-[:' + relationshipType + ']->(dst)'
             ].join('\n');
 
-            if (relationships.indexOf(relationship) != relationships.length - 1) {
+            if (edges.indexOf(edge) != edges.length - 1) {
                 addEdgeQuery += '\nUNION\n';
             }
             finalQuery += addEdgeQuery;
@@ -728,7 +728,7 @@ function addEntityRelationship(req, res, next) {
         
         try {
             const result = await executeCypherQuery(session, finalQuery, {}, 'WRITE');
-            const response = validateRelationShipsCreated(result, Object.keys(relationships).length);
+            const response = validateRelationShipsCreated(result, Object.keys(edges).length);
             writeResponse(res, response);
         } catch (error) {
             session.close();
@@ -749,5 +749,5 @@ module.exports = {
     getAllEntitiesByType: getAllEntitiesByType,
     searchForEntity: searchForEntity,
     setEntityProperties: setEntityProperties,
-    addEntityRelationship: addEntityRelationship
+    addEntityRelationship: addEntityRelationships
 }
