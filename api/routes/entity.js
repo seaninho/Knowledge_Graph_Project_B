@@ -145,7 +145,7 @@ async function _verifyEntityExists(session, entityType, entityIdField, entityIdV
  * @param {*} entityScheme entity's scheme to validate against
  * @throws {*} 
  */
-function _validateRequestBodyProperties(reqBody, entityScheme) {
+function _validateEntityProperties(reqBody, entityScheme) {
     const properties = reqBody['properties'];
     for (const [property, _value] of Object.entries(properties)) {
         if (property != entityScheme['name'] && 
@@ -180,7 +180,7 @@ async function _validatePropertiesObject(req, res, reqBody) {
         throw new EntityIdNotFound(entityType, entityId);
     }    
 
-    _validateRequestBodyProperties(reqBody, entityScheme);
+    _validateEntityProperties(reqBody, entityScheme);
 }
 
 /**
@@ -377,7 +377,7 @@ async function _validateEntityObject(req, res, reqBody) {
     }
 
     const entityScheme = getScheme(req, res, false);
-    _validateRequestBodyProperties(reqBody, entityScheme);
+    _validateEntityProperties(reqBody, entityScheme);
 
     const relationships = reqBody['relationships'];
     for (const [_, relationshipData] of Object.entries(relationships)) {
