@@ -411,7 +411,7 @@ async function _validateRequestBody(req) {
  * @param {*} newEntityTuple new entity type + id
  * @returns Cypher query
  */
-function _buildCreateRelationshipsQuery(relationshipData, newEntityTuple = null) {
+function _buildRelationshipsCreationQuery(relationshipData, newEntityTuple = null) {
     const relationshipType = _getRelationshipType(relationshipData['edgeName']);
     const srcEntityType = _getEntityType(relationshipData['src']);
     const dstEntityType = _getEntityType(relationshipData['dst']);    
@@ -743,7 +743,7 @@ function addEntityRelationships(req, res, next) {
     .then(async () => {
         const session = getSession(req);
         const reqBody = req.body;
-        const query = _buildCreateRelationshipsQuery(reqBody);
+        const query = _buildRelationshipsCreationQuery(reqBody);
         
         try {
             const result = await executeCypherQuery(session, query, {}, 'WRITE');
