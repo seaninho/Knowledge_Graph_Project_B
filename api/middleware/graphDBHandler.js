@@ -108,6 +108,27 @@ function validateRelationShipsCreated(result, possibleRelationshipsCreated) {
 }
 
 /**
+ * validate entity was successfully created
+ * @param {*} result neo4j result object
+ * @param {*} possiblePropertiesSet number of properties to be set
+ * @returns Notifing the client of success in creating the desired entity. 
+ * Otherwise, throws an exception notifing of failure.
+ */
+function validateEntityCreated(result, possiblePropertiesSet) {
+    const actualEntitiesCreated = result.summary['counters']['_stats']['nodesCreated'];    
+    if (actualEntitiesCreated == 1) {  // creating one entity at a time
+        validatePropertiesSet(result, possiblePropertiesSet);
+        return { 
+            status: 'ok', 
+            message: 'Entity was successfully created!' 
+        };
+    } 
+    else {
+        throw new GeneralError('Failed to create entity!');
+    }
+}
+
+/**
  * get all nodes stored in records by field key
  * @param {*} records neo4j result records
  * @param {*} fieldKey lookup key
@@ -235,6 +256,7 @@ module.exports = {
     executeCypherQuery: executeCypherQuery,
     validatePropertiesSet: validatePropertiesSet,
     validateRelationShipsCreated: validateRelationShipsCreated,
+    validateEntityCreated: validateEntityCreated,
     validateDatabaseGetByIdResponse: validateDatabaseGetByIdResponse,
     getAllNodesByFieldKey: getAllNodesByFieldKey,
     importDataFromCsv: importDataFromCsv,

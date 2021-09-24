@@ -15,6 +15,7 @@ const executeCypherQuery = databaseHandler.executeCypherQuery;
 const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 const validatePropertiesSet = databaseHandler.validatePropertiesSet;
 const validateRelationShipsCreated = databaseHandler.validateRelationShipsCreated;
+const validateEntityCreated = databaseHandler.validateEntityCreated;
 const responseHandler = require('../helpers/response');
 const writeResponse = responseHandler.writeResponse;
 const { GeneralError, BadRequest, EntityTypeNotFound, EntityIdNotFound, 
@@ -800,18 +801,25 @@ async function addEntity(req, res, next) {
 
         const entityId = await _getMaxIdForEntityType(session, entityType, entityScheme['id']) + 1;
         const createEntityQuery = _buildEntityCreationQuery(entityScheme, entityId, reqBody);
-        var queryArray = [];
+        var queryObject = {};
         const relationships = reqBody['relationships']; 
-        for (const [_, relationshipData] of Object.entries(relationships)) {
-            queryArray.push(_buildRelationshipsCreationQuery(relationshipData, [entityType, entityId]));
+        for (let [relationshipName, relationshipData] of Object.entries(relationships)) {
+            queryObject[relationshipName] = 
+                _buildRelationshipsCreationQuery(relationshipData, [entityType, entityId]);
         }
 
         try {
-            await executeCypherQuery(session, createEntityQuery, {}, 'WRITE');
-            for (let query of queryArray) {                
-                await executeCypherQuery(session, query, {}, 'WRITE');
+            const createEntityResult = await executeCypherQuery(session, createEntityQuery, {}, 'WRITE');
+            const propertiesToSet = Object.keys(reqBody['properties']).length + 1; // id property isn't part of the request
+            var response = validateEntityCreated(createEntityResult, propertiesToSet); 
+            
+            var createRelationshipResult, relationshipsToCreate;
+            for (let [relationship, query] of Object.entries(queryObject)) {                
+                createRelationshipResult = await executeCypherQuery(session, query, {}, 'WRITE');
+                relationshipsToCreate = relationships[relationship]['edges'].length;
+                validateRelationShipsCreated(createRelationshipResult, relationshipsToCreate);
             }            
-            return writeResponse(res, 'Entity added successfully!'); // action validation to follow
+            return writeResponse(res, response);
         } catch (error) {
             session.close();
             throw error;
