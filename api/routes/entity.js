@@ -406,6 +406,27 @@ async function _validateRequestBody(req) {
 }
 
 /**
+ * build Cypher query for creating a new entity based on entity scheme 
+ * @param {*} entityScheme new entity's scheme
+ * @param {*} entityId new entity's id
+ * @param {*} reqBody request body
+ * @returns 
+ */
+function _buildEntityCreationQuery(entityScheme, entityId, reqBody) {
+    const entityType = entityScheme['entity'];
+    const entity = entityType.toLowerCase();        
+    var query = 'CREATE (' + entity + ':' + entityType + 
+        ' {' + entityScheme['id'] + ': \'' + entityId + '\'';
+    
+    const properties = reqBody['properties'];    
+    for (const [property, value] of Object.entries(properties)) {
+        query += ', ' + property + ': ' + '\'' + value + '\'';
+    }
+    query += '})';
+    return query;        
+}
+
+/**
  * build Cypher query for creating all relationships as described in relationshipData object
  * @param {*} relationshipData all src-dst relationships
  * @param {*} newEntityTuple new entity type + id
@@ -759,6 +780,48 @@ function addEntityRelationships(req, res, next) {
     });
 }
 
+/**
+ * add entity according to request
+ * @param {*} req client's request (containing entity's type)
+ * @param {*} res server's response
+ * @param {*} next next function to execute
+ * @returns if successful, 
+ * a message notifing the client of successfully adding desired entity.
+ * if not, throws an exception notifing the client of failure.
+ */
+async function addEntity(req, res, next) {
+    _validateRequestBody(req, res)
+    .then(async () => {
+        const session = getSession(req);
+        const reqBody = req.body;        
+        const entity = req.params.entity.toLowerCase();        
+        const entityType = _getEntityType(entity);
+        const entityScheme = getEntityScheme(entity);
+
+        const entityId = await _getMaxIdForEntityType(session, entityType, entityScheme['id']) + 1;
+        const createEntityQuery = _buildEntityCreationQuery(entityScheme, entityId, reqBody);
+        var queryArray = [];
+        const relationships = reqBody['relationships']; 
+        for (const [_, relationshipData] of Object.entries(relationships)) {
+            queryArray.push(_buildRelationshipsCreationQuery(relationshipData, [entityType, entityId]));
+        }
+
+        try {
+            await executeCypherQuery(session, createEntityQuery, {}, 'WRITE');
+            for (let query of queryArray) {                
+                await executeCypherQuery(session, query, {}, 'WRITE');
+            }            
+            return writeResponse(res, 'Entity added successfully!'); // action validation to follow
+        } catch (error) {
+            session.close();
+            throw error;
+        }
+    })
+    .catch(error => {
+        next(error);
+    }); 
+}
+
 
 module.exports = {
     getAllEntityTypes: getAllEntityTypes,
@@ -768,5 +831,6 @@ module.exports = {
     getAllEntitiesByType: getAllEntitiesByType,
     searchForEntity: searchForEntity,
     setEntityProperties: setEntityProperties,
-    addEntityRelationship: addEntityRelationships
+    addEntityRelationship: addEntityRelationships,
+    addEntity: addEntity
 }

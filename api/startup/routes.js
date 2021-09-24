@@ -16,6 +16,7 @@ function route(app) {
     // PUT REQUEST
     app.put("/entity/:entity/:id", entity.setEntityProperties);
     // POST REQUEST
+    app.post("/entity/:entity", entity.addEntity);
     app.post("/entity/:entity/:id", entity.addEntityRelationship);
 }
 
