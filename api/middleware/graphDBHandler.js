@@ -70,13 +70,13 @@ function validateDatabaseGetByIdResponse(response) {
 /**
  * validate all provided properties were successfully set
  * @param {*} result neo4j result object
- * @param {*} possibleProprtiesSet number of properties to be set
+ * @param {*} possiblePropertiesSet number of properties to be set
  * @returns Notifing the client of success in setting the desired properties. 
  * Otherwise, throws an exception notifing of failure.
  */
-function validatePropertiesSet(result, possibleProprtiesSet) {
+function validatePropertiesSet(result, possiblePropertiesSet) {
     const actualPropertiesSet = result.summary['counters']['_stats']['propertiesSet'];
-    if (actualPropertiesSet == possibleProprtiesSet) {
+    if (actualPropertiesSet == possiblePropertiesSet) {
         return { 
             status: 'ok', 
             message: 'Properties were successfully set!' 
@@ -103,7 +103,7 @@ function validateRelationShipsCreated(result, possibleRelationshipsCreated) {
         };
     } 
     else {
-        throw new GeneralError('Falied to create relationships!');
+        throw new GeneralError('Failed to create relationships!');
     }
 }
 
