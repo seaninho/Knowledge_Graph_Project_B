@@ -408,24 +408,36 @@ async function _validateRequestBody(req) {
 /**
  * build Cypher query for creating all relationships as described in relationshipData object
  * @param {*} relationshipData all src-dst relationships
+ * @param {*} newEntityTuple new entity type + id
  * @returns Cypher query
  */
-function _buildCreateRelationshipsQuery(relationshipData) {
+function _buildCreateRelationshipsQuery(relationshipData, newEntityTuple = null) {
     const relationshipType = _getRelationshipType(relationshipData['edgeName']);
     const srcEntityType = _getEntityType(relationshipData['src']);
     const dstEntityType = _getEntityType(relationshipData['dst']);    
     const srcEntityScheme = getEntityScheme(srcEntityType);
     const dstEntityScheme = getEntityScheme(dstEntityType);
     
+    const [newEntityType, newEntityId] = newEntityTuple !== null ? 
+        newEntityTuple : [null, null];
+    const createdEntityIsSource = 
+        ((newEntityTuple !== null) && (newEntityType == srcEntityType)) ? true : false;
+
+    var srcEntityId, dstEntityId, addEdgeQuery;
     var query = [];
-    var addEdgeQuery;
+    
     const edges = relationshipData['edges'];
     edges.forEach((edge) => {   // each edge constitutes a relationship
+        srcEntityId = newEntityTuple === null ? 
+            edge['src'] : createdEntityIsSource ? newEntityId : edge['src'];
+        dstEntityId = newEntityTuple === null ? 
+            edge['dst'] : createdEntityIsSource ? edge['dst'] : newEntityId;
+
         addEdgeQuery = 
         [
             'MATCH (src:' + srcEntityType + '), ' + '(dst:' + dstEntityType + ')',
-            'WHERE src.' + srcEntityScheme['id'] + ' = ' + '\'' + edge['src'] + '\' ' + 
-            'AND dst.' + dstEntityScheme['id'] + ' = ' + '\'' + edge['dst'] + '\'',
+            'WHERE src.' + srcEntityScheme['id'] + ' = ' + '\'' + srcEntityId + '\' ' + 
+            'AND dst.' + dstEntityScheme['id'] + ' = ' + '\'' + dstEntityId + '\'',
             'CREATE (src)-[:' + relationshipType + ']->(dst)'
         ].join('\n');
 
