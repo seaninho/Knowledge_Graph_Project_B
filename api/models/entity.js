@@ -1,13 +1,13 @@
 const _ = require('lodash');
 
-const Article = require('./article');
-const Faculty = require('./faculty');
-const Lab = require('./lab');
-const Research = require('./research');
-const ResearchArea = require('./researchArea');
-const Researcher = require('./researcher');
-const ResearchSetup = require('./researchSetup');
-const Product = require('./product');
+const Article = require('./entity/article');
+const Faculty = require('./entity/faculty');
+const Lab = require('./entity/lab');
+const Research = require('./entity/research');
+const ResearchArea = require('./entity/researchArea');
+const Researcher = require('./entity/researcher');
+const ResearchSetup = require('./entity/researchSetup');
+const Product = require('./entity/product');
 
 const databaseHandler = require('../middleware/graphDBHandler');
 const getSession = databaseHandler.getSession;

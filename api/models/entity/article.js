@@ -1,11 +1,11 @@
 const _ = require('lodash');
 
-const databaseHandler = require('../middleware/graphDBHandler');
+const databaseHandler = require('../../middleware/graphDBHandler');
 const executeQuery = databaseHandler.executeCypherQuery;
 const validateResponse = databaseHandler.validateDatabaseGetByIdResponse;
 const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 
-const { EntityIdNotFound } = require("../utils/errors");
+const { EntityIdNotFound } = require("../../utils/errors");
 
 function _getArticlePageInfo(records) {
     if (records.length > 0) {
