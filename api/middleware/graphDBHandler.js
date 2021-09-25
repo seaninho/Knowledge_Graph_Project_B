@@ -247,7 +247,13 @@ function importDataFromCsv(req, res, next) {
         savedBookmarks.push(session.lastBookmark())
     })
     .then(() => session.close())
-    .then(response => writeResponse(res, response))
+    .then(() => {
+        const response = {
+            status: 'ok',
+            message: 'Database Imported Successfully!'
+        };
+        writeResponse(res, response);
+    })
     .catch(error => {
         session.close();
         next(error);
@@ -272,7 +278,13 @@ function exportDataToCsv(req, res, next) {
         savedBookmarks.push(session.lastBookmark())
     })
     .then(() => session.close())
-    .then(response => writeResponse(res, response))
+    .then(() => {
+        const response = {
+            status: 'ok',
+            message: 'Database Exported Successfully!'
+        };
+        writeResponse(res, response);
+    })
     .catch(error => {
         session.close();
         next(error);
