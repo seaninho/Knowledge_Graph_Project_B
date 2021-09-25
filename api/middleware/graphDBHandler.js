@@ -10,6 +10,7 @@ const importer = require('../helpers/graphDBImporter');
 const exporter = require('../helpers/graphDBExporter');
 const enforcer = require('../helpers/graphDBEnforcer');
 const responseHandler = require('../helpers/response');
+const writeResponse = responseHandler.writeResponse;
 const { GeneralError, BadRequest, NotFound } = require('../utils/errors');
 
 const driver = neo4j.driver(uri, neo4j.auth.basic(user, password), {
@@ -151,7 +152,7 @@ function getAllEntityTypes(req, res, next) {
     })
     .then(entityTypesFound => {        
         const response = { 'entityType': entityTypesFound };
-        responseHandler.writeResponse(res, response);
+        writeResponse(res, response);
     })
     .catch(error => {
         session.close();
@@ -185,7 +186,7 @@ function getAllRelationshipTypes(req, res, next) {
     })
     .then(relationshipTypesFound => {        
         const response = { 'relationshipType': relationshipTypesFound };
-        responseHandler.writeResponse(res, response);
+        writeResponse(res, response);
     })
     .catch(error => {
         session.close();
@@ -246,7 +247,7 @@ function importDataFromCsv(req, res, next) {
         savedBookmarks.push(session.lastBookmark())
     })
     .then(() => session.close())
-    .then(response => responseHandler.writeResponse(res, response))
+    .then(response => writeResponse(res, response))
     .catch(error => {
         session.close();
         next(error);
@@ -271,7 +272,7 @@ function exportDataToCsv(req, res, next) {
         savedBookmarks.push(session.lastBookmark())
     })
     .then(() => session.close())
-    .then(response => responseHandler.writeResponse(res, response))
+    .then(response => writeResponse(res, response))
     .catch(error => {
         session.close();
         next(error);
@@ -306,7 +307,7 @@ async function deleteDatabase(req, res, next) {
             status: 'ok',
             message: 'Database Deleted Successfully!'
         };
-        responseHandler.writeResponse(res, response);
+        writeResponse(res, response);
     })       
     .catch(error => {
         session.close();
