@@ -129,6 +129,71 @@ function validateEntityCreated(result, possiblePropertiesSet) {
 }
 
 /**
+ * get all entity types existing in database
+ * @param {*} req client's request
+ * @param {*} res server's response
+ * @returns all existing entity types
+ */
+function getAllEntityTypes(req, res, next) {
+    const session = getSession(req);
+    const query = 'call db.labels()';
+    const params = {};
+
+    return executeCypherQuery(session, query, params)
+    .then(result => {        
+        if (!_.isEmpty(result.records) ) {
+            var nodeLabels = [];
+            result.records.forEach((record) => {
+                nodeLabels.push(record._fields[0]);
+            }) 
+            return nodeLabels;
+        }
+    })
+    .then(entityTypesFound => {        
+        const response = { 'entityType': entityTypesFound };
+        responseHandler.writeResponse(res, response);
+    })
+    .catch(error => {
+        session.close();
+        next(error);
+    });
+}
+
+/**
+ * get all relationship types existing in database
+ * @param {*} req client's request
+ * @param {*} res server's response
+ * @returns all existing relationship types
+ */
+function getAllRelationshipTypes(req, res, next) {
+    const session = getSession(req);
+    const query = [
+        'MATCH (a)-[r]->(b)', 
+        'RETURN DISTINCT TYPE(r)'
+    ].join('\n');
+    const params = {};
+
+    return executeCypherQuery(session, query, params)
+    .then(result => {        
+        if (!_.isEmpty(result.records) ) {
+            var relationshipTypes = [];
+            result.records.forEach((record) => {
+                relationshipTypes.push(record._fields[0]);
+            }) 
+            return relationshipTypes;
+        }
+    })
+    .then(relationshipTypesFound => {        
+        const response = { 'relationshipType': relationshipTypesFound };
+        responseHandler.writeResponse(res, response);
+    })
+    .catch(error => {
+        session.close();
+        next(error);
+    });
+}
+
+/**
  * get all nodes stored in records by field key
  * @param {*} records neo4j result records
  * @param {*} fieldKey lookup key
@@ -258,6 +323,8 @@ module.exports = {
     validateRelationShipsCreated: validateRelationShipsCreated,
     validateEntityCreated: validateEntityCreated,
     validateDatabaseGetByIdResponse: validateDatabaseGetByIdResponse,
+    getAllEntityTypes: getAllEntityTypes,
+    getAllRelationshipTypes: getAllRelationshipTypes,
     getAllNodesByFieldKey: getAllNodesByFieldKey,
     importDataFromCsv: importDataFromCsv,
     exportDataToCsv: exportDataToCsv, 

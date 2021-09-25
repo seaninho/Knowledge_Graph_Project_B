@@ -473,83 +473,6 @@ function _buildRelationshipsCreationQuery(relationshipData, newEntityTuple = nul
 }
 
 /**
- * get all relationship types existing in database
- * @param {*} req client's request
- * @param {*} res server's response
- * @returns all existing relationship types
- */
-function getAllRelationshipTypes(req, res, next) {
-    const session = getSession(req);
-    const query = [
-        'MATCH (a)-[r]->(b)', 
-        'RETURN DISTINCT TYPE(r)'
-    ].join('\n');
-    const params = {};
-
-    return executeCypherQuery(session, query, params)
-    .then(result => {        
-        if (!_.isEmpty(result.records) ) {
-            var relationshipTypes = [];
-            result.records.forEach((record) => {
-                relationshipTypes.push(record._fields[0]);
-            }) 
-            return relationshipTypes;
-        }
-    })
-    .then(relationshipTypesFound => {
-        relationshipTypesFound.forEach((type) => {
-            if (!relationshipTypes.includes(type)) {
-                throw new GeneralError('Database does not match model. ' +
-                'relationship type: ' + type + ' found in database but not in model!');
-            }
-        })
-        const response = { 'relationshipType': relationshipTypesFound };
-        writeResponse(res, response);
-    })
-    .catch(error => {
-        session.close();
-        next(error);
-    });
-}
-
-/**
- * get all entity types existing in database
- * @param {*} req client's request
- * @param {*} res server's response
- * @returns all existing entity types
- */
-function getAllEntityTypes(req, res, next) {
-    const session = getSession(req);
-    const query = 'call db.labels()';
-    const params = {};
-
-    return executeCypherQuery(session, query, params)
-    .then(result => {        
-        if (!_.isEmpty(result.records) ) {
-            var nodeLabels = [];
-            result.records.forEach((record) => {
-                nodeLabels.push(record._fields[0]);
-            }) 
-            return nodeLabels;
-        }
-    })
-    .then(entityTypesFound => {
-        entityTypesFound.forEach((type) => {
-            if (!entityTypes.includes(type)) {
-                throw new GeneralError('Database does not match model. ' +
-                'entity type: ' + type + ' found in database but not in model!');
-            }
-        })
-        const response = { 'entityType': entityTypesFound };
-        writeResponse(res, response);
-    })
-    .catch(error => {
-        session.close();
-        next(error);
-    });
-}
-
-/**
  * get entity scheme by entity type
  * @param {*} entity requested entity for which to get scheme
  * @param {*} res server's response. if null, no need to respond.
@@ -832,8 +755,6 @@ async function addEntity(req, res, next) {
 
 
 module.exports = {
-    getAllEntityTypes: getAllEntityTypes,
-    getAllRelationshipTypes: getAllRelationshipTypes,
     getEntityScheme: getEntityScheme,
     getEntityById: getEntityById,
     getAllEntitiesByType: getAllEntitiesByType,

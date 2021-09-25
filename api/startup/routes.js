@@ -7,10 +7,10 @@ function route(app) {
     app.get("/database/import", dbHandler.importDataFromCsv);
     app.get("/database/export", dbHandler.exportDataToCsv);
     app.get("/database/delete", dbHandler.deleteDatabase);
-    app.get("/entity/types", entity.getAllEntityTypes);
+    app.get("/entity/types", dbHandler.getAllEntityTypes);
     app.get("/entity/:entity", entity.getAllEntitiesByType);
     app.get("/entity/:entity/:id", entity.getEntityById); 
-    app.get("/relationship/types", entity.getAllRelationshipTypes);
+    app.get("/relationship/types", dbHandler.getAllRelationshipTypes);
     app.get("/scheme/:entity", entity.getEntityScheme);
     app.get("/search/:entity", entity.searchForEntity);
     // PUT REQUEST
