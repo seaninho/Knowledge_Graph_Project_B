@@ -1,5 +1,5 @@
 const dbHandler = require('../middleware/graphDBHandler');
-const entity = require('../routes/entity');
+const entity = require('../models/entity');
 
 
 function route(app) {
