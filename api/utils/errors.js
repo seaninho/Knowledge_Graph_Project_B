@@ -18,8 +18,14 @@ class GeneralError extends Error {
     }
 }
 
-class BadRequest extends GeneralError { }
-class NotFound extends GeneralError { }
+class BadRequest extends GeneralError {}
+class NotFound extends GeneralError {}
+
+class DatabaseActionError extends GeneralError {
+    constructor(action, error) {
+        super('Database ' + action + ' Failure. ' + error);
+    }
+}
 
 class EntityTypeNotFound extends NotFound { 
     constructor(entityType) {
@@ -56,6 +62,7 @@ module.exports = {
     GeneralError,
     BadRequest,
     NotFound,
+    DatabaseActionError,
     EntityTypeNotFound,
     EntityIdNotFound,
     EntityHasNoSuchRelationship,

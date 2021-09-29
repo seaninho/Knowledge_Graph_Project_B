@@ -11,7 +11,7 @@ const exporter = require('../helpers/graphDBExporter');
 const enforcer = require('../helpers/graphDBEnforcer');
 const responseHandler = require('../helpers/response');
 const writeResponse = responseHandler.writeResponse;
-const { GeneralError, BadRequest, NotFound } = require('../utils/errors');
+const { GeneralError, BadRequest, NotFound, DatabaseActionError } = require('../utils/errors');
 
 const driver = neo4j.driver(uri, neo4j.auth.basic(user, password), {
     maxConnectionLifetime: 3 * 60 * 60 * 1000, // 3 hours
@@ -254,9 +254,9 @@ function importDataFromCsv(req, res, next) {
         };
         writeResponse(res, response);
     })
-    .catch(error => {
+    .catch(error => {        
         session.close();
-        next(error);
+        next(new DatabaseActionError('Import', error));
     });
 
   Promise.all([txRes]);
@@ -287,7 +287,7 @@ function exportDataToCsv(req, res, next) {
     })
     .catch(error => {
         session.close();
-        next(error);
+        next(new DatabaseActionError('Export', error));
     });
 
     Promise.all([txRes]);
@@ -323,7 +323,7 @@ async function deleteDatabase(req, res, next) {
     })       
     .catch(error => {
         session.close();
-        next(error);
+        next(new DatabaseActionError('Delete', error));
     });
 
     Promise.all([txRes]);
