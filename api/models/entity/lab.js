@@ -65,6 +65,7 @@ function getLabById(session, labId, next) {
     'OPTIONAL MATCH (researchArea:ResearchArea)<-[:RESEARCHES]-(r:Researcher)-[:ACTIVE_AT]->(lab)',
     'WITH DISTINCT lab,',
     'researcher, product, faculty, researchArea',
+    'ORDER BY product.isActiveProduct DESC',
     'RETURN COLLECT(DISTINCT lab) AS lab,',
     'COLLECT(DISTINCT faculty)[0..20] AS faculty,',
     'COLLECT(DISTINCT researcher)[0..20] AS researchers,',

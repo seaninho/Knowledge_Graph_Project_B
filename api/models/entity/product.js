@@ -79,6 +79,7 @@ function getProductById(session, productId, next) {
     'WITH DISTINCT product,',
     'lab, researchSetup, research, owner, researcher, researchArea, ',
     'otherProduct, labCommonProduct, raCommonProduct',
+    'ORDER BY product.isActiveProduct DESC',
     'RETURN COLLECT(DISTINCT product) AS product,',
     'COLLECT(DISTINCT lab)[0..20] AS labs,',
     'COLLECT(DISTINCT researchSetup)[0..20] AS researchSetups,',

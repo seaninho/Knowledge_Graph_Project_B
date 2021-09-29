@@ -60,6 +60,7 @@ function getResearchAreaById(session, researchAreaId, next) {
     'OPTIONAL MATCH (lab:Lab)<-[:ACTIVE_AT]-(rr:Researcher)-[:RESEARCHES]->(researchArea)',
     'WITH DISTINCT researchArea,',
     'research, researcher, product, lab',
+    'ORDER BY product.isActiveProduct DESC',
     'RETURN COLLECT(DISTINCT researchArea) AS researchArea,',
     'COLLECT(DISTINCT research)[0..20] AS researches,',
     'COLLECT(DISTINCT researcher)[0..20] AS researchers,',

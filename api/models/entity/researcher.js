@@ -75,6 +75,7 @@ function getResearcherById(session, researcherId, next) {
     'OPTIONAL MATCH (sharedProduct:Product)<-[:USING {isOwner: "false"}]-(researcher)',     
     'WITH DISTINCT researcher,',
     'lab, researchArea, research, article, purchasedProduct, sharedProduct',
+    'ORDER BY purchasedProduct.isActiveProduct, sharedProduct.isActiveProduct DESC',
     'RETURN COLLECT(DISTINCT researcher) AS researcher,',
     'COLLECT(DISTINCT lab)[0..20] AS labs,',
     'COLLECT(DISTINCT researchArea)[0..20] AS researchAreas,',

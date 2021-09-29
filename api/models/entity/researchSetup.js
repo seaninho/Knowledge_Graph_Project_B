@@ -51,6 +51,7 @@ function getResearchSetupById(session, researchSetupId, next) {
     'OPTIONAL MATCH (research:Research)<-[:USED_IN]-(researchSetup)',
     'WITH DISTINCT researchSetup,',
     'product, research',
+    'ORDER BY product.isActiveProduct DESC',
     'RETURN COLLECT(DISTINCT researchSetup) AS researchSetup,',
     'COLLECT(DISTINCT product)[0..20] AS products,',
     'COLLECT(DISTINCT research)[0..20] AS researches',
