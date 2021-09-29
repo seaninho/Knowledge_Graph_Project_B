@@ -147,9 +147,13 @@ async function _verifyEntityExists(session, entityIdProfile) {
  */
 function _validateEntityProperties(reqBody, entityScheme) {
     const properties = reqBody['properties'];
+    var specialProperties = [entityScheme['name']];
+    if ('activeField' in entityScheme) {  // checking if entity's scheme has an "active" property
+        specialProperties.push(entityScheme['activeField']);
+    }
+        
     for (const [property, _value] of Object.entries(properties)) {
-        if (property != entityScheme['name'] && 
-            !entityScheme['property'].includes(property)) {
+        if (!(specialProperties.includes(property) || entityScheme['property'].includes(property))) {
             throw new BadRequest('Unknown request property in request body \'properties\': \'' + property +'\''); 
         }
     }
