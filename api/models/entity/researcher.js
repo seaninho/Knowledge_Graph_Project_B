@@ -46,7 +46,13 @@ function getScheme() {
             {
                 'src': 'Researcher',
                 'dst': 'Lab',
-                'edgeName': 'ACTIVE_AT'
+                'edgeName': 'ACTIVE_AT',
+                'listOfEntities': [
+                    {
+                        'listName': 'onResearchAreas',
+                        'entity': 'ResearchArea'
+                    }
+                ]
             },
             {
                 'src': 'Researcher',
