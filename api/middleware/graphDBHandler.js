@@ -255,7 +255,7 @@ function importDataFromCsv(req, res, next) {
         writeResponse(res, response);
     })
     .catch(error => {        
-        session.close();
+        deleteDatabase(req, res, next, false);
         next(new DatabaseActionError('Import', error));
     });
 
@@ -298,10 +298,11 @@ function exportDataToCsv(req, res, next) {
  * @param {*} req client's request
  * @param {*} res server's response
  * @param {*} next next function to execute
+ * @param {*} writeRes write result iff true
  * @returns Notifing the client of success in deleting the database. 
  * Otherwise, throws an exception notifing of failure.
  */
-async function deleteDatabase(req, res, next) {
+async function deleteDatabase(req, res, next, writeRes = true) {
     const savedBookmarks = [];
     const session = getSession(req);
     const txRes = session.writeTransaction(tx => tx.run('MATCH (n) DETACH DELETE n'))       // Clear Database
@@ -315,11 +316,13 @@ async function deleteDatabase(req, res, next) {
     .then(() => { savedBookmarks.push(session.lastBookmark()) })
     .then(() => session.close())
     .then(() => {
-        const response = {
-            status: 'ok',
-            message: 'Database Deleted Successfully!'
-        };
-        writeResponse(res, response);
+        if (writeRes == true) {
+            const response = {
+                status: 'ok',
+                message: 'Database Deleted Successfully!'
+            };
+            writeResponse(res, response);
+        }
     })       
     .catch(error => {
         session.close();
