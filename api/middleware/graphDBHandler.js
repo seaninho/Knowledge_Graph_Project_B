@@ -239,9 +239,7 @@ function getAllNodesByFieldKey(records, fieldKey, resultIsSingleNode = false) {
 function importDataFromCsv(req, res, next) {  
     const savedBookmarks = [];
     const session = getSession(req);
-    const txRes = importer.importEntitiesData(session)
-    .then(() => importer.importRelationshipData(session))
-    .then(() => importer.importSpecialPropertyData(session))
+    const txRes = importer.importGraphDatabase(session)
     .then(() => enforcer.createGraphConstraints(session))
     .then(() => {
         savedBookmarks.push(session.lastBookmark())

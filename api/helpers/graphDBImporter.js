@@ -144,7 +144,7 @@ function _importSpecialPropertyOnResearchAreas(tx) {
 /// Import Functions ///
 ////////////////////////
 
-function importEntitiesData(session) {
+function _importEntitiesData(session) {
   return session.writeTransaction(tx => _importEntityLabs(tx))
     .then(() => session.writeTransaction(tx => _importEntityResearchers(tx)))
     .then(() => session.writeTransaction(tx => _importEntityResearchAreas(tx)))
@@ -155,7 +155,7 @@ function importEntitiesData(session) {
     .then(() => session.writeTransaction(tx => _importEntityArticles(tx)))
 }
 
-function importRelationshipData(session) {
+function _importRelationshipData(session) {
   return session.writeTransaction(tx => _importRelationshipWasResearchedAt(tx))
     .then(() => session.writeTransaction(tx => _importRelationshipUsedAt(tx)))
     .then(() => session.writeTransaction(tx => _importRelationshipResearches(tx)))
@@ -169,12 +169,16 @@ function importRelationshipData(session) {
     .then(() => session.writeTransaction(tx => _importRelationshipComposedOf(tx)))
 }
 
-function importSpecialPropertyData(session) {
+function _importSpecialPropertyData(session) {
   return session.writeTransaction(tx => _importSpecialPropertyOnResearchAreas(tx))
 }
 
+function importGraphDatabase(session) {
+  return _importEntitiesData(session)
+    .then(() => _importRelationshipData(session))
+    .then(() => _importSpecialPropertyData(session))
+}
+
 module.exports = {
-    importEntitiesData: importEntitiesData,
-    importRelationshipData: importRelationshipData,
-    importSpecialPropertyData: importSpecialPropertyData
+    importGraphDatabase: importGraphDatabase
 }
