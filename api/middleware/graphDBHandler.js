@@ -237,13 +237,9 @@ function getAllNodesByFieldKey(records, fieldKey, resultIsSingleNode = false) {
  * @param {*} next next function to execute
  */
 function importDataFromCsv(req, res, next) {  
-    const savedBookmarks = [];
     const session = getSession(req);
-    const txRes = importer.importGraphDatabase(session)
+    importer.importGraphDatabase(session)
     .then(() => enforcer.createGraphConstraints(session))
-    .then(() => {
-        savedBookmarks.push(session.lastBookmark())
-    })
     .then(() => session.close())
     .then(() => {
         const response = {
@@ -256,8 +252,6 @@ function importDataFromCsv(req, res, next) {
         deleteDatabase(req, res, next, false);
         next(new DatabaseActionError('Import', error));
     });
-
-  Promise.all([txRes]);
 }
 
 /**
@@ -293,12 +287,8 @@ function _getNeo4jDBMSFolder(session) {
  * @param {*} next next function to execute
  */
 function exportDataToCsv(req, res, next) {  
-    const savedBookmarks = [];
     const session = getSession(req);
     const txRes = exporter.exportGraphDatabase(session)
-    .then(() => {
-        savedBookmarks.push(session.lastBookmark())
-    })
     .then(() => session.close())
     .then(() => {
         const response = {
@@ -311,8 +301,6 @@ function exportDataToCsv(req, res, next) {
         session.close();
         next(new DatabaseActionError('Export', error));
     });
-
-    Promise.all([txRes]);
 }
 
 /**
@@ -325,17 +313,15 @@ function exportDataToCsv(req, res, next) {
  * Otherwise, throws an exception notifing of failure.
  */
 async function deleteDatabase(req, res, next, writeRes = true) {
-    const savedBookmarks = [];
     const session = getSession(req);
-    const txRes = session.writeTransaction(tx => tx.run('MATCH (n) DETACH DELETE n'))       // Clear Database
+    session.writeTransaction(tx => tx.run('MATCH (n) DETACH DELETE n'))       // Clear Database
     .then(() => session.writeTransaction(tx => tx.run('CALL apoc.schema.assert({}, {})')))  // Clear Constraints
     .then(() => session.readTransaction(tx => tx.run('MATCH (n) RETURN n')))
     .then(result => {
-    if (!_.isEmpty(result.records)) {
-        throw new GeneralError('Database Was Not Deleted Properly!');
-    }
+        if (!_.isEmpty(result.records)) {
+            throw new GeneralError('Database Was Not Deleted Properly!');
+        }
     })
-    .then(() => { savedBookmarks.push(session.lastBookmark()) })
     .then(() => session.close())
     .then(() => {
         if (writeRes == true) {
@@ -350,8 +336,6 @@ async function deleteDatabase(req, res, next, writeRes = true) {
         session.close();
         next(new DatabaseActionError('Delete', error));
     });
-
-    Promise.all([txRes]);
 };
 
 module.exports = {
