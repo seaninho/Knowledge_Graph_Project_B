@@ -263,6 +263,32 @@ function importDataFromCsv(req, res, next) {
 }
 
 /**
+ * get full path for the neo4j home folder
+ * @param {*} session neo4j session
+ * @returns neo4j home folder full path
+ */
+function _getNeo4jDBMSFolder(session) {
+    const query = [
+        'Call dbms.listConfig() YIELD name, value',
+        'WHERE name=\'dbms.directories.neo4j_home\'',
+        'RETURN value'
+    ].join('\n');
+    const params = {};
+
+    return executeCypherQuery(session, query, params)
+    .then(result => {  
+        if (!_.isEmpty(result.records) ) {
+            var folderPath = result.records[0].get('value');
+            return folderPath;
+        }
+    })
+    .catch(error => {
+        session.close();
+        next(error);
+    });
+}
+
+/**
  * export data to csv files
  * @param {*} req client's request
  * @param {*} res server's response
