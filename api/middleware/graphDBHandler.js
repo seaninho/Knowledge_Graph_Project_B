@@ -295,7 +295,7 @@ function _getNeo4jDBMSFolder(session) {
 function exportDataToCsv(req, res, next) {  
     const savedBookmarks = [];
     const session = getSession(req);
-    const txRes = exporter.exportDatabase(session)
+    const txRes = exporter.exportGraphDatabase(session)
     .then(() => {
         savedBookmarks.push(session.lastBookmark())
     })

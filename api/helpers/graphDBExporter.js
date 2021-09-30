@@ -211,7 +211,7 @@ function _exportSpecialPropertyData(session) {
   return session.writeTransaction(tx => _exportSpecialPropertyHasActiveProject(tx))
 }
 
-function exportDatabase(session) {
+function exportGraphDatabase(session) {
   return _exportEntitiesData(session)
     .then(() => _exportRelationshipData(session))
     .then(() => _exportSpecialPropertyData(session))
@@ -219,5 +219,5 @@ function exportDatabase(session) {
 
 
 module.exports = {
-    exportDatabase: exportDatabase
+    exportGraphDatabase: exportGraphDatabase
 }
