@@ -182,7 +182,7 @@ function _exportSpecialPropertyHasActiveProject(tx) {
 /// Export Functions ///
 ////////////////////////
 
-function exportEntitiesData(session) {
+function _exportEntitiesData(session) {
   return session.writeTransaction(tx => _exportEntityLabs(tx))
     .then(() => session.writeTransaction(tx => _exportEntityResearchers(tx)))
     .then(() => session.writeTransaction(tx => _exportEntityResearchAreas(tx)))
@@ -193,7 +193,7 @@ function exportEntitiesData(session) {
     .then(() => session.writeTransaction(tx => _exportEntityArticles(tx)))
 }
 
-function exportRelationshipData(session) {
+function _exportRelationshipData(session) {
   return session.writeTransaction(tx => _exportRelationshipWasResearchedAt(tx))
     .then(() => session.writeTransaction(tx => _exportRelationshipUsedAt(tx)))
     .then(() => session.writeTransaction(tx => _exportRelationshipResearches(tx)))
@@ -207,13 +207,17 @@ function exportRelationshipData(session) {
     .then(() => session.writeTransaction(tx => _exportRelationshipComposedOf(tx)))
 }
 
-function exportSpecialPropertyData(session) {
+function _exportSpecialPropertyData(session) {
   return session.writeTransaction(tx => _exportSpecialPropertyHasActiveProject(tx))
+}
+
+function exportDatabase(session) {
+  return _exportEntitiesData(session)
+    .then(() => _exportRelationshipData(session))
+    .then(() => _exportSpecialPropertyData(session))
 }
 
 
 module.exports = {
-    exportEntitiesData: exportEntitiesData,
-    exportRelationshipData: exportRelationshipData,
-    exportSpecialPropertyData: exportSpecialPropertyData
+    exportDatabase: exportDatabase
 }
