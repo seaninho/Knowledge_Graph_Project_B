@@ -176,7 +176,7 @@ async function _validatePropertiesObject(req, reqBody) {
     }
 
     const session = getSession(req);
-    const entityScheme = getEntityScheme(req.params.entity);
+    const entityScheme = _getEntityScheme(req.params.entity);
     const entityIdProfile = [entityType, entityScheme['id'], entityId];
     const exists = await _verifyEntityExists(session, entityIdProfile);
     if (exists !== true) {
@@ -330,11 +330,11 @@ async function _validateRelationshipsObject(req, reqBody, newlyCreated = false) 
             '[Source entity is of the same entity type as destination entity]');
     }
     
-    const srcEntityScheme = getEntityScheme(srcEntityType);
+    const srcEntityScheme = _getEntityScheme(srcEntityType);
     if (srcEntityScheme['edges'].findIndex(edge => edge['edgeName'] === relationshipType) === -1) {
         throw new EntityHasNoSuchRelationship(srcEntityType, relationshipType);
     }
-    const dstEntityScheme = getEntityScheme(dstEntityType);
+    const dstEntityScheme = _getEntityScheme(dstEntityType);
     if (dstEntityScheme['edges'].findIndex(edge => edge['edgeName'] === relationshipType) === -1) {
         throw new EntityHasNoSuchRelationship(srcEntityType, relationshipType);
     }
@@ -376,7 +376,7 @@ async function _validateEntityObject(req, reqBody) {
         throw new BadRequest('Request body entity id does not match an invalid entity id!');
     }
 
-    const entityScheme = getEntityScheme(req.params.entity);
+    const entityScheme = _getEntityScheme(req.params.entity);
     _validateEntityProperties(reqBody, entityScheme);
 
     const relationships = reqBody['relationships'];
@@ -441,8 +441,8 @@ function _buildRelationshipsCreationQuery(relationshipData, newEntityTuple = nul
     const relationshipType = _getRelationshipType(relationshipData['edgeName']);
     const srcEntityType = _getEntityType(relationshipData['src']);
     const dstEntityType = _getEntityType(relationshipData['dst']);    
-    const srcEntityScheme = getEntityScheme(srcEntityType);
-    const dstEntityScheme = getEntityScheme(dstEntityType);
+    const srcEntityScheme = _getEntityScheme(srcEntityType);
+    const dstEntityScheme = _getEntityScheme(dstEntityType);
     
     const [newEntityType, newEntityId] = newEntityTuple !== null ? 
         newEntityTuple : [null, null];
@@ -479,10 +479,9 @@ function _buildRelationshipsCreationQuery(relationshipData, newEntityTuple = nul
 /**
  * get entity scheme by entity type
  * @param {*} entity requested entity for which to get scheme
- * @param {*} res server's response. if null, no need to respond.
  * @returns requested entity's scheme
  */
-function getEntityScheme(entity, res = null) {
+function _getEntityScheme(entity) {
     const entityType = _getEntityType(entity);
     
     var entityScheme;
@@ -514,7 +513,18 @@ function getEntityScheme(entity, res = null) {
         default:
     }
     
-    return res != null ? writeResponse(res, entityScheme) : entityScheme;
+    return entityScheme;
+}
+
+/**
+ * get entity scheme by entity type
+ * @param {*} req client's request (containing entity's type)
+ * @param {*} res server's response
+ * @returns requested entity's scheme
+ */
+function getEntityScheme(req, res) {
+    const entityScheme = _getEntityScheme(req.params.entity);
+    return writeResponse(res, entityScheme);
 }
 
 /**
@@ -602,7 +612,7 @@ function searchForEntity(req, res, next) {
         const reqBody = req.body;
         const entity = req.params.entity.toLowerCase();
         const entityType = _getEntityType(entity);
-        const entityScheme = getEntityScheme(entity);
+        const entityScheme = _getEntityScheme(entity);
 
         const session = getSession(req);
         const entityDescField = entityScheme['name'];
@@ -651,7 +661,7 @@ function setEntityProperties(req, res, next) {
         const entity = req.params.entity.toLowerCase();
         const entityType = _getEntityType(entity);
         const entityId = req.params.id;
-        const entityScheme = getEntityScheme(entity);
+        const entityScheme = _getEntityScheme(entity);
         
         const session = getSession(req);
         var query = [
@@ -724,7 +734,7 @@ async function addEntity(req, res, next) {
         const reqBody = req.body;        
         const entity = req.params.entity.toLowerCase();        
         const entityType = _getEntityType(entity);
-        const entityScheme = getEntityScheme(entity);
+        const entityScheme = _getEntityScheme(entity);
 
         const entityId = await _getMaxIdForEntityType(session, entityType, entityScheme['id']) + 1;
         const createEntityQuery = _buildEntityCreationQuery(entityScheme, entityId, reqBody);
