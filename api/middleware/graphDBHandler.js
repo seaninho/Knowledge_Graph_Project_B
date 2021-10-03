@@ -286,21 +286,20 @@ function _getNeo4jDBMSFolder(session) {
  * @param {*} res server's response
  * @param {*} next next function to execute
  */
-function exportDataToCsv(req, res, next) {  
+async function exportDataToCsv(req, res, next) {  
     const session = getSession(req);
-    const txRes = exporter.exportGraphDatabase(session)
-    .then(() => session.close())
-    .then(() => {
+    try {
+        const exportDirectoryBase = await _getNeo4jDBMSFolder(session) + '\\export';
+        const exportDirectory = await exporter.exportGraphDatabase(session, exportDirectoryBase);
         const response = {
             status: 'ok',
-            message: 'Database Exported Successfully!'
+            message: 'Database exported successfully to ' + exportDirectory
         };
-        writeResponse(res, response);
-    })
-    .catch(error => {
+        return writeResponse(res, response);
+    } catch (error) {
         session.close();
         next(new DatabaseActionError('Export', error));
-    });
+    }
 }
 
 /**
