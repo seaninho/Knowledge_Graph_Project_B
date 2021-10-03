@@ -1,4 +1,5 @@
 var fs = require('fs');
+var dateTime = require('date-and-time');
 
 var exportDirectory = undefined;
 var entityExportDirectory = undefined;
@@ -217,7 +218,7 @@ function _exportSpecialPropertyData(session) {
 }
 
 async function exportGraphDatabase(session, exportDirectoryBase) {
-  var todayDate = new Date().toISOString().slice(0, 10);
+  const todayDate = dateTime.format(new Date(), 'YYYY-MM-DD');
   exportDirectory = exportDirectoryBase.replace(/\\/g,'/') + '/' + todayDate;
   entityExportDirectory = exportDirectory + '/' + 'entity_tables';
   relationshipExportDirectory = exportDirectory + '/' + 'relationship_tables';
