@@ -216,7 +216,7 @@ function _exportSpecialPropertyData(session) {
   return session.writeTransaction(tx => _exportSpecialPropertyHasActiveProject(tx))
 }
 
-function exportGraphDatabase(session, exportDirectoryBase) {
+async function exportGraphDatabase(session, exportDirectoryBase) {
   var todayDate = new Date().toISOString().slice(0, 10);
   exportDirectory = exportDirectoryBase.replace(/\\/g,'/') + '/' + todayDate;
   entityExportDirectory = exportDirectory + '/' + 'entity_tables';
@@ -230,12 +230,15 @@ function exportGraphDatabase(session, exportDirectoryBase) {
     }
   }  
 
-  return _exportEntitiesData(session)
-    .then(() => _exportRelationshipData(session))
-    .then(() => _exportSpecialPropertyData(session))
-    .then(() => {
-      return exportDirectory.replace(/\//g,'\\');
-    });
+  try {
+    await _exportEntitiesData(session);
+    await _exportRelationshipData(session);
+    await _exportSpecialPropertyData(session);
+    return exportDirectory.replace(/\//g,'\\');
+  } catch (error) {
+    fs.rmdirSync(exportDirectory, { recursive: true });
+    throw error;
+  }
 }
 
 
