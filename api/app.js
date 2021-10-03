@@ -4,7 +4,6 @@ const morganLogger = require('morgan');
 const path = require('path');
 
 const { NotFound } = require('./utils/errors');
-const homepage = require('./routes/index');
 const router = require('./startup/routes');
 const config = require('./startup/config');
 const exceptionHandler = require('./middleware/exceptionHandler');
@@ -14,8 +13,6 @@ config.assertHostAlive();
 
 var app = express();
 exceptionHandler();
-
-app.use('/', homepage);
 
 // app configurations
 app.use(express.urlencoded({ extended: false }));

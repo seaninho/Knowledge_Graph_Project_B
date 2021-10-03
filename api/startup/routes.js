@@ -3,7 +3,10 @@ const entity = require('../models/entity');
 
 
 function route(app) {
-    // GET REQUEST    
+    // GET REQUEST
+    app.get('/', function(_req, res, _next) {
+        res.render('index', { title: 'HOME' });
+    });  
     app.get("/entity/types", dbHandler.getAllEntityTypes);
     app.get("/entity/:entity", entity.getAllEntitiesByType);
     app.get("/entity/:entity/:id", entity.getEntityById); 
