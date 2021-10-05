@@ -391,6 +391,23 @@ async function _validateRequestBody(req) {
 }
 
 /**
+ * 
+ * @param {*} reqQueryObject 
+ */
+function _validateRequestSearchQuery(reqQueryObject) {
+    const reqQueryParameter = 'searchLine';
+    if (_.isEmpty(reqQueryObject)) {
+        throw new BadRequest('URL is missing the query object!');
+    }
+    if (!(reqQueryParameter in reqQueryObject)) {
+        throw new BadRequest('URL query is missing the \'' + reqQueryParameter + '\' parameter!');
+    }
+    if (reqQueryObject[reqQueryParameter] === '') {
+        throw new BadRequest('URL search line is empty!');
+    }
+}
+
+/**
  * build Cypher query for creating a new entity based on entity scheme 
  * @param {*} entityScheme new entity's scheme
  * @param {*} entityId new entity's id
@@ -590,9 +607,9 @@ async function searchForEntity(req, res, next) {
     const entity = req.params.entity.toLowerCase();
     const entityType = _getEntityType(entity);
     const entityScheme = _getEntityScheme(entity);
-
     const session = getSession(req);
     const entityDescField = entityScheme['name'];
+    _validateRequestSearchQuery(req.query);
     const searchQuery = req.query.searchLine;
     const similarityThreshold = 0.55;
     var query = [
