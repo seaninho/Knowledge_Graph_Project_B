@@ -606,12 +606,13 @@ function getAllEntitiesByType(req, res, next) {
 async function searchForEntity(req, res, next) {
     const entity = req.params.entity.toLowerCase();
     const entityType = _getEntityType(entity);
-    const entityScheme = _getEntityScheme(entity);
-    const session = getSession(req);
+    const entityScheme = _getEntityScheme(entity);        
     const entityDescField = entityScheme['name'];
     _validateRequestSearchQuery(req.query);
     const searchQuery = req.query.searchLine;
     const similarityThreshold = 0.55;
+    
+    const session = getSession(req);
     var query = [
         'MATCH (' + entity + ':' + entityType + ')',
         'WITH DISTINCT ' + entity + ', ', 
@@ -624,8 +625,8 @@ async function searchForEntity(req, res, next) {
         'ORDER BY similarity DESC',
         'LIMIT 20'
     ].join('\n');
-    
-    try {
+
+    try {        
         const result = await executeCypherQuery(session, query, {});
         const response = getAllNodesByFieldKey(result.records, entity);
         return writeResponse(res, response);
@@ -689,11 +690,11 @@ function setEntityProperties(req, res, next) {
  */
 function addEntityRelationships(req, res, next) {
     _validateRequestBody(req)
-    .then(async () => {
-        const session = getSession(req);
+    .then(async () => {        
         const reqBody = req.body;
-        const query = _buildRelationshipsCreationQuery(reqBody);
-        
+
+        const session = getSession(req);
+        const query = _buildRelationshipsCreationQuery(reqBody);        
         try {
             const result = await executeCypherQuery(session, query, {}, 'WRITE');
             const response = validateRelationShipsCreated(result, Object.keys(reqBody['edges']).length);
@@ -719,23 +720,23 @@ function addEntityRelationships(req, res, next) {
  */
 async function addEntity(req, res, next) {
     _validateRequestBody(req, res)
-    .then(async () => {
-        const session = getSession(req);
+    .then(async () => {        
         const reqBody = req.body;        
         const entity = req.params.entity.toLowerCase();        
         const entityType = _getEntityType(entity);
         const entityScheme = _getEntityScheme(entity);
-
-        const entityId = await _getMaxIdForEntityType(session, entityType, entityScheme['id']) + 1;
-        const createEntityQuery = _buildEntityCreationQuery(entityScheme, entityId, reqBody);
-        var queryObject = {};
-        const relationships = reqBody['relationships']; 
-        for (let [relationshipName, relationshipData] of Object.entries(relationships)) {
-            queryObject[relationshipName] = 
-                _buildRelationshipsCreationQuery(relationshipData, [entityType, entityId]);
-        }
-
+        
         try {
+            const session = getSession(req);
+            const entityId = await _getMaxIdForEntityType(session, entityType, entityScheme['id']) + 1;
+            const createEntityQuery = _buildEntityCreationQuery(entityScheme, entityId, reqBody);
+            var queryObject = {};
+            const relationships = reqBody['relationships']; 
+            for (let [relationshipName, relationshipData] of Object.entries(relationships)) {
+                queryObject[relationshipName] = 
+                    _buildRelationshipsCreationQuery(relationshipData, [entityType, entityId]);
+            }
+            
             const createEntityResult = await executeCypherQuery(session, createEntityQuery, {}, 'WRITE');
             const propertiesToSet = Object.keys(reqBody['properties']).length + 1; // id property isn't part of the request
             var response = validateEntityCreated(createEntityResult, propertiesToSet); 
