@@ -101,23 +101,6 @@ async function _getMaxIdForEntityType(session, entityType, entityIdField) {
 }
 
 /**
- * validate request body search object
- * @param {*} req client's request
- * @param {*} reqBody request body
- */
-async function _validateSearchObject(req, reqBody) {
-    const entityType = _getEntityType(reqBody['entityType']);
-    if (entityType.toLowerCase() != req.params.entity) {
-        throw new BadRequest('Request body entity type does not match route\'s entity type!');  
-    }
-
-    const searchQuery = reqBody['searchQuery'];
-    if (searchQuery == null) {
-        throw new BadRequest('Request body has no search query!');
-    }
-}
-
-/**
  * verify entity exists
  * @param {*} session neo4j session
  * @param {*} entityIdProfile entity's id profile (type, id field, id value)
@@ -393,9 +376,6 @@ async function _validateRequestBody(req) {
     const reqBody = req.body;    
     const reqObject = reqBody['object'];
     switch (reqObject) {
-        case 'search':
-            await _validateSearchObject(req, reqBody);
-            break;
         case 'properties':
             await _validatePropertiesObject(req, reqBody);
             break;
@@ -606,43 +586,36 @@ function getAllEntitiesByType(req, res, next) {
  * @param {*} next next function to execute
  * @returns search results limited to 20 results
  */
-function searchForEntity(req, res, next) {
-    _validateRequestBody(req)
-    .then(async () => {
-        const reqBody = req.body;
-        const entity = req.params.entity.toLowerCase();
-        const entityType = _getEntityType(entity);
-        const entityScheme = _getEntityScheme(entity);
+async function searchForEntity(req, res, next) {
+    const entity = req.params.entity.toLowerCase();
+    const entityType = _getEntityType(entity);
+    const entityScheme = _getEntityScheme(entity);
 
-        const session = getSession(req);
-        const entityDescField = entityScheme['name'];
-        const searchQuery = reqBody['searchQuery'];
-        const similarityThreshold = 0.55;
-        var query = [
-            'MATCH (' + entity + ':' + entityType + ')',
-            'WITH DISTINCT ' + entity + ', ', 
-            'apoc.text.jaroWinklerDistance(',
-                'toLower('+ entity + '.' + entityDescField +'), ',
-                'toLower(\'' + searchQuery + '\')',
-            ') as similarity',
-            'WHERE similarity >= ' + similarityThreshold,
-            'RETURN ' + entity,
-            'ORDER BY similarity DESC',
-            'LIMIT 20'
-        ].join('\n');
-        
-        try {
-            const result = await executeCypherQuery(session, query, {});
-            const response = getAllNodesByFieldKey(result.records, entity);
-            return writeResponse(res, response);
-        } catch (error) {
-            session.close();
-            throw error;
-        }
-    })
-    .catch(error => {
+    const session = getSession(req);
+    const entityDescField = entityScheme['name'];
+    const searchQuery = req.query.searchLine;
+    const similarityThreshold = 0.55;
+    var query = [
+        'MATCH (' + entity + ':' + entityType + ')',
+        'WITH DISTINCT ' + entity + ', ', 
+        'apoc.text.jaroWinklerDistance(',
+            'toLower('+ entity + '.' + entityDescField +'), ',
+            'toLower(\'' + searchQuery + '\')',
+        ') as similarity',
+        'WHERE similarity >= ' + similarityThreshold,
+        'RETURN ' + entity,
+        'ORDER BY similarity DESC',
+        'LIMIT 20'
+    ].join('\n');
+    
+    try {
+        const result = await executeCypherQuery(session, query, {});
+        const response = getAllNodesByFieldKey(result.records, entity);
+        return writeResponse(res, response);
+    } catch (error) {
+        session.close();
         next(error);
-    });
+    }
 }
 
 /**
