@@ -238,7 +238,13 @@ function getAllNodesByFieldKey(records, fieldKey, resultIsSingleNode = false) {
  */
 function importDataFromCsv(req, res, next) {  
     const session = getSession(req);
-    importer.importGraphDatabase(session)
+    session.readTransaction(tx => tx.run('MATCH (n) RETURN n'))
+    .then(result => {
+        if (!_.isEmpty(result.records)) {
+            throw new GeneralError('Database was not deleted properly prior to import!');
+        }
+    })
+    .then(() => importer.importGraphDatabase(session))
     .then(() => enforcer.createGraphConstraints(session))
     .then(() => session.close())
     .then(() => {
@@ -248,8 +254,10 @@ function importDataFromCsv(req, res, next) {
         };
         writeResponse(res, response);
     })
-    .catch(error => {        
-        deleteDatabase(req, res, next, false);
+    .catch(error => {
+        if (!(error instanceof GeneralError)) {
+            deleteDatabase(req, res, next, false);
+        }        
         next(new DatabaseActionError('Import', error));
     });
 }
