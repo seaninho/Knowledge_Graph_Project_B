@@ -149,7 +149,7 @@ function _validateEntityProperties(reqBody, entityScheme) {
  */
 async function _validatePropertiesObject(req, reqBody) {
     const entityType = _getEntityType(reqBody['entityType']);
-    if (entityType.toLowerCase() != req.params.entity) {
+    if (entityType.toLowerCase() != req.params.entity.toLowerCase()) {
         throw new BadRequest('Request body entity type does not match route\'s entity type!');  
     }
 
@@ -216,7 +216,7 @@ async function _validateEdgesObjectForExistingEntity(req, reqBody, typeTuple, sc
         srcEntityIdProfile = [srcEntityType, srcEntityScheme['id'], srcEntityId];
         dstEntityIdProfile = [dstEntityType, dstEntityScheme['id'], dstEntityId];
 
-        if (srcEntityType.toLowerCase() == req.params.entity) {
+        if (srcEntityType.toLowerCase() == req.params.entity.toLowerCase()) {
             if (srcEntityId != req.params.id) {
                 throw new BadRequest('Request body source entity id ' + 
                     'does not match route\'s entity id!');
@@ -266,7 +266,7 @@ async function _validateEdgesObjectForNewEntity(req, reqBody, typeTuple, schemeT
         srcEntityIdProfile = [srcEntityType, srcEntityScheme['id'], srcEntityId];
         dstEntityIdProfile = [dstEntityType, dstEntityScheme['id'], dstEntityId];
         createdEntityIsSource = 
-            req.params.entity == srcEntityType.toLowerCase() ? true : false;
+            req.params.entity.toLowerCase() == srcEntityType.toLowerCase() ? true : false;
 
         if (createdEntityIsSource) {
             if (srcEntityId != -1) {
@@ -304,8 +304,8 @@ async function _validateRelationshipsObject(req, reqBody, newlyCreated = false) 
     const srcEntityType = _getEntityType(reqBody['src']);
     const dstEntityType = _getEntityType(reqBody['dst']);
     
-    if (srcEntityType.toLowerCase() != req.params.entity &&
-        dstEntityType.toLowerCase() != req.params.entity) {
+    if (srcEntityType.toLowerCase() != req.params.entity.toLowerCase() &&
+        dstEntityType.toLowerCase() != req.params.entity.toLowerCase()) {
             throw new BadRequest('Request body entity type does not match route\'s entity type!');
     }
     if (srcEntityType === dstEntityType) {
@@ -350,7 +350,7 @@ async function _validateRelationshipsObject(req, reqBody, newlyCreated = false) 
  */
 async function _validateEntityObject(req, reqBody) {
     const entityType = _getEntityType(reqBody['entityType']);
-    if (entityType.toLowerCase() != req.params.entity) {
+    if (entityType.toLowerCase() != req.params.entity.toLowerCase()) {
         throw new BadRequest('Request body entity type does not match route\'s entity type!');  
     }
 
