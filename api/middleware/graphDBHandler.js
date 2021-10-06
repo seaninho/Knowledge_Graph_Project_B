@@ -229,6 +229,21 @@ function getAllNodesByFieldKey(records, fieldKey, resultIsSingleNode = false) {
     return resultIsSingleNode ? nodesProperties[0] : result;
 };
 
+/**
+ * verify database is empty (clear)
+ * @param {*} session neo4j session
+ * @param {*} errorMessage error message to display in case database isn't clear
+ */
+async function _verifyDatabaseIsClear(session, errorMessage) {
+    const query = 'MATCH (n) RETURN n';
+    const params = {};
+
+    const result = await executeCypherQuery(session, query, params)
+    if (!_.isEmpty(result.records)) {
+        throw new GeneralError(errorMessage);
+    }
+}
+
 
 /**
  * import data from csv files
@@ -238,12 +253,7 @@ function getAllNodesByFieldKey(records, fieldKey, resultIsSingleNode = false) {
  */
 function importDataFromCsv(req, res, next) {  
     const session = getSession(req);
-    session.readTransaction(tx => tx.run('MATCH (n) RETURN n'))
-    .then(result => {
-        if (!_.isEmpty(result.records)) {
-            throw new GeneralError('Database was not deleted properly prior to import!');
-        }
-    })
+    _verifyDatabaseIsClear(session, 'Database was not deleted properly prior to import!')
     .then(() => importer.importGraphDatabase(session))
     .then(() => enforcer.createGraphConstraints(session))
     .then(() => session.close())
@@ -323,12 +333,7 @@ async function deleteDatabase(req, res, next, writeRes = true) {
     const session = getSession(req);
     session.writeTransaction(tx => tx.run('MATCH (n) DETACH DELETE n'))       // Clear Database
     .then(() => session.writeTransaction(tx => tx.run('CALL apoc.schema.assert({}, {})')))  // Clear Constraints
-    .then(() => session.readTransaction(tx => tx.run('MATCH (n) RETURN n')))
-    .then(result => {
-        if (!_.isEmpty(result.records)) {
-            throw new GeneralError('Database Was Not Deleted Properly!');
-        }
-    })
+    .then(() => _verifyDatabaseIsClear(session, 'Database Was Not Deleted Properly!'))
     .then(() => session.close())
     .then(() => {
         if (writeRes == true) {
