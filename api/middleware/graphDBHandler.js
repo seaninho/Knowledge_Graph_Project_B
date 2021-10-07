@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const neo4j = require('neo4j-driver');
 const config = require('config');
+const spawn = require('child_process').spawn;
 
 const uri = config.get('dbHost');
 const user = config.get('dbUser');
@@ -12,6 +13,7 @@ const enforcer = require('../helpers/graphDBEnforcer');
 const responseHandler = require('../helpers/response');
 const writeResponse = responseHandler.writeResponse;
 const { GeneralError, BadRequest, NotFound, DatabaseActionError } = require('../utils/errors');
+const response = require('../helpers/response');
 
 const driver = neo4j.driver(uri, neo4j.auth.basic(user, password), {
     maxConnectionLifetime: 3 * 60 * 60 * 1000, // 3 hours
@@ -350,6 +352,44 @@ async function deleteDatabase(req, res, next, writeRes = true) {
     });
 };
 
+/**
+ * create graph database files
+ * @param {*} req client's request
+ * @param {*} res server's response
+ * @param {*} _next next function to execute
+ */
+async function createDatabaseFiles(req, res, _next) {
+    const session = getSession(req);
+    const neo4jRootDirectory = await _getNeo4jDBMSFolder(session);  
+    const directoryBasePath = neo4jRootDirectory.split('\\dbms-')[0] + "\\researshare";
+    const pythonScriptPath = directoryBasePath + "\\scripts\\raw_to_graph_tables_converter.py";
+    const schemeTablePath = directoryBasePath + "\\model\\graphScheme.csv";
+    const lookupTablePath = directoryBasePath + "\\model\\lookupTable.csv";
+    const facultyTablesPath = directoryBasePath + "\\faculty_tables_base";
+    const destinationDirectoryName = "import";
+
+    // spawn a new child process to call python script
+    const pythonProcess = spawn('python', 
+        [
+            pythonScriptPath, 
+            schemeTablePath, 
+            lookupTablePath, 
+            facultyTablesPath, 
+            directoryBasePath, 
+            destinationDirectoryName
+        ]
+    );
+    // close event triggers the server's response
+    pythonProcess.on('close', () => {
+        const response = {
+          status: "ok",
+          message: "Database Files Created Successfully!"
+        };
+        writeResponse(res, response);
+    });
+}
+
+
 module.exports = {
     getSession: getSession,
     executeCypherQuery: executeCypherQuery,
@@ -362,5 +402,6 @@ module.exports = {
     getAllNodesByFieldKey: getAllNodesByFieldKey,
     importDataFromCsv: importDataFromCsv,
     exportDataToCsv: exportDataToCsv, 
-    deleteDatabase: deleteDatabase
+    deleteDatabase: deleteDatabase,
+    createDatabaseFiles: createDatabaseFiles
 }

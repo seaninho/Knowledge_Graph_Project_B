@@ -19,6 +19,7 @@ function route(app) {
     app.post("/database/import", dbHandler.importDataFromCsv);
     app.post("/database/export", dbHandler.exportDataToCsv);
     app.post("/database/delete", dbHandler.deleteDatabase);
+    app.post("/database/create", dbHandler.createDatabaseFiles);
     app.post("/entity/:entity", entity.addEntity);
     app.post("/entity/:entity/:id", entity.addEntityRelationship);
 }
