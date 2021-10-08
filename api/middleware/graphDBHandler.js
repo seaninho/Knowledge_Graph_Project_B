@@ -361,12 +361,12 @@ async function deleteDatabase(req, res, next, writeRes = true) {
 async function createDatabaseFiles(req, res, _next) {
     const session = getSession(req);
     const neo4jRootDirectory = await _getNeo4jDBMSFolder(session);  
-    const directoryBasePath = neo4jRootDirectory.split('\\dbms-')[0] + "\\researshare";
-    const pythonScriptPath = directoryBasePath + "\\scripts\\raw_to_graph_tables_converter.py";
-    const schemeTablePath = directoryBasePath + "\\model\\graphScheme.csv";
-    const lookupTablePath = directoryBasePath + "\\model\\lookupTable.csv";
-    const facultyTablesPath = directoryBasePath + "\\faculty_tables_base";
-    const destinationDirectoryName = "import";
+    const directoryBasePath = neo4jRootDirectory.split('\\dbms-')[0] + '\\researshare';
+    const pythonScriptPath = directoryBasePath + '\\scripts\\raw_to_graph_tables_converter.py';
+    const schemeTablePath = directoryBasePath + '\\model\\graphScheme.csv';
+    const lookupTablePath = directoryBasePath + '\\model\\lookupTable.csv';
+    const facultyTablesPath = directoryBasePath + '\\faculty_tables_base';
+    const destinationDirectoryName = 'import';
 
     // spawn a new child process to call python script
     const pythonProcess = spawn('python', 
@@ -381,11 +381,11 @@ async function createDatabaseFiles(req, res, _next) {
     );
     // close event triggers the server's response
     pythonProcess.on('close', () => {
-        const response = {
-          status: "ok",
-          message: "Database Files Created Successfully!"
-        };
-        writeResponse(res, response);
+            const response = {
+                status: 'ok',
+                message: 'Database Files Created Successfully!'
+            };
+            writeResponse(res, response);
     });
 }
 
