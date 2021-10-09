@@ -275,11 +275,11 @@ function importDataFromCsv(req, res, next) {
 }
 
 /**
- * get full path for the neo4j home folder
+ * get full path for the neo4j dbmss directory
  * @param {*} session neo4j session
- * @returns neo4j home folder full path
+ * @returns neo4j dbmss directory full path
  */
-function _getNeo4jDBMSFolder(session) {
+function _getNeo4jDbmssDirectory(session) {
     const query = [
         'Call dbms.listConfig() YIELD name, value',
         'WHERE name=\'dbms.directories.neo4j_home\'',
@@ -291,7 +291,8 @@ function _getNeo4jDBMSFolder(session) {
     .then(result => {  
         if (!_.isEmpty(result.records) ) {
             var folderPath = result.records[0].get('value');
-            return folderPath;
+            // dbms.directories.neo4j_home returns active dbms directory
+            return folderPath.split('\\dbms-')[0];
         }
     })
     .catch(error => {
@@ -309,7 +310,8 @@ function _getNeo4jDBMSFolder(session) {
 async function exportDataToCsv(req, res, next) {  
     const session = getSession(req);
     try {
-        const exportDirectoryBase = await _getNeo4jDBMSFolder(session) + '\\export';
+        const neo4jDbmssDirectory = await _getNeo4jDbmssDirectory(session);
+        const exportDirectoryBase = neo4jDbmssDirectory + '\\researshare\\export';
         const exportDirectory = await exporter.exportGraphDatabase(session, exportDirectoryBase);
         const response = {
             status: 'ok',
@@ -360,8 +362,8 @@ async function deleteDatabase(req, res, next, writeRes = true) {
  */
 async function createDatabaseFiles(req, res, next) {
     const session = getSession(req);
-    const neo4jRootDirectory = await _getNeo4jDBMSFolder(session);  
-    const directoryBasePath = neo4jRootDirectory.split('\\dbms-')[0] + '\\researshare';
+    const neo4jDbmssDirectory = await _getNeo4jDbmssDirectory(session);  
+    const directoryBasePath = neo4jDbmssDirectory + '\\researshare';
     const pythonScriptPath = directoryBasePath + '\\scripts\\raw_to_graph_tables_converter.py';
     const schemeTablePath = directoryBasePath + '\\model\\graphScheme.csv';
     const lookupTablePath = directoryBasePath + '\\model\\lookupTable.csv';
