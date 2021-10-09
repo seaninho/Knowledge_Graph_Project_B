@@ -358,7 +358,7 @@ async function deleteDatabase(req, res, next, writeRes = true) {
  * @param {*} res server's response
  * @param {*} _next next function to execute
  */
-async function createDatabaseFiles(req, res, _next) {
+async function createDatabaseFiles(req, res, next) {
     const session = getSession(req);
     const neo4jRootDirectory = await _getNeo4jDBMSFolder(session);  
     const directoryBasePath = neo4jRootDirectory.split('\\dbms-')[0] + '\\researshare';
@@ -379,6 +379,10 @@ async function createDatabaseFiles(req, res, _next) {
             destinationDirectoryName
         ]
     );
+    pythonProcess.stderr.on('data', (error) => {
+        const err = String.fromCharCode.apply(null, error); // need to convert error from uint8
+        next(new DatabaseActionError('Create', err));
+    })
     // close event triggers the server's response
     pythonProcess.on('close', () => {
             const response = {
