@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const neo4j = require('neo4j-driver');
 const config = require('config');
-const spawn = require('child_process').spawn;
+const { PythonShell } = require('python-shell');
 
 const uri = config.get('dbHost');
 const user = config.get('dbUser');
@@ -364,34 +364,34 @@ async function createDatabaseFiles(req, res, next) {
     const session = getSession(req);
     const neo4jDbmssDirectory = await _getNeo4jDbmssDirectory(session);  
     const directoryBasePath = neo4jDbmssDirectory + '\\researshare';
-    const pythonScriptPath = directoryBasePath + '\\scripts\\raw_to_graph_tables_converter.py';
+    const pythonScriptsPath = directoryBasePath + '\\scripts';
     const schemeTablePath = directoryBasePath + '\\model\\graphScheme.csv';
     const lookupTablePath = directoryBasePath + '\\model\\lookupTable.csv';
     const facultyTablesPath = directoryBasePath + '\\faculty_tables_base';
     const destinationDirectoryName = 'import';
 
-    // spawn a new child process to call python script
-    const pythonProcess = spawn('python', 
-        [
-            pythonScriptPath, 
-            schemeTablePath, 
-            lookupTablePath, 
-            facultyTablesPath, 
-            directoryBasePath, 
-            destinationDirectoryName
-        ]
-    );
-    pythonProcess.stderr.on('data', (error) => {
-        const err = String.fromCharCode.apply(null, error); // need to convert error from uint8
-        next(new DatabaseActionError('Create', err));
-    })
-    // close event triggers the server's response
-    pythonProcess.on('close', () => {
-            const response = {
-                status: 'ok',
-                message: 'Database Files Created Successfully!'
-            };
-            writeResponse(res, response);
+    var options = {
+        mode: 'text',        
+        scriptPath: pythonScriptsPath,
+        args: [
+            schemeTablePath,
+            lookupTablePath,
+            facultyTablesPath,
+            directoryBasePath,
+            destinationDirectoryName,
+        ],
+    };
+    
+    PythonShell.run('raw_to_graph_tables_converter.py', options, function (error) {
+        if (error) {            
+            next(new DatabaseActionError('Create', error));
+        }
+
+        const response = {
+            status: 'ok',
+            message: 'Database Files Created Successfully!',
+        };
+        writeResponse(res, response);
     });
 }
 
