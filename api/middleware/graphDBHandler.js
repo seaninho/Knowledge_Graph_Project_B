@@ -252,28 +252,37 @@ async function _verifyDatabaseIsClear(session, errorMessage) {
  * @param {*} req client's request
  * @param {*} res server's response
  * @param {*} next next function to execute
+ * @param {*} respond write result iff true
+ * @returns Notifying the client of success in restoring the database.
+ * Otherwise, throws an exception notifing of failure.
  */
-async function restoreDatabase(req, res, next) {  
+async function restoreDatabase(req, res, next, respond = true) {  
     const session = getSession(req);
     try {
         await _verifyDatabaseIsClear(
             session,
-            'Database was not deleted properly prior to import!'
+            'Please delete database prior to restore!'
         );
         await importer.importGraphDatabase(session);
         await enforcer.createGraphConstraints(session);
         
-        const response = {
-            status: 'ok',
-            message: 'Database Restored Successfully!',
-        };
-        writeResponse(res, response);
+        if (respond == true) {
+            const response = {
+                status: 'ok',
+                message: 'Database Restored Successfully!',
+            };
+            writeResponse(res, response);
+        }        
     }
     catch (error) {
         if (!(error instanceof GeneralError)) {
             deleteDatabase(req, res, next, false);
-        }        
-        next(new DatabaseActionError('Restore', error));
+        }
+
+        if (respond == true) {
+            return next(new DatabaseActionError('Restore', error));
+        }
+        throw error;
     }
 }
 
@@ -359,12 +368,12 @@ async function deleteDatabase(req, res, next, respond = true) {
 };
 
 /**
- * create graph database files
+ * initialize graph database
  * @param {*} req client's request
  * @param {*} res server's response
- * @param {*} _next next function to execute
+ * @param {*} next next function to execute
  */
-async function createDatabaseFiles(req, res, next) {
+async function initializeDatabase(req, res, next) {
     const session = getSession(req);
     const neo4jDbmssDirectory = await _getNeo4jDbmssDirectory(session);  
     const directoryBasePath = neo4jDbmssDirectory + '\\researshare';
@@ -386,16 +395,23 @@ async function createDatabaseFiles(req, res, next) {
         ],
     };
     
-    PythonShell.run('raw_to_graph_tables_converter.py', options, function (error) {
+    PythonShell.run('raw_to_graph_tables_converter.py', options, async function (error) {
         if (error) {            
-            next(new DatabaseActionError('Create', error));
+            next(new DatabaseActionError('Initialize', error));
         }
 
-        const response = {
-            status: 'ok',
-            message: 'Database Files Created Successfully!',
-        };
-        writeResponse(res, response);
+        try {
+            await restoreDatabase(req, res, next, false);
+
+            const response = {
+                status: 'ok',
+                message: 'Database Initialized Successfully!',
+            };
+            writeResponse(res, response);
+        }
+        catch (error) {
+            next(new DatabaseActionError('Initialize', error.getMessage()));
+        }        
     });
 }
 
@@ -413,5 +429,5 @@ module.exports = {
     restoreDatabase: restoreDatabase,
     backupDatabase: backupDatabase, 
     deleteDatabase: deleteDatabase,
-    createDatabaseFiles: createDatabaseFiles
+    initializeDatabase: initializeDatabase
 }
