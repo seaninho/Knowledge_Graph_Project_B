@@ -20,6 +20,7 @@ function route(app) {
     app.post("/database/backup", dbHandler.backupDatabase);
     app.post("/database/delete", dbHandler.deleteDatabase);
     app.post("/database/initialize", dbHandler.initializeDatabase);
+    app.post('/database/update', dbHandler.updateDatabase);
     app.post("/entity/:entity", entity.addEntity);
     app.post("/entity/:entity/:id", entity.addEntityRelationship);
 }

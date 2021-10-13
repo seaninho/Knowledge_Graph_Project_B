@@ -325,23 +325,34 @@ async function restoreDatabase(req, res, next, respond = true, path = '') {
  * @param {*} req client's request
  * @param {*} res server's response
  * @param {*} next next function to execute
+ * @param {*} respond write result iff true
+ * @returns Notifying the client of success in backing up the database.
+ * Otherwise, throws an exception notifing of failure.
  */
-async function backupDatabase(req, res, next) {  
+async function backupDatabase(req, res, next, respond = true) {  
     const session = getSession(req);
     try {
         const neo4jDbmssDirectory = await _getNeo4jDbmssDirectory(session);
         const backupDirectoryBase = neo4jDbmssDirectory + '\\researshare\\backup';
         const backupDirectory = await exporter.exportGraphDatabase(session, backupDirectoryBase);
-        const response = {
-            status: 'ok',
-            message:
-                'Database has been successfully backed up to ' +
-                backupDirectory,
-        };
-        return writeResponse(res, response);
+        if (respond == true) {
+            const response = {
+                status: 'ok',
+                message:
+                    'Database has been successfully backed up to ' +
+                    backupDirectory,
+            };
+            return writeResponse(res, response);
+        }
+
+        return backupDirectory;
     } catch (error) {
         session.close();
-        next(new DatabaseActionError('Backup', error));
+
+        if (respond == true) {
+            return next(new DatabaseActionError('Backup', error));
+        }
+        throw error;
     }
 }
 
@@ -422,6 +433,115 @@ async function initializeDatabase(req, res, next) {
     });
 }
 
+/**
+ * Update graph database
+ * @param {*} req client's request
+ * @param {*} res server's response
+ * @param {*} next next function to execute
+ * 
+ * Update procedure:
+ * 1. Create update faculty (database-ready) tables using raw_to_graph_tables_converter.py
+ * 2. Backup current graph database
+ * 3. Create merged database-ready tables using update_tables_merger.py
+ * 4. Delete current graph database
+ * 5. Restore graph database using newly merged tables
+ */
+async function updateDatabase(req, res, next) {
+    const session = getSession(req);
+    const neo4jDbmssDirectory = await _getNeo4jDbmssDirectory(session);
+    const directoryBasePath = neo4jDbmssDirectory + '\\researshare';
+    const pythonScriptsPath = directoryBasePath + '\\scripts';
+    const schemeTablePath = directoryBasePath + '\\model\\graphScheme.csv';
+    const lookupTablePath = directoryBasePath + '\\model\\lookupTable.csv';
+    const facultyTablesPath = directoryBasePath + '\\faculty_tables_update';
+    const updateTablesDirectory = 'update_tables';
+    const updateTablesDirectoryPath =
+        directoryBasePath + '\\' + updateTablesDirectory;
+
+    var options = {
+        mode: 'text',
+        pythonOptions: ['-u'],
+        scriptPath: pythonScriptsPath,
+        args: [
+            schemeTablePath,
+            lookupTablePath,
+            facultyTablesPath,           // faculty origin tables
+            directoryBasePath,           // destination folder path
+            updateTablesDirectory,       // run_purpose
+        ],
+    };
+
+    PythonShell.run(
+        'raw_to_graph_tables_converter.py',
+        options,
+        async function(error) {
+            if (error) {
+                return next(new DatabaseActionError('Update', error));
+            }
+
+            try {
+                const backupDirectory = await backupDatabase(
+                    req,
+                    res,
+                    next,
+                    false
+                );
+                const conflictPolicy = 'enforce_conflicts';                
+
+                let options = {
+                    mode: 'text',
+                    pythonOptions: ['-u'],
+                    scriptPath: pythonScriptsPath,
+                    args: [
+                        backupDirectory,            // graph_folder
+                        updateTablesDirectoryPath,       // update_folder
+                        conflictPolicy,
+                        schemeTablePath,
+                        directoryBasePath,          // destination folder path
+                    ],
+                };
+
+                PythonShell.run(
+                    'update_tables_merger.py',
+                    options,
+                    async function(error) {
+                        if (error) {
+                            return next(
+                                new DatabaseActionError('Update', error)
+                            );
+                        }
+
+                        try {
+                            await deleteDatabase(req, res, next, false);
+                            await restoreDatabase(
+                                req,
+                                res,
+                                next,
+                                false,
+                                directoryBasePath + '\\merged_tables\\'
+                            );
+
+                            const response = {
+                                status: 'ok',
+                                message: 'Database Updated Successfully!',
+                            };
+                            writeResponse(res, response);
+                        }
+                        catch (error) {
+                            next(
+                                new DatabaseActionError(
+                                    'Update',
+                                    error.getMessage()
+                                )
+                            );
+                        }
+                    })               
+            } catch (error) {
+                next(new DatabaseActionError('Update', error.getMessage()));
+            }
+        }
+    );
+}
 
 module.exports = {
     getSession: getSession,
@@ -436,5 +556,6 @@ module.exports = {
     restoreDatabase: restoreDatabase,
     backupDatabase: backupDatabase, 
     deleteDatabase: deleteDatabase,
-    initializeDatabase: initializeDatabase
+    initializeDatabase: initializeDatabase,
+    updateDatabase: updateDatabase
 }
