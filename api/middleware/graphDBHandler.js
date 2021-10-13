@@ -248,12 +248,12 @@ async function _verifyDatabaseIsClear(session, errorMessage) {
 
 
 /**
- * import graph database from csv files (restore)
+ * restore graph database from csv files (import)
  * @param {*} req client's request
  * @param {*} res server's response
  * @param {*} next next function to execute
  */
-async function importDatabase(req, res, next) {  
+async function restoreDatabase(req, res, next) {  
     const session = getSession(req);
     try {
         await _verifyDatabaseIsClear(
@@ -265,7 +265,7 @@ async function importDatabase(req, res, next) {
         
         const response = {
             status: 'ok',
-            message: 'Database Imported Successfully!',
+            message: 'Database Restored Successfully!',
         };
         writeResponse(res, response);
     }
@@ -273,7 +273,7 @@ async function importDatabase(req, res, next) {
         if (!(error instanceof GeneralError)) {
             deleteDatabase(req, res, next, false);
         }        
-        next(new DatabaseActionError('Import', error));
+        next(new DatabaseActionError('Restore', error));
     }
 }
 
@@ -305,25 +305,27 @@ function _getNeo4jDbmssDirectory(session) {
 }
 
 /**
- * export graph database to csv files (backup)
+ * backup graph database to csv files (export)
  * @param {*} req client's request
  * @param {*} res server's response
  * @param {*} next next function to execute
  */
-async function exportDatabase(req, res, next) {  
+async function backupDatabase(req, res, next) {  
     const session = getSession(req);
     try {
         const neo4jDbmssDirectory = await _getNeo4jDbmssDirectory(session);
-        const exportDirectoryBase = neo4jDbmssDirectory + '\\researshare\\export';
-        const exportDirectory = await exporter.exportGraphDatabase(session, exportDirectoryBase);
+        const backupDirectoryBase = neo4jDbmssDirectory + '\\researshare\\backup';
+        const backupDirectory = await exporter.exportGraphDatabase(session, backupDirectoryBase);
         const response = {
             status: 'ok',
-            message: 'Database exported successfully to ' + exportDirectory
+            message:
+                'Database has been successfully backed up to ' +
+                backupDirectory,
         };
         return writeResponse(res, response);
     } catch (error) {
         session.close();
-        next(new DatabaseActionError('Export', error));
+        next(new DatabaseActionError('Backup', error));
     }
 }
 
@@ -408,8 +410,8 @@ module.exports = {
     getAllEntityTypes: getAllEntityTypes,
     getAllRelationshipTypes: getAllRelationshipTypes,
     getAllNodesByFieldKey: getAllNodesByFieldKey,
-    importDatabase: importDatabase,
-    exportDatabase: exportDatabase, 
+    restoreDatabase: restoreDatabase,
+    backupDatabase: backupDatabase, 
     deleteDatabase: deleteDatabase,
     createDatabaseFiles: createDatabaseFiles
 }
