@@ -5,20 +5,18 @@ const executeQuery = databaseHandler.executeCypherQuery;
 const validateResponse = databaseHandler.validateDatabaseGetByIdResponse;
 const getAllNodesByFieldKey = databaseHandler.getAllNodesByFieldKey;
 
-
-const { EntityIdNotFound } = require("../../utils/errors");
+const { EntityIdNotFound } = require('../../utils/errors');
 
 function _getResearchAreaPageInfo(records) {
     if (records.length > 0) {
         var result = {};
-        result["Entity"] = getAllNodesByFieldKey(records, 'researchArea', true);
-        result["Researched In Labs"] = getAllNodesByFieldKey(records, 'labs');
-        result["Researches In This Area"] = getAllNodesByFieldKey(records, 'researches');
-        result["Researchers In This Area"] = getAllNodesByFieldKey(records, 'researchers');
-        result["Products Used In This Area"] = getAllNodesByFieldKey(records, 'products');       
+        result['Entity'] = getAllNodesByFieldKey(records, 'researchArea', true);
+        result['Researched In Labs'] = getAllNodesByFieldKey(records, 'labs');
+        result['Researches In This Area'] = getAllNodesByFieldKey(records, 'researches');
+        result['Researchers In This Area'] = getAllNodesByFieldKey(records, 'researchers');
+        result['Products Used In This Area'] = getAllNodesByFieldKey(records, 'products');
         return result;
-    }
-    else {
+    } else {
         return null;
     }
 }
@@ -26,66 +24,65 @@ function _getResearchAreaPageInfo(records) {
 // get research area scheme ("recipe")
 function getScheme() {
     return {
-        'entity': 'ResearchArea',
-        'id': 'researchAreaId',
-        'name': 'researchAreaName',
-        'property': [],
-        'edges': [
+        entity: 'ResearchArea',
+        id: 'researchAreaId',
+        name: 'researchAreaName',
+        property: [],
+        edges: [
             {
-                'src': 'ResearchArea',
-                'dst': 'Lab',
-                'edgeName': 'WAS_RESEARCHED_AT'
+                src: 'ResearchArea',
+                dst: 'Lab',
+                edgeName: 'WAS_RESEARCHED_AT',
             },
             {
-                'src': 'Researcher',
-                'dst': 'ResearchArea',
-                'edgeName': 'RESEARCHES'
+                src: 'Researcher',
+                dst: 'ResearchArea',
+                edgeName: 'RESEARCHES',
             },
             {
-                'src': 'Research',
-                'dst': 'ResearchArea',
-                'edgeName': 'RELEVANT_TO'
-            }
-        ]
+                src: 'Research',
+                dst: 'ResearchArea',
+                edgeName: 'RELEVANT_TO',
+            },
+        ],
     };
 }
 
 // get research area by id
 function getResearchAreaById(session, researchAreaId, next) {
     const query = [
-    'MATCH (researchArea:ResearchArea) WHERE researchArea.researchAreaId = $researchAreaId',    
-    'OPTIONAL MATCH (research:Research)-[:RELEVANT_TO]->(researchArea)',
-    'OPTIONAL MATCH (researcher:Researcher)-[:RESEARCHES]->(researchArea)',    
-    'OPTIONAL MATCH (product:Product)<-[:USING]-(r:Researcher)-[:RESEARCHES]->(researchArea)',
-    'OPTIONAL MATCH (lab:Lab)<-[:ACTIVE_AT]-(rr:Researcher)-[:RESEARCHES]->(researchArea)',
-    'WITH DISTINCT researchArea,',
-    'research, researcher, product, lab',
-    'ORDER BY product.isActiveProduct DESC',
-    'RETURN COLLECT(DISTINCT researchArea) AS researchArea,',
-    'COLLECT(DISTINCT research)[0..20] AS researches,',
-    'COLLECT(DISTINCT researcher)[0..20] AS researchers,',
-    'COLLECT(DISTINCT product)[0..20] AS products,',
-    'COLLECT(DISTINCT lab)[0..20] AS labs',
+        'MATCH (researchArea:ResearchArea) WHERE researchArea.researchAreaId = $researchAreaId',
+        'OPTIONAL MATCH (research:Research)-[:RELEVANT_TO]->(researchArea)',
+        'OPTIONAL MATCH (researcher:Researcher)-[:RESEARCHES]->(researchArea)',
+        'OPTIONAL MATCH (product:Product)<-[:USING]-(r:Researcher)-[:RESEARCHES]->(researchArea)',
+        'OPTIONAL MATCH (lab:Lab)<-[:ACTIVE_AT]-(rr:Researcher)-[:RESEARCHES]->(researchArea)',
+        'WITH DISTINCT researchArea,',
+        'research, researcher, product, lab',
+        'ORDER BY product.isActiveProduct DESC',
+        'RETURN COLLECT(DISTINCT researchArea) AS researchArea,',
+        'COLLECT(DISTINCT research)[0..20] AS researches,',
+        'COLLECT(DISTINCT researcher)[0..20] AS researchers,',
+        'COLLECT(DISTINCT product)[0..20] AS products,',
+        'COLLECT(DISTINCT lab)[0..20] AS labs',
     ].join('\n');
     const params = { researchAreaId: researchAreaId };
 
     return executeQuery(session, query, params)
-    .then(response => {
-        if (validateResponse(response)) {
-            return _getResearchAreaPageInfo(response.records);
-        }
-        else {
-            throw new EntityIdNotFound('ResearchArea', researchAreaId);
-        }
-    })
-    .catch(error => {      
-      session.close();
-      next(error);
-    });
-};
+        .then((response) => {
+            if (validateResponse(response)) {
+                return _getResearchAreaPageInfo(response.records);
+            } else {
+                throw new EntityIdNotFound('ResearchArea', researchAreaId);
+            }
+        })
+        .catch((error) => {
+            session.close();
+            next(error);
+        });
+}
 
 // exported functions
 module.exports = {
     getScheme: getScheme,
-    getResearchAreaById: getResearchAreaById
-}
+    getResearchAreaById: getResearchAreaById,
+};

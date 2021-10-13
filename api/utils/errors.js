@@ -36,35 +36,22 @@ class EntityTypeNotFound extends NotFound {
 
 class EntityIdNotFound extends NotFound {
     constructor(entityType, entityId) {
-        super(
-            "Entity type: '" +
-                entityType +
-                "' with id: '" +
-                entityId +
-                "' was not found!"
-        );
+        super("Entity type: '" + entityType + "' with id: '" + entityId + "' was not found!");
     }
 }
 
 class EntityHasNoSuchRelationship extends NotFound {
     constructor(entityType, relationshipType) {
         super(
-            "Entity type: '" +
-                entityType +
-                "' has no relationship type named: '" +
-                relationshipType +
-                "'!"
+            "Entity type: '" + entityType + "' has no relationship type named: '" +
+            relationshipType + "'!"
         );
     }
 }
 
 class RelationshipTypeNotFound extends NotFound {
     constructor(relationshipType) {
-        super(
-            "Relationship type: '" +
-                relationshipType +
-                "' is not a valid relationship!"
-        );
+        super("Relationship type: '" + relationshipType + "' is not a valid relationship!");
     }
 }
 
