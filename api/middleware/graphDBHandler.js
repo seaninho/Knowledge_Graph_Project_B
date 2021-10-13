@@ -232,6 +232,33 @@ function getAllNodesByFieldKey(records, fieldKey, resultIsSingleNode = false) {
 };
 
 /**
+ * get full path for the neo4j dbmss directory
+ * @param {*} session neo4j session
+ * @returns neo4j dbmss directory full path
+ */
+function _getNeo4jDbmssDirectory(session) {
+    const query = [
+        'Call dbms.listConfig() YIELD name, value',
+        'WHERE name=\'dbms.directories.neo4j_home\'',
+        'RETURN value'
+    ].join('\n');
+    const params = {};
+
+    return executeCypherQuery(session, query, params)
+    .then(result => {  
+        if (!_.isEmpty(result.records) ) {
+            var folderPath = result.records[0].get('value');
+            // dbms.directories.neo4j_home returns active dbms directory
+            return folderPath.split('\\dbms-')[0];
+        }
+    })
+    .catch(error => {
+        session.close();
+        next(error);
+    });
+}
+
+/**
  * verify database is empty (clear)
  * @param {*} session neo4j session
  * @param {*} errorMessage error message to display in case database isn't clear
@@ -291,34 +318,6 @@ async function restoreDatabase(req, res, next, respond = true, path = '') {
         }
         throw error;
     }
-}
-
-
-/**
- * get full path for the neo4j dbmss directory
- * @param {*} session neo4j session
- * @returns neo4j dbmss directory full path
- */
-function _getNeo4jDbmssDirectory(session) {
-    const query = [
-        'Call dbms.listConfig() YIELD name, value',
-        'WHERE name=\'dbms.directories.neo4j_home\'',
-        'RETURN value'
-    ].join('\n');
-    const params = {};
-
-    return executeCypherQuery(session, query, params)
-    .then(result => {  
-        if (!_.isEmpty(result.records) ) {
-            var folderPath = result.records[0].get('value');
-            // dbms.directories.neo4j_home returns active dbms directory
-            return folderPath.split('\\dbms-')[0];
-        }
-    })
-    .catch(error => {
-        session.close();
-        next(error);
-    });
 }
 
 /**
