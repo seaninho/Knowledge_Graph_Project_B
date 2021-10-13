@@ -248,7 +248,7 @@ async function _verifyDatabaseIsClear(session, errorMessage) {
 
 
 /**
- * import graph database from csv files
+ * import graph database from csv files (restore)
  * @param {*} req client's request
  * @param {*} res server's response
  * @param {*} next next function to execute
@@ -305,12 +305,12 @@ function _getNeo4jDbmssDirectory(session) {
 }
 
 /**
- * export data to csv files
+ * export graph database to csv files (backup)
  * @param {*} req client's request
  * @param {*} res server's response
  * @param {*} next next function to execute
  */
-async function exportDataToCsv(req, res, next) {  
+async function exportDatabase(req, res, next) {  
     const session = getSession(req);
     try {
         const neo4jDbmssDirectory = await _getNeo4jDbmssDirectory(session);
@@ -410,7 +410,7 @@ module.exports = {
     getAllRelationshipTypes: getAllRelationshipTypes,
     getAllNodesByFieldKey: getAllNodesByFieldKey,
     importDatabase: importDatabase,
-    exportDataToCsv: exportDataToCsv, 
+    exportDatabase: exportDatabase, 
     deleteDatabase: deleteDatabase,
     createDatabaseFiles: createDatabaseFiles
 }
