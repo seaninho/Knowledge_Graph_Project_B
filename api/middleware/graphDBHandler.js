@@ -12,12 +12,7 @@ const exporter = require('../helpers/graphDBExporter');
 const enforcer = require('../helpers/graphDBEnforcer');
 const responseHandler = require('../helpers/response');
 const writeResponse = responseHandler.writeResponse;
-const {
-    GeneralError,
-    BadRequest,
-    NotFound,
-    DatabaseActionError,
-} = require('../utils/errors');
+const { GeneralError, DatabaseActionError } = require('../utils/errors');
 
 const driver = neo4j.driver(uri, neo4j.auth.basic(user, password), {
     maxConnectionLifetime: 3 * 60 * 60 * 1000, // 3 hours
@@ -53,9 +48,7 @@ async function executeCypherQuery(session, query, params = {}, op = 'READ') {
         if (op == 'READ') {
             return await session.readTransaction((tx) => tx.run(query, params));
         } else {
-            return await session.writeTransaction((tx) =>
-                tx.run(query, params)
-            );
+            return await session.writeTransaction((tx) => tx.run(query, params));
         }
     } catch (error) {
         session.close();
@@ -83,8 +76,7 @@ function validateDatabaseGetByIdResponse(response) {
  * Otherwise, throws an exception notifing of failure.
  */
 function validatePropertiesSet(result, possiblePropertiesSet) {
-    const actualPropertiesSet =
-        result.summary['counters']['_stats']['propertiesSet'];
+    const actualPropertiesSet = result.summary['counters']['_stats']['propertiesSet'];
     if (actualPropertiesSet == possiblePropertiesSet) {
         return {
             status: 'ok',
@@ -103,8 +95,7 @@ function validatePropertiesSet(result, possiblePropertiesSet) {
  * Otherwise, throws an exception notifing of failure.
  */
 function validateRelationShipsCreated(result, possibleRelationshipsCreated) {
-    const actualRelationshipsCreated =
-        result.summary['counters']['_stats']['relationshipsCreated'];
+    const actualRelationshipsCreated = result.summary['counters']['_stats']['relationshipsCreated'];
     if (actualRelationshipsCreated == possibleRelationshipsCreated) {
         return {
             status: 'ok',
@@ -123,8 +114,7 @@ function validateRelationShipsCreated(result, possibleRelationshipsCreated) {
  * Otherwise, throws an exception notifing of failure.
  */
 function validateEntityCreated(result, possiblePropertiesSet) {
-    const actualEntitiesCreated =
-        result.summary['counters']['_stats']['nodesCreated'];
+    const actualEntitiesCreated = result.summary['counters']['_stats']['nodesCreated'];
     if (actualEntitiesCreated == 1) {
         // creating one entity at a time
         validatePropertiesSet(result, possiblePropertiesSet);
@@ -215,9 +205,7 @@ function getAllNodesByFieldKey(records, fieldKey, resultIsSingleNode = false) {
         if (!_.isEmpty(nodes)) {
             if (Array.isArray(nodes)) {
                 nodeLabel = nodes[0].labels[0];
-                nodesProperties = nodesProperties.concat(
-                    _.map(nodes, (node) => node.properties)
-                );
+                nodesProperties = nodesProperties.concat(_.map(nodes, (node) => node.properties));
             } else {
                 nodeLabel = nodes.labels[0];
                 nodesProperties = nodesProperties.concat(nodes.properties);
@@ -290,17 +278,10 @@ async function _verifyDatabaseIsClear(session, errorMessage) {
 async function restoreDatabase(req, res, next, respond = true, path = '') {
     const session = getSession(req);
     try {
-        await _verifyDatabaseIsClear(
-            session,
-            'Please delete database prior to restore!'
-        );
+        await _verifyDatabaseIsClear(session, 'Please delete database prior to restore!');
         const neo4jDbmssDirectory = await _getNeo4jDbmssDirectory(session);
-        const defaultRestorePath =
-            neo4jDbmssDirectory + '\\researshare\\import\\';
-        await importer.importGraphDatabase(
-            session,
-            path == '' ? defaultRestorePath : path
-        );
+        const defaultRestorePath = neo4jDbmssDirectory + '\\researshare\\import\\';
+        await importer.importGraphDatabase(session, path == '' ? defaultRestorePath : path);
         await enforcer.createGraphConstraints(session);
 
         if (respond == true) {
@@ -335,18 +316,12 @@ async function backupDatabase(req, res, next, respond = true) {
     const session = getSession(req);
     try {
         const neo4jDbmssDirectory = await _getNeo4jDbmssDirectory(session);
-        const backupDirectoryBase =
-            neo4jDbmssDirectory + '\\researshare\\backup';
-        const backupDirectory = await exporter.exportGraphDatabase(
-            session,
-            backupDirectoryBase
-        );
+        const backupDirectoryBase = neo4jDbmssDirectory + '\\researshare\\backup';
+        const backupDirectory = await exporter.exportGraphDatabase(session, backupDirectoryBase);
         if (respond == true) {
             const response = {
                 status: 'ok',
-                message:
-                    'Database has been successfully backed up to ' +
-                    backupDirectory,
+                message: 'Database has been successfully backed up to ' + backupDirectory,
             };
             return writeResponse(res, response);
         }
@@ -374,16 +349,9 @@ async function backupDatabase(req, res, next, respond = true) {
 async function deleteDatabase(req, res, next, respond = true) {
     const session = getSession(req);
     try {
-        await session.writeTransaction((tx) =>
-            tx.run('MATCH (n) DETACH DELETE n')
-        ); // Clear Database
-        await session.writeTransaction((tx) =>
-            tx.run('CALL apoc.schema.assert({}, {})')
-        ); // Clear Constraints
-        await _verifyDatabaseIsClear(
-            session,
-            'Database Was Not Deleted Properly!'
-        );
+        await session.writeTransaction((tx) => tx.run('MATCH (n) DETACH DELETE n')); // Clear Database
+        await session.writeTransaction((tx) => tx.run('CALL apoc.schema.assert({}, {})')); // Clear Constraints
+        await _verifyDatabaseIsClear(session, 'Database Was Not Deleted Properly!');
         if (respond == true) {
             const response = {
                 status: 'ok',
@@ -425,27 +393,23 @@ async function initializeDatabase(req, res, next) {
         ],
     };
 
-    PythonShell.run(
-        'raw_to_graph_tables_converter.py',
-        options,
-        async function (error) {
-            if (error) {
-                next(new DatabaseActionError('Initialize', error));
-            }
-
-            try {
-                await restoreDatabase(req, res, next, false);
-
-                const response = {
-                    status: 'ok',
-                    message: 'Database Initialized Successfully!',
-                };
-                writeResponse(res, response);
-            } catch (error) {
-                next(new DatabaseActionError('Initialize', error.getMessage()));
-            }
+    PythonShell.run('raw_to_graph_tables_converter.py', options, async function (error) {
+        if (error) {
+            next(new DatabaseActionError('Initialize', error));
         }
-    );
+
+        try {
+            await restoreDatabase(req, res, next, false);
+
+            const response = {
+                status: 'ok',
+                message: 'Database Initialized Successfully!',
+            };
+            writeResponse(res, response);
+        } catch (error) {
+            next(new DatabaseActionError('Initialize', error.getMessage()));
+        }
+    });
 }
 
 /**
@@ -470,8 +434,7 @@ async function updateDatabase(req, res, next) {
     const lookupTablePath = directoryBasePath + '\\model\\lookupTable.csv';
     const facultyTablesPath = directoryBasePath + '\\faculty_tables_update';
     const updateTablesDirectory = 'update_tables';
-    const updateTablesDirectoryPath =
-        directoryBasePath + '\\' + updateTablesDirectory;
+    const updateTablesDirectoryPath = directoryBasePath + '\\' + updateTablesDirectory;
 
     var options = {
         mode: 'text',
@@ -486,76 +449,56 @@ async function updateDatabase(req, res, next) {
         ],
     };
 
-    PythonShell.run(
-        'raw_to_graph_tables_converter.py',
-        options,
-        async function (error) {
-            if (error) {
-                return next(new DatabaseActionError('Update', error));
-            }
-
-            try {
-                const backupDirectory = await backupDatabase(
-                    req,
-                    res,
-                    next,
-                    false
-                );
-                const conflictPolicy = 'enforce_conflicts';
-
-                let options = {
-                    mode: 'text',
-                    pythonOptions: ['-u'],
-                    scriptPath: pythonScriptsPath,
-                    args: [
-                        backupDirectory, // graph_folder
-                        updateTablesDirectoryPath, // update_folder
-                        conflictPolicy,
-                        schemeTablePath,
-                        directoryBasePath, // destination folder path
-                    ],
-                };
-
-                PythonShell.run(
-                    'update_tables_merger.py',
-                    options,
-                    async function (error) {
-                        if (error) {
-                            return next(
-                                new DatabaseActionError('Update', error)
-                            );
-                        }
-
-                        try {
-                            await deleteDatabase(req, res, next, false);
-                            await restoreDatabase(
-                                req,
-                                res,
-                                next,
-                                false,
-                                directoryBasePath + '\\merged_tables\\'
-                            );
-
-                            const response = {
-                                status: 'ok',
-                                message: 'Database Updated Successfully!',
-                            };
-                            writeResponse(res, response);
-                        } catch (error) {
-                            next(
-                                new DatabaseActionError(
-                                    'Update',
-                                    error.getMessage()
-                                )
-                            );
-                        }
-                    }
-                );
-            } catch (error) {
-                next(new DatabaseActionError('Update', error.getMessage()));
-            }
+    PythonShell.run('raw_to_graph_tables_converter.py', options, async function (error) {
+        if (error) {
+            return next(new DatabaseActionError('Update', error));
         }
-    );
+
+        try {
+            const backupDirectory = await backupDatabase(req, res, next, false);
+            const conflictPolicy = 'enforce_conflicts';
+
+            let options = {
+                mode: 'text',
+                pythonOptions: ['-u'],
+                scriptPath: pythonScriptsPath,
+                args: [
+                    backupDirectory, // graph_folder
+                    updateTablesDirectoryPath, // update_folder
+                    conflictPolicy,
+                    schemeTablePath,
+                    directoryBasePath, // destination folder path
+                ],
+            };
+
+            PythonShell.run('update_tables_merger.py', options, async function (error) {
+                if (error) {
+                    return next(new DatabaseActionError('Update', error));
+                }
+
+                try {
+                    await deleteDatabase(req, res, next, false);
+                    await restoreDatabase(
+                        req,
+                        res,
+                        next,
+                        false,
+                        directoryBasePath + '\\merged_tables\\'
+                    );
+
+                    const response = {
+                        status: 'ok',
+                        message: 'Database Updated Successfully!',
+                    };
+                    writeResponse(res, response);
+                } catch (error) {
+                    next(new DatabaseActionError('Update', error.getMessage()));
+                }
+            });
+        } catch (error) {
+            next(new DatabaseActionError('Update', error.getMessage()));
+        }
+    });
 }
 
 module.exports = {
