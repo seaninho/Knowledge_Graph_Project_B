@@ -338,11 +338,10 @@ async function exportDatabase(req, res, next) {
  */
 async function deleteDatabase(req, res, next, writeRes = true) {
     const session = getSession(req);
-    session.writeTransaction(tx => tx.run('MATCH (n) DETACH DELETE n'))       // Clear Database
-    .then(() => session.writeTransaction(tx => tx.run('CALL apoc.schema.assert({}, {})')))  // Clear Constraints
-    .then(() => _verifyDatabaseIsClear(session, 'Database Was Not Deleted Properly!'))
-    .then(() => session.close())
-    .then(() => {
+    try {
+        await session.writeTransaction(tx => tx.run('MATCH (n) DETACH DELETE n'))       // Clear Database
+        await session.writeTransaction(tx => tx.run('CALL apoc.schema.assert({}, {})'))  // Clear Constraints
+        await _verifyDatabaseIsClear(session, 'Database Was Not Deleted Properly!')
         if (writeRes == true) {
             const response = {
                 status: 'ok',
@@ -350,11 +349,11 @@ async function deleteDatabase(req, res, next, writeRes = true) {
             };
             writeResponse(res, response);
         }
-    })       
-    .catch(error => {
+    }
+    catch (error) {
         session.close();
         next(new DatabaseActionError('Delete', error));
-    });
+    }
 };
 
 /**
