@@ -16,7 +16,7 @@ function route(app) {
     // PUT REQUEST
     app.put("/entity/:entity/:id", entity.setEntityProperties);
     // POST REQUEST
-    app.post("/database/import", dbHandler.importDataFromCsv);
+    app.post("/database/restore", dbHandler.importDatabase);
     app.post("/database/export", dbHandler.exportDataToCsv);
     app.post("/database/delete", dbHandler.deleteDatabase);
     app.post("/database/create", dbHandler.createDatabaseFiles);

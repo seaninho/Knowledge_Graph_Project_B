@@ -248,30 +248,33 @@ async function _verifyDatabaseIsClear(session, errorMessage) {
 
 
 /**
- * import data from csv files
+ * import graph database from csv files
  * @param {*} req client's request
  * @param {*} res server's response
  * @param {*} next next function to execute
  */
-function importDataFromCsv(req, res, next) {  
+async function importDatabase(req, res, next) {  
     const session = getSession(req);
-    _verifyDatabaseIsClear(session, 'Database was not deleted properly prior to import!')
-    .then(() => importer.importGraphDatabase(session))
-    .then(() => enforcer.createGraphConstraints(session))
-    .then(() => session.close())
-    .then(() => {
+    try {
+        await _verifyDatabaseIsClear(
+            session,
+            'Database was not deleted properly prior to import!'
+        );
+        await importer.importGraphDatabase(session);
+        await enforcer.createGraphConstraints(session);
+        
         const response = {
             status: 'ok',
-            message: 'Database Imported Successfully!'
+            message: 'Database Imported Successfully!',
         };
         writeResponse(res, response);
-    })
-    .catch(error => {
+    }
+    catch (error) {
         if (!(error instanceof GeneralError)) {
             deleteDatabase(req, res, next, false);
         }        
         next(new DatabaseActionError('Import', error));
-    });
+    }
 }
 
 /**
@@ -406,7 +409,7 @@ module.exports = {
     getAllEntityTypes: getAllEntityTypes,
     getAllRelationshipTypes: getAllRelationshipTypes,
     getAllNodesByFieldKey: getAllNodesByFieldKey,
-    importDataFromCsv: importDataFromCsv,
+    importDatabase: importDatabase,
     exportDataToCsv: exportDataToCsv, 
     deleteDatabase: deleteDatabase,
     createDatabaseFiles: createDatabaseFiles
