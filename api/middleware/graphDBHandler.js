@@ -253,17 +253,24 @@ async function _verifyDatabaseIsClear(session, errorMessage) {
  * @param {*} res server's response
  * @param {*} next next function to execute
  * @param {*} respond write result iff true
+ * @param {*} path restore database from this directory
  * @returns Notifying the client of success in restoring the database.
  * Otherwise, throws an exception notifing of failure.
  */
-async function restoreDatabase(req, res, next, respond = true) {  
+async function restoreDatabase(req, res, next, respond = true, path = '') {  
     const session = getSession(req);
     try {
         await _verifyDatabaseIsClear(
             session,
             'Please delete database prior to restore!'
         );
-        await importer.importGraphDatabase(session);
+        const neo4jDbmssDirectory = await _getNeo4jDbmssDirectory(session);
+        const defaultRestorePath =
+            neo4jDbmssDirectory + '\\researshare\\import\\';
+        await importer.importGraphDatabase(
+            session,
+            path == '' ? defaultRestorePath : path
+        );
         await enforcer.createGraphConstraints(session);
         
         if (respond == true) {
@@ -285,6 +292,7 @@ async function restoreDatabase(req, res, next, respond = true) {
         throw error;
     }
 }
+
 
 /**
  * get full path for the neo4j dbmss directory
