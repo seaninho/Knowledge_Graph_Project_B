@@ -7,13 +7,14 @@ class GeneralError extends Error {
     getCode() {
         if (this instanceof BadRequest) {
             return 400;
-        } if (this instanceof NotFound) {
+        }
+        if (this instanceof NotFound) {
             return 404;
         }
         return 500;
     }
 
-    getMessage() {        
+    getMessage() {
         return this.message;
     }
 }
@@ -27,27 +28,43 @@ class DatabaseActionError extends GeneralError {
     }
 }
 
-class EntityTypeNotFound extends NotFound { 
+class EntityTypeNotFound extends NotFound {
     constructor(entityType) {
-        super('Entity type: \'' + entityType + '\' is not a valid entity!');
+        super("Entity type: '" + entityType + "' is not a valid entity!");
     }
 }
 
 class EntityIdNotFound extends NotFound {
     constructor(entityType, entityId) {
-        super('Entity type: \'' + entityType + '\' with id: \'' + entityId + '\' was not found!');
+        super(
+            "Entity type: '" +
+                entityType +
+                "' with id: '" +
+                entityId +
+                "' was not found!"
+        );
     }
 }
 
 class EntityHasNoSuchRelationship extends NotFound {
     constructor(entityType, relationshipType) {
-        super('Entity type: \'' + entityType + '\' has no relationship type named: \'' + relationshipType + '\'!');
+        super(
+            "Entity type: '" +
+                entityType +
+                "' has no relationship type named: '" +
+                relationshipType +
+                "'!"
+        );
     }
 }
 
-class RelationshipTypeNotFound extends NotFound { 
+class RelationshipTypeNotFound extends NotFound {
     constructor(relationshipType) {
-        super('Relationship type: \'' + relationshipType + '\' is not a valid relationship!');
+        super(
+            "Relationship type: '" +
+                relationshipType +
+                "' is not a valid relationship!"
+        );
     }
 }
 

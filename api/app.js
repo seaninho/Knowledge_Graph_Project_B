@@ -33,10 +33,10 @@ router.route(app);
 
 // catch 404 and forward to our error handler
 app.use((_req, _res, next) => {
-  next(new NotFound());
+    next(new NotFound());
 });
 
-//error handling 
+//error handling
 app.use(errorHandler.handleErrors);
 
 module.exports = app;
