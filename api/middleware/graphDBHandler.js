@@ -332,17 +332,17 @@ async function exportDatabase(req, res, next) {
  * @param {*} req client's request
  * @param {*} res server's response
  * @param {*} next next function to execute
- * @param {*} writeRes write result iff true
+ * @param {*} respond write result iff true
  * @returns Notifing the client of success in deleting the database. 
  * Otherwise, throws an exception notifing of failure.
  */
-async function deleteDatabase(req, res, next, writeRes = true) {
+async function deleteDatabase(req, res, next, respond = true) {
     const session = getSession(req);
     try {
         await session.writeTransaction(tx => tx.run('MATCH (n) DETACH DELETE n'))       // Clear Database
         await session.writeTransaction(tx => tx.run('CALL apoc.schema.assert({}, {})'))  // Clear Constraints
         await _verifyDatabaseIsClear(session, 'Database Was Not Deleted Properly!')
-        if (writeRes == true) {
+        if (respond == true) {
             const response = {
                 status: 'ok',
                 message: 'Database Deleted Successfully!'
