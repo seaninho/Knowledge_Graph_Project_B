@@ -193,33 +193,28 @@ function getAllRelationshipTypes(req, res, next) {
  * get all nodes stored in records by field key
  * @param {*} records neo4j result records
  * @param {*} fieldKey lookup key
+ * @param {*} nodeLabel node label
  * @param {*} resultIsSingleNode boolean value indicating whether or not the result object is of a single node
  * @returns an object containing all nodes found matching the label key provided.
  * If no nodes were found, returns an empty object.
  */
-function getAllNodesByFieldKey(records, fieldKey, resultIsSingleNode = false) {
-    var nodes, nodeLabel;
+function getAllNodesByFieldKey(records, fieldKey, nodeLabel, resultIsSingleNode = false) {
+    var nodes;
     var nodesProperties = [];
     for (let record of records) {
         nodes = record.get(fieldKey);
-        if (!_.isEmpty(nodes)) {
-            if (Array.isArray(nodes)) {
-                nodeLabel = nodes[0].labels[0];
-                nodesProperties = nodesProperties.concat(_.map(nodes, (node) => node.properties));
-            } else {
-                nodeLabel = nodes.labels[0];
-                nodesProperties = nodesProperties.concat(nodes.properties);
-            }
+        if (Array.isArray(nodes)) {
+            nodesProperties = nodesProperties.concat(_.map(nodes, (node) => node.properties));
+        } else {
+            nodesProperties = nodesProperties.concat(nodes.properties);
         }
     }
 
     var result;
-    if (typeof nodeLabel !== 'undefined' && !_.isEmpty(nodesProperties)) {
-        result = {
-            entityType: nodeLabel,
-            entityList: nodesProperties,
-        };
-    }
+    result = {
+        entityType: nodeLabel,
+        entityList: nodesProperties,
+    };
     return resultIsSingleNode ? nodesProperties[0] : result;
 }
 

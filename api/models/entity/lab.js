@@ -10,11 +10,32 @@ const { EntityIdNotFound } = require('../../utils/errors');
 function _getLabPageInfo(records) {
     if (records.length > 0) {
         var result = {};
-        result['Entity'] = getAllNodesByFieldKey(records, 'lab', true);
-        result['Department of'] = getAllNodesByFieldKey(records, 'faculty');
-        result['Areas of Research'] = getAllNodesByFieldKey(records, 'researchAreas');
-        result['Researchers'] = getAllNodesByFieldKey(records, 'researchers');
-        result['Products'] = getAllNodesByFieldKey(records, 'products');
+        result['Entity'] = getAllNodesByFieldKey(
+            records, 
+            'lab', 
+            'Lab', 
+            true
+        );
+        result['Department of'] = getAllNodesByFieldKey(
+            records, 
+            'faculty', 
+            'Faculty'
+        );
+        result['Areas of Research'] = getAllNodesByFieldKey(
+            records,
+            'researchAreas',
+            'ResearchArea'
+        );
+        result['Researchers'] = getAllNodesByFieldKey(
+            records, 
+            'researchers', 
+            'Researcher'
+        );
+        result['Products'] = getAllNodesByFieldKey(
+            records, 
+            'products', 
+            'Product'
+        );
         return result;
     } else {
         return null;

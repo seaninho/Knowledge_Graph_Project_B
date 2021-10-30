@@ -11,22 +11,46 @@ function _getProductPageInfo(records) {
     if (records.length > 0) {
         var result = {};
         var recommendations = {};
-        result['Entity'] = getAllNodesByFieldKey(records, 'product', true);
-        result['Labs That Use This Product'] = getAllNodesByFieldKey(records, 'labs');
+        result['Entity'] = getAllNodesByFieldKey(
+            records, 
+            'product', 
+            'Product', 
+            true
+        );
+        result['Labs That Use This Product'] = getAllNodesByFieldKey(
+            records, 
+            'labs', 
+            'Lab'
+        );
         result['Research Areas That Use This Product'] = getAllNodesByFieldKey(
             records,
-            'researchAreas'
+            'researchAreas',
+            'ResearchArea'
         );
-        result['Researches That Use This Product'] = getAllNodesByFieldKey(records, 'researches');
-        result['Researchers That Use This Product'] = getAllNodesByFieldKey(records, 'researchers');
-        result['Part of This Research Setup'] = getAllNodesByFieldKey(records, 'researchSetups');        
+        result['Researches That Use This Product'] = getAllNodesByFieldKey(
+            records,
+            'researches',
+            'Research'
+        );
+        result['Researchers That Use This Product'] = getAllNodesByFieldKey(
+            records,
+            'researchers',
+            'Researcher'
+        );
+        result['Part of This Research Setup'] = getAllNodesByFieldKey(
+            records,
+            'researchSetups',
+            'ResearchSetup'
+        );
         recommendations['Other Products Used At The Same Lab'] = getAllNodesByFieldKey(
             records,
-            'labCommonProducts'
+            'labCommonProducts',
+            'Product'
         );
         recommendations['Other Products Used In The Same Research Area'] = getAllNodesByFieldKey(
             records,
-            'raCommonProducts'
+            'raCommonProducts',
+            'Product'
         );
         result['recommendations'] = recommendations;
         return result;

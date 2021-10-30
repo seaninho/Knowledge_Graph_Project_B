@@ -10,11 +10,32 @@ const { EntityIdNotFound } = require('../../utils/errors');
 function _getResearchPageInfo(records) {
     if (records.length > 0) {
         var result = {};
-        result['Entity'] = getAllNodesByFieldKey(records, 'research', true);
-        result['Researchers'] = getAllNodesByFieldKey(records, 'researchers');
-        result['Areas of Research'] = getAllNodesByFieldKey(records, 'researchAreas');
-        result['Research Setup Used'] = getAllNodesByFieldKey(records, 'researchSetups');
-        result['Articles Published'] = getAllNodesByFieldKey(records, 'articles');
+        result['Entity'] = getAllNodesByFieldKey(
+            records, 
+            'research',
+            'Research',
+            true
+        );
+        result['Researchers'] = getAllNodesByFieldKey(
+            records, 
+            'researchers', 
+            'Researcher'
+        );
+        result['Areas of Research'] = getAllNodesByFieldKey(
+            records,
+            'researchAreas',
+            'ResearchArea'
+        );
+        result['Research Setup Used'] = getAllNodesByFieldKey(
+            records,
+            'researchSetups',
+            'ResearchSetup'
+        );
+        result['Articles Published'] = getAllNodesByFieldKey(
+            records, 
+            'articles', 
+            'Article'
+        );
         return result;
     } else {
         return null;

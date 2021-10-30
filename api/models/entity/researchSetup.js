@@ -10,9 +10,9 @@ const { EntityIdNotFound } = require('../../utils/errors');
 function _getResearchSetupPageInfo(records) {
     if (records.length > 0) {
         var result = {};
-        result['Entity'] = getAllNodesByFieldKey(records, 'researchSetup', true);
-        result['Setup Products'] = getAllNodesByFieldKey(records, 'products');
-        result['Used In Researches'] = getAllNodesByFieldKey(records, 'researches');
+        result['Entity'] = getAllNodesByFieldKey(records, 'researchSetup', 'ResearchSetup', true);
+        result['Setup Products'] = getAllNodesByFieldKey(records, 'products', 'Product');
+        result['Used In Researches'] = getAllNodesByFieldKey(records, 'researches', 'Research');
         return result;
     } else {
         return null;

@@ -10,9 +10,9 @@ const { EntityIdNotFound } = require('../../utils/errors');
 function _getArticlePageInfo(records) {
     if (records.length > 0) {
         var result = {};
-        result['Entity'] = getAllNodesByFieldKey(records, 'article', true);
-        result['Written By'] = getAllNodesByFieldKey(records, 'researchers');
-        result['Written About'] = getAllNodesByFieldKey(records, 'researches');
+        result['Entity'] = getAllNodesByFieldKey(records, 'article', 'Article', true);
+        result['Written By'] = getAllNodesByFieldKey(records, 'researchers', 'Researcher');
+        result['Written About'] = getAllNodesByFieldKey(records, 'researches', 'Research');
         return result;
     } else {
         return null;
