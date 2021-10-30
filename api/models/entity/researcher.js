@@ -15,8 +15,7 @@ function _getResearcherPageInfo(records) {
         result['Areas of Research'] = getAllNodesByFieldKey(records, 'researchAreas');
         result['Active Researches'] = getAllNodesByFieldKey(records, 'researches');
         result['Published Articles'] = getAllNodesByFieldKey(records, 'articles');
-        result['Purchased Products'] = getAllNodesByFieldKey(records, 'purchasedProducts');
-        result['Shared Products'] = getAllNodesByFieldKey(records, 'sharedProducts');
+        result['Used Products'] = getAllNodesByFieldKey(records, 'products');
         return result;
     } else {
         return null;
@@ -69,18 +68,16 @@ function getResearcherById(session, researcherId, next) {
         'OPTIONAL MATCH (researchArea:ResearchArea)<-[:RESEARCHES]-(researcher)',
         'OPTIONAL MATCH (research:Research)<-[:CONDUCTS]-(researcher)',
         'OPTIONAL MATCH (article:Article)-[:WROTE_REGARD_TO]->(r:Research)<-[:CONDUCTS]-(researcher)',
-        'OPTIONAL MATCH (purchasedProduct:Product)<-[:USING {isOwner: "true"}]-(researcher)',
-        'OPTIONAL MATCH (sharedProduct:Product)<-[:USING {isOwner: "false"}]-(researcher)',
+        'OPTIONAL MATCH (product:Product)<-[:USING]-(researcher)',
         'WITH DISTINCT researcher,',
-        'lab, researchArea, research, article, purchasedProduct, sharedProduct',
-        'ORDER BY purchasedProduct.isActiveProduct, sharedProduct.isActiveProduct DESC',
+        'lab, researchArea, research, article, product',
+        'ORDER BY product.isActiveProduct DESC',
         'RETURN COLLECT(DISTINCT researcher) AS researcher,',
         'COLLECT(DISTINCT lab)[0..20] AS labs,',
         'COLLECT(DISTINCT researchArea)[0..20] AS researchAreas,',
         'COLLECT(DISTINCT research)[0..20] AS researches,',
         'COLLECT(DISTINCT article)[0..20] AS articles,',
-        'COLLECT(DISTINCT purchasedProduct)[0..20] AS purchasedProducts,',
-        'COLLECT(DISTINCT sharedProduct)[0..20] AS sharedProducts',
+        'COLLECT(DISTINCT product)[0..20] AS products',
     ].join('\n');
     const params = { researcherId: researcherId };
 

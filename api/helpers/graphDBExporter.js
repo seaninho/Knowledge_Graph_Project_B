@@ -174,7 +174,7 @@ function _exportRelationshipComposedOf(tx) {
 /// Special Property Functions ///
 //////////////////////////////////
 
-function _exportSpecialPropertyHasActiveProject(tx) {
+function _exportSpecialPropertyOnResearchAreas(tx) {
     return tx.run('WITH "MATCH path = (r:Researcher)-[h:ACTIVE_AT]->(l:Lab) ' +
       'UNWIND h.onResearchAreas AS H ' +
       'RETURN r.researcherId AS ResearcherId, l.labId AS LabId, H AS ResearchAreaId" AS query ' +
@@ -215,7 +215,7 @@ function _exportRelationshipData(session) {
 }
 
 function _exportSpecialPropertyData(session) {
-    return session.writeTransaction((tx) => _exportSpecialPropertyHasActiveProject(tx));
+    return session.writeTransaction((tx) => _exportSpecialPropertyOnResearchAreas(tx));
 }
 
 async function exportGraphDatabase(session, exportDirectoryBase) {
