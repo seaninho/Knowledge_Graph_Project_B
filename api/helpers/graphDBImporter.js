@@ -74,13 +74,13 @@ function _importRelationshipResearches(tx) {
 function _importRelationshipUsing(tx) {
   return tx.run('LOAD CSV WITH HEADERS FROM "file:///' + importDirectoryPath + 'relationship_tables/USING.csv" AS row ' +
     'MATCH(r: Researcher { researcherId: row.ResearcherId }), (p: Product { productId: row.ProductId }) ' +
-    'CREATE (r) - [: USING { isOwner: row.isOwner }] -> (p)');
+    'CREATE (r) - [: USING] -> (p)');
 }
 
 function _importRelationshipActiveAt(tx) {
   return tx.run('LOAD CSV WITH HEADERS FROM "file:///' + importDirectoryPath + 'relationship_tables/ACTIVE_AT.csv" AS row ' +
     'MATCH(r: Researcher { researcherId: row.ResearcherId }), (l: Lab { labId: row.LabId }) ' +
-    'CREATE (r) - [: ACTIVE_AT { onResearchAreas: [], hasActiveProject: row.hasActiveProject }] -> (l)');
+    'CREATE (r) - [: ACTIVE_AT { onResearchAreas: [] }] -> (l)');
 }
 
 function _importRelationshipConducts(tx) {
