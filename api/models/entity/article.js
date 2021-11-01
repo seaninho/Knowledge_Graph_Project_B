@@ -10,9 +10,12 @@ const { EntityIdNotFound } = require('../../utils/errors');
 function _getArticlePageInfo(records) {
     if (records.length > 0) {
         var result = {};
+        var unconnected = {};
         result['Entity'] = getAllNodesByFieldKey(records, 'article', 'Article', true);
-        result['Written By'] = getAllNodesByFieldKey(records, 'researchers', 'Researcher');
+        unconnected['Written By'] = getAllNodesByFieldKey(records, 'researchers', 'Researcher');
         result['Written About'] = getAllNodesByFieldKey(records, 'researches', 'Research');
+        // TODO: 'recommendation' is a hard-coded term used by front-end. Needs to be changed
+        result['recommendations'] = unconnected;
         return result;
     } else {
         return null;

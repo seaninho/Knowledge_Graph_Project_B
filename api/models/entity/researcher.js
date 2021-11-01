@@ -10,6 +10,7 @@ const { EntityIdNotFound } = require('../../utils/errors');
 function _getResearcherPageInfo(records) {
     if (records.length > 0) {
         var result = {};
+        var unconnected = {};
         result['Entity'] = getAllNodesByFieldKey(records, 'researcher', 'Researcher', true);
         result['Member Of Labs'] = getAllNodesByFieldKey(records, 'labs', 'Lab');
         result['Areas of Research'] = getAllNodesByFieldKey(
@@ -18,8 +19,10 @@ function _getResearcherPageInfo(records) {
             'ResearchArea'
         );
         result['Active Researches'] = getAllNodesByFieldKey(records, 'researches', 'Research');
-        result['Published Articles'] = getAllNodesByFieldKey(records, 'articles', 'Article');
+        unconnected['Published Articles'] = getAllNodesByFieldKey(records, 'articles', 'Article');
         result['Used Products'] = getAllNodesByFieldKey(records, 'products', 'Product');
+        // TODO: 'recommendation' is a hard-coded term used by front-end. Needs to be changed
+        result['recommendations'] = unconnected;
         return result;
     } else {
         return null;
