@@ -11,7 +11,7 @@ const errorHandler = require('./middleware/errorHandler');
 
 config.assertHostAlive();
 
-var app = express();
+const app = express();
 exceptionHandler();
 
 // app configurations
