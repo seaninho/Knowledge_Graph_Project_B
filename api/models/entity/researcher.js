@@ -35,6 +35,7 @@ function getScheme() {
         entity: 'Researcher',
         id: 'researcherId',
         name: 'researcherName',
+        activeField: 'isActiveResearcher',
         property: [],
         edges: [
             {
